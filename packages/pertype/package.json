@@ -1,0 +1,23 @@
+{
+  "name": "pertype",
+  "description": "Typescript-first schema declaration and validation library",
+  "type": "module",
+  "author": {
+    "name": "Zulfikar Raditya Hernanta",
+    "email": "hernantas@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hernantas/pertype.git",
+    "directory": "packages/pertype"
+  },
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "runtime",
+    "schema",
+    "type",
+    "validate",
+    "validation"
+  ]
+}
