@@ -19,5 +19,8 @@
     "type",
     "validate",
     "validation"
-  ]
+  ],
+  "scripts": {
+    "test": "npx jest"
+  }
 }
