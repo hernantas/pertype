@@ -7,3 +7,10 @@ export type Constructor<T, Args extends any[]> = new (...args: Args) => T
  * Alias for valid object property key
  */
 export type Key = string | number | symbol
+
+/**
+ * Alias for any object with properties
+ */
+export type AnyObject = {
+  [key: Key]: unknown
+}
