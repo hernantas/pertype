@@ -19,5 +19,11 @@
     "validate",
     "validation"
   ],
-  "private": true
+  "private": true,
+  "scripts": {
+    "format": "npx prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
 }
