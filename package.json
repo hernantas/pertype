@@ -1,6 +1,7 @@
 {
   "name": "pertype",
   "description": "Typescript-first schema declaration and validation library",
+  "type": "module",
   "author": {
     "name": "Zulfikar Raditya Hernanta",
     "email": "hernantas@gmail.com"
