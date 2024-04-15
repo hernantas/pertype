@@ -19,6 +19,9 @@
     "validate",
     "validation"
   ],
+  "workspaces": [
+    "packages/*"
+  ],
   "private": true,
   "scripts": {
     "format": "npx prettier --write ."
