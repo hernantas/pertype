@@ -1,7 +1,21 @@
-import { number } from './schema'
+import { bool, boolean, number } from './schema'
 
 describe('Schema', () => {
   function expectType<T>(_: T): void {}
+
+  describe('BooleanSchema', () => {
+    it('Should be compatible with Schema', () => expectType(boolean()))
+    it('Should be compatible with Schema', () => expectType(bool()))
+
+    it('Should narrow boolean as boolean', () => {
+      expect(boolean().is(true)).toBe(true)
+      expect(boolean().is(false)).toBe(true)
+      expect(boolean().is(0)).toBe(false)
+      expect(boolean().is(1)).toBe(false)
+      expect(boolean().is('true')).toBe(false)
+      expect(boolean().is('false')).toBe(false)
+    })
+  })
 
   describe('NumberSchema', () => {
     it('Should be compatible with Schema', () => expectType(number()))

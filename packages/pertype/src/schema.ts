@@ -113,6 +113,37 @@ export abstract class Schema<T = any> extends ImmutableBuilder<Definition<T>> {
  */
 export type TypeOf<S extends Schema> = S extends Schema<infer R> ? R : never
 
+// # Boolean
+
+/**
+ * {@link Schema} that represent `boolean`
+ */
+export class BooleanSchema extends Schema<boolean> {
+  public override is(value: unknown): value is boolean {
+    return typeof value === 'boolean'
+  }
+}
+
+/**
+ * Create new instance of {@link BooleanSchema}
+ *
+ * @returns A new instance
+ */
+export function boolean(): BooleanSchema {
+  return booleanInstance
+}
+
+/**
+ * Create new instance of {@link BooleanSchema}
+ *
+ * @returns A new instance
+ */
+export function bool(): BooleanSchema {
+  return booleanInstance
+}
+
+const booleanInstance = new BooleanSchema({})
+
 // # Number
 
 /**
