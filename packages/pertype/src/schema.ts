@@ -407,6 +407,27 @@ export function string(): StringSchema {
 }
 const stringInstance = new StringSchema({})
 
+// # Null
+
+/**
+ * {@link Schema} that represent `null`
+ */
+export class NullSchema extends Schema<null> {
+  public override is(value: unknown): value is null {
+    return value === null
+  }
+}
+
+/**
+ * Create new instances of {@link NullSchema}
+ *
+ * @returns A new instances
+ */
+export function _null(): NullSchema {
+  return nullInstance
+}
+const nullInstance = new NullSchema({})
+
 // # Array
 
 export interface ArrayDefinition<S extends Schema>

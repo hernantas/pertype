@@ -1,5 +1,6 @@
 import {
   Schema,
+  _null,
   any,
   array,
   bool,
@@ -158,6 +159,10 @@ describe('Schema', () => {
       expect(validator.validate('email@email').valid).toBe(false)
       expect(validator.validate('user_name').valid).toBe(false)
     })
+  })
+
+  describe('NullSchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(_null()))
   })
 
   describe('ArraySchema', () => {
