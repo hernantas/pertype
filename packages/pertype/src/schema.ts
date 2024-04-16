@@ -525,3 +525,24 @@ export function any(): AnySchema {
   return anyInstance
 }
 const anyInstance = new AnySchema({})
+
+// # Unknown
+
+/**
+ * {@link Schema} that represent `unknown`
+ */
+export class UnknownSchema extends Schema<unknown> {
+  public override is(_: unknown): _ is unknown {
+    return true
+  }
+}
+
+/**
+ * Create new instances of {@link UnknownSchema}
+ *
+ * @returns A new instances
+ */
+export function unknown(): UnknownSchema {
+  return unknownInstance
+}
+const unknownInstance = new UnknownSchema({})

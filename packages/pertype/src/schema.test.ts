@@ -1,4 +1,13 @@
-import { Schema, any, array, bool, boolean, number, string } from './schema'
+import {
+  Schema,
+  any,
+  array,
+  bool,
+  boolean,
+  number,
+  string,
+  unknown,
+} from './schema'
 
 describe('Schema', () => {
   function expectType<T>(_: T): void {}
@@ -181,5 +190,9 @@ describe('Schema', () => {
 
   describe('AnySchema', () => {
     it('Should be compatible with Schema', () => expectType<Schema>(any()))
+  })
+
+  describe('UnknownSchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(unknown()))
   })
 })
