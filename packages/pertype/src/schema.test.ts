@@ -137,7 +137,7 @@ describe('Schema', () => {
       expect(validator.validate('')).toHaveLength(0)
     })
 
-    it('Not empty', () => {
+    it('Not empty constraint should check if string empty or not', () => {
       const validator = string().notEmpty()
       expect(validator.validate('username')).toHaveLength(0)
       expect(validator.validate('use')).toHaveLength(0)
@@ -145,7 +145,7 @@ describe('Schema', () => {
       expect(validator.validate('').length).toBeGreaterThan(0)
     })
 
-    it('Pattern', () => {
+    it('Pattern constraint should check if string match the pattern', () => {
       const validator = string().pattern(/^[a-zA-Z0-9]+$/)
       expect(validator.validate('UserName98543')).toHaveLength(0)
       expect(validator.validate('65891238912')).toHaveLength(0)
