@@ -4,8 +4,10 @@ describe('Schema', () => {
   function expectType<T>(_: T): void {}
 
   describe('BooleanSchema', () => {
-    it('Should be compatible with Schema', () => expectType<Schema>(boolean()))
-    it('Should be compatible with Schema', () => expectType<Schema>(bool()))
+    it('Should be compatible with Schema', () => {
+      expectType<Schema>(boolean())
+      expectType<Schema>(bool())
+    })
 
     it('Should narrow boolean as boolean', () => {
       expect(boolean().is(true)).toBe(true)
