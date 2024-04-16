@@ -47,6 +47,16 @@ export interface Violation {
   readonly args?: AnyObject | undefined
 }
 
+export type ValidationResult<T> =
+  | {
+      readonly valid: true
+      readonly value: T
+    }
+  | {
+      readonly valid: false
+      readonly violations: Violation[]
+    }
+
 /**
  * Key value store used in schema
  */
@@ -88,19 +98,28 @@ export abstract class Schema<
   }
 
   /**
-   * Validated given value by the current active constraints on the schema
+   * Validate given value by the current active constraints on the schema
    *
    * @param value Value to be validated
    * @returns An array of info of constraint being violated
    */
-  public validate(value: T): Violation[] {
-    return this.constraints
+  public validate(value: T): ValidationResult<T> {
+    const violations = this.constraints
       .filter((constraint) => !constraint.validate(value))
       .map((constraint) => ({
         type: constraint.type,
         message: constraint.message,
         args: constraint.args,
       }))
+    return violations.length === 0
+      ? {
+          valid: true,
+          value,
+        }
+      : {
+          valid: false,
+          violations,
+        }
   }
 
   /**
