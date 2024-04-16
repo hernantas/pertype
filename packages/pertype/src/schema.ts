@@ -504,3 +504,24 @@ export class ArraySchema<S extends Schema> extends Schema<
 export function array<S extends Schema>(schema: S): ArraySchema<S> {
   return new ArraySchema({ inner: schema })
 }
+
+// # Any
+
+/**
+ * {@link Schema} that represent `any`
+ */
+export class AnySchema extends Schema<any> {
+  public override is(_: unknown): _ is any {
+    return true
+  }
+}
+
+/**
+ * Create new instances of {@link AnySchema}
+ *
+ * @returns A new instances
+ */
+export function any(): AnySchema {
+  return anyInstance
+}
+const anyInstance = new AnySchema({})

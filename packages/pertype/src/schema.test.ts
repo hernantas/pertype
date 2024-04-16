@@ -1,4 +1,4 @@
-import { Schema, array, bool, boolean, number, string } from './schema'
+import { Schema, any, array, bool, boolean, number, string } from './schema'
 
 describe('Schema', () => {
   function expectType<T>(_: T): void {}
@@ -177,5 +177,9 @@ describe('Schema', () => {
       expect(validator.validate([0, 1]).valid).toBe(true)
       expect(validator.validate([0]).valid).toBe(true)
     })
+  })
+
+  describe('AnySchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(any()))
   })
 })
