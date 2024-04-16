@@ -1,4 +1,4 @@
-import { bool, boolean, number } from './schema'
+import { bool, boolean, number, string } from './schema'
 
 describe('Schema', () => {
   function expectType<T>(_: T): void {}
@@ -99,6 +99,59 @@ describe('Schema', () => {
       expect(
         validator.validate(Number.MAX_SAFE_INTEGER).length,
       ).toBeGreaterThan(0)
+    })
+  })
+
+  describe('StringSchema', () => {
+    it('Should be compatible with Schema', () => expectType(string()))
+
+    it('Should narrow string as string', () => {
+      expect(string().is('Hello World')).toBe(true)
+      expect(string().is('0')).toBe(true)
+      expect(string().is('false')).toBe(true)
+      expect(string().is(0)).toBe(false)
+      expect(string().is(false)).toBe(false)
+    })
+
+    it('Length constraint should check string length to be equal with limit', () => {
+      const validator = string().length(3)
+      expect(validator.validate('username').length).toBeGreaterThan(0)
+      expect(validator.validate('use')).toHaveLength(0)
+      expect(validator.validate('u').length).toBeGreaterThan(0)
+      expect(validator.validate('').length).toBeGreaterThan(0)
+    })
+
+    it('Min constraint should check minimum string length', () => {
+      const validator = string().min(3)
+      expect(validator.validate('username')).toHaveLength(0)
+      expect(validator.validate('use')).toHaveLength(0)
+      expect(validator.validate('u').length).toBeGreaterThan(0)
+      expect(validator.validate('').length).toBeGreaterThan(0)
+    })
+
+    it('Max constraint should check maximum string length', () => {
+      const validator = string().max(3)
+      expect(validator.validate('username').length).toBeGreaterThan(0)
+      expect(validator.validate('use')).toHaveLength(0)
+      expect(validator.validate('u')).toHaveLength(0)
+      expect(validator.validate('')).toHaveLength(0)
+    })
+
+    it('Not empty', () => {
+      const validator = string().notEmpty()
+      expect(validator.validate('username')).toHaveLength(0)
+      expect(validator.validate('use')).toHaveLength(0)
+      expect(validator.validate('u')).toHaveLength(0)
+      expect(validator.validate('').length).toBeGreaterThan(0)
+    })
+
+    it('Pattern', () => {
+      const validator = string().pattern(/^[a-zA-Z0-9]+$/)
+      expect(validator.validate('UserName98543')).toHaveLength(0)
+      expect(validator.validate('65891238912')).toHaveLength(0)
+      expect(validator.validate('').length).toBeGreaterThan(0)
+      expect(validator.validate('email@email').length).toBeGreaterThan(0)
+      expect(validator.validate('user_name').length).toBeGreaterThan(0)
     })
   })
 })

@@ -272,3 +272,115 @@ export function number(): NumberSchema {
   return numberInstance
 }
 const numberInstance = new NumberSchema({})
+
+// # String
+
+/**
+ * {@link Schema} that represent `string`
+ */
+export class StringSchema extends Schema<string> {
+  public override is(value: unknown): value is string {
+    return typeof value === 'string'
+  }
+
+  /**
+   * Add new validation constraint that check character length
+   *
+   * @param limit Character length
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public length(
+    limit: number,
+    message: string = `must be at ${limit} characters`,
+  ): this {
+    return this.check({
+      type: `string.length`,
+      args: { limit },
+      validate: (v) => v.length === limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check minimum character length (`>=`)
+   *
+   * @param limit Minimum character length
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public min(
+    limit: number,
+    message: string = `must be more than ${limit} characters`,
+  ): this {
+    return this.check({
+      type: `string.length.min`,
+      args: { limit },
+      validate: (v) => v.length >= limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check maximum character length (`<=`)
+   *
+   * @param limit Maximum character length
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public max(
+    limit: number,
+    message: string = `must be less than ${limit} characters`,
+  ): this {
+    return this.check({
+      type: `string.length.max`,
+      args: { limit },
+      validate: (v) => v.length <= limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check if string is empty
+   *
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public notEmpty(message: string = `must not empty`): this {
+    return this.check({
+      type: `string.not.empty`,
+      validate: (v) => v.length > 0,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check if string match given regex
+   * pattern
+   *
+   * @param pattern Regex pattern for validation
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public pattern(
+    pattern: RegExp,
+    message: string = `must match "${pattern.source}" pattern`,
+  ): this {
+    return this.check({
+      type: `string.pattern`,
+      args: { pattern },
+      validate: (v) => pattern.test(v),
+      message,
+    })
+  }
+}
+
+/**
+ * Create new instances of {@link StringSchema}
+ *
+ * @returns A new instances
+ */
+export function string(): StringSchema {
+  return stringInstance
+}
+const stringInstance = new StringSchema({})
