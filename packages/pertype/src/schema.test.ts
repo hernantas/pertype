@@ -1,6 +1,7 @@
 import {
   Schema,
   _null,
+  _undefined,
   any,
   array,
   bool,
@@ -163,6 +164,11 @@ describe('Schema', () => {
 
   describe('NullSchema', () => {
     it('Should be compatible with Schema', () => expectType<Schema>(_null()))
+  })
+
+  describe('UndefinedSchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(_undefined()))
   })
 
   describe('ArraySchema', () => {

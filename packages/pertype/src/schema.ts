@@ -428,6 +428,27 @@ export function _null(): NullSchema {
 }
 const nullInstance = new NullSchema({})
 
+// # Undefined
+
+/**
+ * {@link Schema} that represent `null`
+ */
+export class UndefinedSchema extends Schema<undefined> {
+  public override is(value: unknown): value is undefined {
+    return value === undefined
+  }
+}
+
+/**
+ * Create new instances of {@link UndefinedSchema}
+ *
+ * @returns A new instances
+ */
+export function _undefined(): UndefinedSchema {
+  return undefinedInstance
+}
+const undefinedInstance = new UndefinedSchema({})
+
 // # Array
 
 export interface ArrayDefinition<S extends Schema>
