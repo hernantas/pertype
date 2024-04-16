@@ -406,3 +406,101 @@ export function string(): StringSchema {
   return stringInstance
 }
 const stringInstance = new StringSchema({})
+
+// # Array
+
+export interface ArrayDefinition<S extends Schema>
+  extends Definition<TypeOf<S>[]> {
+  /**
+   * Inner schema
+   */
+  readonly inner: S
+}
+
+/**
+ * {@link Schema} that represent `Array` of type of inner schema
+ */
+export class ArraySchema<S extends Schema> extends Schema<
+  TypeOf<S>[],
+  ArrayDefinition<S>
+> {
+  public override is(value: unknown): value is TypeOf<S>[] {
+    return (
+      Array.isArray(value) &&
+      value.find((v) => !this.innerSchema.is(v)) === false
+    )
+  }
+
+  /**
+   * Inner schema
+   */
+  public get innerSchema(): S {
+    return this.get('inner')
+  }
+
+  /**
+   * Add new validation constraint to check array length (`=`)
+   *
+   * @param limit Limit of array length
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public length(
+    limit: number,
+    message: string = `must be at ${limit} length`,
+  ): this {
+    return this.check({
+      type: `array.length`,
+      args: { limit },
+      validate: (value) => value.length === limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint to check minimum array length (`<=`)
+   *
+   * @param limit Minimum array length
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public min(
+    limit: number,
+    message: string = `must be at least ${limit} length`,
+  ): this {
+    return this.check({
+      type: `array.length.min`,
+      args: { limit },
+      validate: (value) => value.length >= limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint to check maximum array length (`>=`)
+   *
+   * @param limit Maximum array length
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public max(
+    limit: number,
+    message: string = `must be at most ${limit} length`,
+  ): this {
+    return this.check({
+      type: `array.length.max`,
+      args: { limit },
+      validate: (value) => value.length <= limit,
+      message,
+    })
+  }
+}
+
+/**
+ * Create new instances of {@link ArraySchema}
+ *
+ * @returns A new instances
+ */
+export function array<S extends Schema>(schema: S): ArraySchema<S> {
+  return new ArraySchema({ inner: schema })
+}

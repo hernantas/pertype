@@ -1,4 +1,4 @@
-import { Schema, bool, boolean, number, string } from './schema'
+import { Schema, array, bool, boolean, number, string } from './schema'
 
 describe('Schema', () => {
   function expectType<T>(_: T): void {}
@@ -148,6 +148,34 @@ describe('Schema', () => {
       expect(validator.validate('').valid).toBe(false)
       expect(validator.validate('email@email').valid).toBe(false)
       expect(validator.validate('user_name').valid).toBe(false)
+    })
+  })
+
+  describe('ArraySchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(array(number())))
+
+    const schema = array(number())
+
+    it('Length constraint should check if array length is equal to limit', () => {
+      const validator = schema.length(2)
+      expect(validator.validate([0, 1, 2]).valid).toBe(false)
+      expect(validator.validate([0, 1]).valid).toBe(true)
+      expect(validator.validate([0]).valid).toBe(false)
+    })
+
+    it('Min constraint should check minimum array length', () => {
+      const validator = schema.min(2)
+      expect(validator.validate([0, 1, 2]).valid).toBe(true)
+      expect(validator.validate([0, 1]).valid).toBe(true)
+      expect(validator.validate([0]).valid).toBe(false)
+    })
+
+    it('Max constraint should check maximum array length', () => {
+      const validator = schema.max(2)
+      expect(validator.validate([0, 1, 2]).valid).toBe(false)
+      expect(validator.validate([0, 1]).valid).toBe(true)
+      expect(validator.validate([0]).valid).toBe(true)
     })
   })
 })
