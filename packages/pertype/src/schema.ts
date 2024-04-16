@@ -66,7 +66,10 @@ export interface Definition<T> {
  * Runtime type that represent some type and can be used to identify and
  * validate the value
  */
-export abstract class Schema<T = any> extends ImmutableBuilder<Definition<T>> {
+export abstract class Schema<
+  T = any,
+  D extends Definition<T> = Definition<T>,
+> extends ImmutableBuilder<D> {
   /**
    * List of constraints of current schema
    */
