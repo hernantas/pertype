@@ -21,38 +21,35 @@ describe('Schema', () => {
     })
 
     it('Should narrow boolean as boolean', () => {
-      const schema = boolean()
-      expect(schema.is(true)).toBe(true)
-      expect(schema.is(false)).toBe(true)
-      expect(schema.is(0)).toBe(false)
-      expect(schema.is(1)).toBe(false)
-      expect(schema.is('true')).toBe(false)
-      expect(schema.is('false')).toBe(false)
+      expect(boolean().is(true)).toBe(true)
+      expect(boolean().is(false)).toBe(true)
+      expect(boolean().is(0)).toBe(false)
+      expect(boolean().is(1)).toBe(false)
+      expect(boolean().is('true')).toBe(false)
+      expect(boolean().is('false')).toBe(false)
     })
   })
 
   describe('NumberSchema', () => {
     it('Should be compatible with Schema', () => expectType<Schema>(number()))
 
-    const schema = number()
-
     it('Should narrow number as number', () => {
-      expect(schema.is(0)).toBe(true)
-      expect(schema.is(255)).toBe(true)
-      expect(schema.is(-255)).toBe(true)
-      expect(schema.is(255.0)).toBe(true)
-      expect(schema.is(0xff)).toBe(true)
-      expect(schema.is(0b11111111)).toBe(true)
-      expect(schema.is(0.255e3)).toBe(true)
-      expect(schema.is(NaN)).toBe(true)
-      expect(schema.is(Infinity)).toBe(true)
-      expect(schema.is(-Infinity)).toBe(true)
-      expect(schema.is('0')).toBe(false)
-      expect(schema.is('3')).toBe(false)
+      expect(number().is(0)).toBe(true)
+      expect(number().is(255)).toBe(true)
+      expect(number().is(-255)).toBe(true)
+      expect(number().is(255.0)).toBe(true)
+      expect(number().is(0xff)).toBe(true)
+      expect(number().is(0b11111111)).toBe(true)
+      expect(number().is(0.255e3)).toBe(true)
+      expect(number().is(NaN)).toBe(true)
+      expect(number().is(Infinity)).toBe(true)
+      expect(number().is(-Infinity)).toBe(true)
+      expect(number().is('0')).toBe(false)
+      expect(number().is('3')).toBe(false)
     })
 
     it('Min constraint should limit its minimum value using greater or equal operator', () => {
-      const validator = schema.min(0)
+      const validator = number().min(0)
       expect(validator.validate(0).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(true)
       expect(validator.validate(1).valid).toBe(true)
@@ -62,7 +59,7 @@ describe('Schema', () => {
     })
 
     it('Max constraint should limit its maximum value using less or equal operator', () => {
-      const validator = schema.max(0)
+      const validator = number().max(0)
       expect(validator.validate(0).valid).toBe(true)
       expect(validator.validate(-1).valid).toBe(true)
       expect(validator.validate(Number.MIN_SAFE_INTEGER).valid).toBe(true)
@@ -71,7 +68,7 @@ describe('Schema', () => {
     })
 
     it('Greater constraint should check value using greater operator', () => {
-      const validator = schema.greater(0)
+      const validator = number().greater(0)
       expect(validator.validate(1).valid).toBe(true)
       expect(validator.validate(Number.MAX_SAFE_INTEGER).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(false)
@@ -80,7 +77,7 @@ describe('Schema', () => {
     })
 
     it('Less constraint should check value using less operator', () => {
-      const validator = schema.less(0)
+      const validator = number().less(0)
       expect(validator.validate(-1).valid).toBe(true)
       expect(validator.validate(Number.MIN_SAFE_INTEGER).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(false)
@@ -89,7 +86,7 @@ describe('Schema', () => {
     })
 
     it('Positive constraint should check for positive number', () => {
-      const validator = schema.positive()
+      const validator = number().positive()
       expect(validator.validate(1).valid).toBe(true)
       expect(validator.validate(Number.MAX_SAFE_INTEGER).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(false)
@@ -98,7 +95,7 @@ describe('Schema', () => {
     })
 
     it('Negative constraint should check for negative number', () => {
-      const validator = schema.negative()
+      const validator = number().negative()
       expect(validator.validate(-1).valid).toBe(true)
       expect(validator.validate(Number.MIN_SAFE_INTEGER).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(false)
@@ -110,18 +107,16 @@ describe('Schema', () => {
   describe('StringSchema', () => {
     it('Should be compatible with Schema', () => expectType<Schema>(string()))
 
-    const schema = string()
-
     it('Should narrow string as string', () => {
-      expect(schema.is('Hello World')).toBe(true)
-      expect(schema.is('0')).toBe(true)
-      expect(schema.is('false')).toBe(true)
-      expect(schema.is(0)).toBe(false)
-      expect(schema.is(false)).toBe(false)
+      expect(string().is('Hello World')).toBe(true)
+      expect(string().is('0')).toBe(true)
+      expect(string().is('false')).toBe(true)
+      expect(string().is(0)).toBe(false)
+      expect(string().is(false)).toBe(false)
     })
 
     it('Length constraint should check string length to be equal with limit', () => {
-      const validator = schema.length(3)
+      const validator = string().length(3)
       expect(validator.validate('username').valid).toBe(false)
       expect(validator.validate('use').valid).toBe(true)
       expect(validator.validate('u').valid).toBe(false)
@@ -129,7 +124,7 @@ describe('Schema', () => {
     })
 
     it('Min constraint should check minimum string length', () => {
-      const validator = schema.min(3)
+      const validator = string().min(3)
       expect(validator.validate('username').valid).toBe(true)
       expect(validator.validate('use').valid).toBe(true)
       expect(validator.validate('u').valid).toBe(false)
@@ -137,7 +132,7 @@ describe('Schema', () => {
     })
 
     it('Max constraint should check maximum string length', () => {
-      const validator = schema.max(3)
+      const validator = string().max(3)
       expect(validator.validate('username').valid).toBe(false)
       expect(validator.validate('use').valid).toBe(true)
       expect(validator.validate('u').valid).toBe(true)
@@ -145,7 +140,7 @@ describe('Schema', () => {
     })
 
     it('Not empty constraint should check if string empty or not', () => {
-      const validator = schema.notEmpty()
+      const validator = string().notEmpty()
       expect(validator.validate('username').valid).toBe(true)
       expect(validator.validate('use').valid).toBe(true)
       expect(validator.validate('u').valid).toBe(true)
@@ -153,7 +148,7 @@ describe('Schema', () => {
     })
 
     it('Pattern constraint should check if string match the pattern', () => {
-      const validator = schema.pattern(/^[a-zA-Z0-9]+$/)
+      const validator = string().pattern(/^[a-zA-Z0-9]+$/)
       expect(validator.validate('UserName98543').valid).toBe(true)
       expect(validator.validate('65891238912').valid).toBe(true)
       expect(validator.validate('').valid).toBe(false)
@@ -173,26 +168,24 @@ describe('Schema', () => {
 
   describe('ArraySchema', () => {
     it('Should be compatible with Schema', () =>
-      expectType<Schema>(array(number())))
-
-    const schema = array(number())
+      expectType<Schema>(array(unknown())))
 
     it('Length constraint should check if array length is equal to limit', () => {
-      const validator = schema.length(2)
+      const validator = array(unknown()).length(2)
       expect(validator.validate([0, 1, 2]).valid).toBe(false)
       expect(validator.validate([0, 1]).valid).toBe(true)
       expect(validator.validate([0]).valid).toBe(false)
     })
 
     it('Min constraint should check minimum array length', () => {
-      const validator = schema.min(2)
+      const validator = array(unknown()).min(2)
       expect(validator.validate([0, 1, 2]).valid).toBe(true)
       expect(validator.validate([0, 1]).valid).toBe(true)
       expect(validator.validate([0]).valid).toBe(false)
     })
 
     it('Max constraint should check maximum array length', () => {
-      const validator = schema.max(2)
+      const validator = array(unknown()).max(2)
       expect(validator.validate([0, 1, 2]).valid).toBe(false)
       expect(validator.validate([0, 1]).valid).toBe(true)
       expect(validator.validate([0]).valid).toBe(true)
