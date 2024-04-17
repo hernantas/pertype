@@ -547,6 +547,61 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
   return new ArraySchema({ inner: schema })
 }
 
+// # Nullable
+
+export interface NullableDefinition<S extends Schema>
+  extends Definition<S | null> {
+  readonly inner: S
+}
+
+/**
+ * {@link Schema} that wrap any schema as `nullable`
+ */
+export class NullableSchema<S extends Schema> extends Schema<
+  TypeOf<S> | null,
+  NullableDefinition<S>
+> {
+  public override is(value: unknown): value is TypeOf<S> | null {
+    return value === null || this.innerSchema.is(value)
+  }
+
+  public override validate(
+    value: TypeOf<S> | null,
+  ): ValidationResult<TypeOf<S> | null> {
+    const violations: Violation[] = []
+
+    const result = super.validate(value)
+    if (!result.valid) {
+      violations.push(...result.violations)
+    }
+
+    if (this.innerSchema.is(value)) {
+      const innerResult = this.innerSchema.validate(value)
+      if (!innerResult.valid) {
+        violations.push(...innerResult.violations)
+      }
+    }
+
+    return violations.length === 0
+      ? { valid: true, value }
+      : { valid: false, violations }
+  }
+
+  public get innerSchema(): S {
+    return this.get('inner')
+  }
+}
+
+/**
+ * Create new instances of {@link NullableSchema}
+ *
+ * @param schema Schema to be wrapped
+ * @returns A new instances
+ */
+export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
+  return new NullableSchema({ inner: schema })
+}
+
 // # Any
 
 /**

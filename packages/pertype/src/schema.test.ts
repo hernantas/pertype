@@ -6,6 +6,7 @@ import {
   array,
   bool,
   boolean,
+  nullable,
   number,
   string,
   unknown,
@@ -199,6 +200,36 @@ describe('Schema', () => {
       expect(validator.validate([0, 1, 2]).valid).toBe(false)
       expect(validator.validate([0, 1]).valid).toBe(true)
       expect(validator.validate([0]).valid).toBe(true)
+    })
+  })
+
+  describe('NullableSchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(nullable(unknown())))
+
+    it('Should narrow as nullable type', () => {
+      expect(nullable(number()).is(undefined)).toBe(false)
+      expect(nullable(number()).is(null)).toBe(true)
+      expect(nullable(number()).is(1)).toBe(true)
+    })
+
+    it('Should check its constraints', () => {
+      const validator = nullable(number()).check({
+        type: 'test.min',
+        validate: (value) => (number().is(value) ? value >= 1 : true),
+      })
+      expect(validator.validate(null).valid).toBe(true)
+      expect(validator.validate(0).valid).toBe(false)
+      expect(validator.validate(1).valid).toBe(true)
+      expect(validator.validate(2).valid).toBe(true)
+    })
+
+    it('Should checks its inner schema constraints', () => {
+      const validator = nullable(number().min(1))
+      expect(validator.validate(null).valid).toBe(true)
+      expect(validator.validate(0).valid).toBe(false)
+      expect(validator.validate(1).valid).toBe(true)
+      expect(validator.validate(2).valid).toBe(true)
     })
   })
 
