@@ -98,19 +98,29 @@ export abstract class Schema<
   }
 
   /**
-   * Validate given value by the current active constraints on the schema
+   * Check given value by the current active constraints on the schema
    *
    * @param value Value to be validated
    * @returns An array of info of constraint being violated
    */
-  public validate(value: T): ValidationResult<T> {
-    const violations = this.constraints
+  public check(value: T): Violation[] {
+    return this.constraints
       .filter((constraint) => !constraint.test(value))
       .map((constraint) => ({
         type: constraint.type,
         message: constraint.message,
         args: constraint.args,
       }))
+  }
+
+  /**
+   * Validate given value by the current active constraints on the schema
+   *
+   * @param value Value to be validated
+   * @returns Result of validation
+   */
+  public validate(value: T): ValidationResult<T> {
+    const violations = this.check(value)
     return violations.length === 0
       ? {
           valid: true,
@@ -473,21 +483,10 @@ export class ArraySchema<S extends Schema> extends Schema<
     )
   }
 
-  public override validate(value: TypeOf<S>[]): ValidationResult<TypeOf<S>[]> {
-    const violations: Violation[] = []
-
-    const result = super.validate(value)
-    if (!result.valid) {
-      violations.push(...result.violations)
-    }
-
-    const innerViolations = value
-      .map((v) => this.innerSchema.validate(v))
-      .flatMap((result) => (result.valid ? [] : result.violations))
-    violations.push(...innerViolations)
-    return violations.length === 0
-      ? { valid: true, value }
-      : { valid: false, violations }
+  public override check(value: TypeOf<S>[]): Violation[] {
+    return super
+      .check(value)
+      .concat(...value.map((v) => this.innerSchema.check(v)))
   }
 
   /**
@@ -582,26 +581,12 @@ export class NullableSchema<S extends Schema> extends Schema<
     return value === null || this.innerSchema.is(value)
   }
 
-  public override validate(
-    value: TypeOf<S> | null,
-  ): ValidationResult<TypeOf<S> | null> {
-    const violations: Violation[] = []
-
-    const result = super.validate(value)
-    if (!result.valid) {
-      violations.push(...result.violations)
-    }
-
-    if (this.innerSchema.is(value)) {
-      const innerResult = this.innerSchema.validate(value)
-      if (!innerResult.valid) {
-        violations.push(...innerResult.violations)
-      }
-    }
-
-    return violations.length === 0
-      ? { valid: true, value }
-      : { valid: false, violations }
+  public override check(value: TypeOf<S> | null): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...(this.innerSchema.is(value) ? this.innerSchema.check(value) : []),
+      )
   }
 
   public get innerSchema(): S {
@@ -637,26 +622,12 @@ export class OptionalSchema<S extends Schema> extends Schema<
     return value === undefined || this.innerSchema.is(value)
   }
 
-  public override validate(
-    value: TypeOf<S> | undefined,
-  ): ValidationResult<TypeOf<S> | undefined> {
-    const violations: Violation[] = []
-
-    const result = super.validate(value)
-    if (!result.valid) {
-      violations.push(...result.violations)
-    }
-
-    if (this.innerSchema.is(value)) {
-      const innerResult = this.innerSchema.validate(value)
-      if (!innerResult.valid) {
-        violations.push(...innerResult.violations)
-      }
-    }
-
-    return violations.length === 0
-      ? { valid: true, value }
-      : { valid: false, violations }
+  public override check(value: TypeOf<S> | undefined): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...(this.innerSchema.is(value) ? this.innerSchema.check(value) : []),
+      )
   }
 
   public get innerSchema(): S {
