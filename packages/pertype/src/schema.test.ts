@@ -170,6 +170,16 @@ describe('Schema', () => {
     it('Should be compatible with Schema', () =>
       expectType<Schema>(array(unknown())))
 
+    it('Should narrow array as array', () => {
+      expect(array(unknown()).is([])).toBe(true)
+      expect(array(unknown()).is([1, 2])).toBe(true)
+      expect(array(unknown()).is([null])).toBe(true)
+      expect(array(unknown()).is([undefined])).toBe(true)
+      expect(array(unknown()).is(1)).toBe(false)
+      expect(array(unknown()).is(null)).toBe(false)
+      expect(array(unknown()).is(undefined)).toBe(false)
+    })
+
     it('Length constraint should check if array length is equal to limit', () => {
       const validator = array(unknown()).length(2)
       expect(validator.validate([0, 1, 2]).valid).toBe(false)
