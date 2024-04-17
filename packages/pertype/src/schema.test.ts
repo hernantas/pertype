@@ -222,7 +222,7 @@ describe('Schema', () => {
     })
 
     it('Should check its constraints', () => {
-      const validator = nullable(number()).check({
+      const validator = nullable(number()).rule({
         type: 'test.min',
         validate: (value) => (number().is(value) ? value >= 1 : true),
       })
@@ -252,7 +252,7 @@ describe('Schema', () => {
     })
 
     it('Should check its constraints', () => {
-      const validator = optional(number()).check({
+      const validator = optional(number()).rule({
         type: 'test.min',
         validate: (value) => (number().is(value) ? value >= 1 : true),
       })

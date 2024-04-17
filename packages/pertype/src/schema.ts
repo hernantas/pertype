@@ -90,11 +90,11 @@ export abstract class Schema<
   /**
    * Add validation constraint to this schema
    *
-   * @param rule Constraint to be added
+   * @param constraint Constraint to be added
    * @returns A new instance of this class
    */
-  public check(rule: Constraint<T>): this {
-    return this.set('constraints', this.constraints.concat(rule))
+  public rule(constraint: Constraint<T>): this {
+    return this.set('constraints', this.constraints.concat(constraint))
   }
 
   /**
@@ -187,7 +187,7 @@ export class NumberSchema extends Schema<number> {
     limit: number,
     message: string = `must greater than or equal to ${limit}`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `number.min`,
       args: { limit },
       validate: (v) => v >= limit,
@@ -206,7 +206,7 @@ export class NumberSchema extends Schema<number> {
     limit: number,
     message: string = `must be less than or equal to ${limit}`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `number.max`,
       args: { limit },
       validate: (v) => v <= limit,
@@ -226,7 +226,7 @@ export class NumberSchema extends Schema<number> {
     limit: number,
     message: string = `must be greater than ${limit}`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `number.greater`,
       args: { limit },
       validate: (v) => v > limit,
@@ -246,7 +246,7 @@ export class NumberSchema extends Schema<number> {
     limit: number,
     message: string = `must be less than ${limit}`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `number.less`,
       args: { limit },
       validate: (v) => v < limit,
@@ -262,7 +262,7 @@ export class NumberSchema extends Schema<number> {
    * @returns A new instance with new rules added
    */
   public positive(message: string = `must be positive number`): this {
-    return this.check({
+    return this.rule({
       type: `number.positive`,
       validate: (v) => v > 0,
       message,
@@ -277,7 +277,7 @@ export class NumberSchema extends Schema<number> {
    * @returns A new instance with new rules added
    */
   public negative(message: string = `must be negative number`): this {
-    return this.check({
+    return this.rule({
       type: `number.negative`,
       validate: (v) => v < 0,
       message: message,
@@ -316,7 +316,7 @@ export class StringSchema extends Schema<string> {
     limit: number,
     message: string = `must be at ${limit} characters`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `string.length`,
       args: { limit },
       validate: (v) => v.length === limit,
@@ -335,7 +335,7 @@ export class StringSchema extends Schema<string> {
     limit: number,
     message: string = `must be more than ${limit} characters`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `string.length.min`,
       args: { limit },
       validate: (v) => v.length >= limit,
@@ -354,7 +354,7 @@ export class StringSchema extends Schema<string> {
     limit: number,
     message: string = `must be less than ${limit} characters`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `string.length.max`,
       args: { limit },
       validate: (v) => v.length <= limit,
@@ -369,7 +369,7 @@ export class StringSchema extends Schema<string> {
    * @returns A new instance with new rules added
    */
   public notEmpty(message: string = `must not empty`): this {
-    return this.check({
+    return this.rule({
       type: `string.not.empty`,
       validate: (v) => v.length > 0,
       message,
@@ -388,7 +388,7 @@ export class StringSchema extends Schema<string> {
     pattern: RegExp,
     message: string = `must match "${pattern.source}" pattern`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `string.pattern`,
       args: { pattern },
       validate: (v) => pattern.test(v),
@@ -508,7 +508,7 @@ export class ArraySchema<S extends Schema> extends Schema<
     limit: number,
     message: string = `must be at ${limit} length`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `array.length`,
       args: { limit },
       validate: (value) => value.length === limit,
@@ -527,7 +527,7 @@ export class ArraySchema<S extends Schema> extends Schema<
     limit: number,
     message: string = `must be at least ${limit} length`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `array.length.min`,
       args: { limit },
       validate: (value) => value.length >= limit,
@@ -546,7 +546,7 @@ export class ArraySchema<S extends Schema> extends Schema<
     limit: number,
     message: string = `must be at most ${limit} length`,
   ): this {
-    return this.check({
+    return this.rule({
       type: `array.length.max`,
       args: { limit },
       validate: (value) => value.length <= limit,
