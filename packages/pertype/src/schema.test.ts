@@ -8,6 +8,7 @@ import {
   boolean,
   nullable,
   number,
+  optional,
   string,
   unknown,
 } from './schema'
@@ -234,6 +235,36 @@ describe('Schema', () => {
     it('Should checks its inner schema constraints', () => {
       const validator = nullable(number().min(1))
       expect(validator.validate(null).valid).toBe(true)
+      expect(validator.validate(0).valid).toBe(false)
+      expect(validator.validate(1).valid).toBe(true)
+      expect(validator.validate(2).valid).toBe(true)
+    })
+  })
+
+  describe('OptionalSchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(optional(unknown())))
+
+    it('Should narrow as optional type', () => {
+      expect(optional(number()).is(undefined)).toBe(true)
+      expect(optional(number()).is(null)).toBe(false)
+      expect(optional(number()).is(1)).toBe(true)
+    })
+
+    it('Should check its constraints', () => {
+      const validator = optional(number()).check({
+        type: 'test.min',
+        validate: (value) => (number().is(value) ? value >= 1 : true),
+      })
+      expect(validator.validate(undefined).valid).toBe(true)
+      expect(validator.validate(0).valid).toBe(false)
+      expect(validator.validate(1).valid).toBe(true)
+      expect(validator.validate(2).valid).toBe(true)
+    })
+
+    it('Should checks its inner schema constraints', () => {
+      const validator = optional(number().min(1))
+      expect(validator.validate(undefined).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(false)
       expect(validator.validate(1).valid).toBe(true)
       expect(validator.validate(2).valid).toBe(true)
