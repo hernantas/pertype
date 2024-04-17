@@ -114,6 +114,16 @@ export abstract class Schema<
   }
 
   /**
+   * Check given value by the current active constraints on the schema
+   *
+   * @param value Value to be validated
+   * @returns True if not breaking any constraints, false otherwise
+   */
+  public test(value: T): boolean {
+    return this.check(value).length === 0
+  }
+
+  /**
    * Validate given value by the current active constraints on the schema
    *
    * @param value Value to be validated
