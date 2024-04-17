@@ -10,6 +10,7 @@ import {
   number,
   optional,
   string,
+  union,
   unknown,
 } from './schema'
 
@@ -277,5 +278,40 @@ describe('Schema', () => {
 
   describe('UnknownSchema', () => {
     it('Should be compatible with Schema', () => expectType<Schema>(unknown()))
+  })
+
+  describe('UnionSchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(union(string(), number())))
+
+    it('Should narrow as union type', () => {
+      expect(union(string(), number()).is('0')).toBe(true)
+      expect(union(string(), number()).is(0)).toBe(true)
+      expect(union(string(), number()).is(null)).toBe(false)
+      expect(union(string(), number()).is(undefined)).toBe(false)
+    })
+
+    it('Should check its constraints', () => {
+      const validator = union(string(), number()).rule({
+        type: 'test.size',
+        test: (value) => (string().is(value) ? value.length === 1 : value >= 1),
+      })
+      expect(validator.validate('').valid).toBe(false)
+      expect(validator.validate('1').valid).toBe(true)
+      expect(validator.validate('12').valid).toBe(false)
+      expect(validator.validate(0).valid).toBe(false)
+      expect(validator.validate(1).valid).toBe(true)
+      expect(validator.validate(2).valid).toBe(true)
+    })
+
+    it('Should checks its inner schema constraints', () => {
+      const validator = union(string().length(1), number().min(1))
+      expect(validator.validate('').valid).toBe(false)
+      expect(validator.validate('1').valid).toBe(true)
+      expect(validator.validate('12').valid).toBe(false)
+      expect(validator.validate(0).valid).toBe(false)
+      expect(validator.validate(1).valid).toBe(true)
+      expect(validator.validate(2).valid).toBe(true)
+    })
   })
 })

@@ -691,3 +691,50 @@ export function unknown(): UnknownSchema {
   return unknownInstance
 }
 const unknownInstance = new UnknownSchema({})
+
+// # Member
+
+export type MemberSchema = [Schema, Schema, ...Schema[]]
+
+// ## Union
+
+export interface UnionDefinition<S extends MemberSchema>
+  extends Definition<TypeOf<S>[number]> {
+  readonly members: S
+}
+
+/**
+ * {@link Schema} that represent `union`
+ */
+export class UnionSchema<S extends MemberSchema> extends Schema<
+  TypeOf<S>[number],
+  UnionDefinition<S>
+> {
+  public override is(value: unknown): value is TypeOf<S>[number] {
+    return this.members.find((member) => member.is(value)) !== undefined
+  }
+
+  public override check(value: TypeOf<S>[number]): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...this.members.flatMap((member) =>
+          member.is(value) ? member.check(value) : [],
+        ),
+      )
+  }
+
+  public get members(): S {
+    return this.get('members')
+  }
+}
+
+/**
+ * Create new instances of {@link UnionSchema}
+ *
+ * @param members inner schema members of this union
+ * @returns A new instances
+ */
+export function union<S extends MemberSchema>(...members: S): UnionSchema<S> {
+  return new UnionSchema({ members })
+}
