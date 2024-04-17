@@ -224,7 +224,7 @@ describe('Schema', () => {
     it('Should check its constraints', () => {
       const validator = nullable(number()).rule({
         type: 'test.min',
-        validate: (value) => (number().is(value) ? value >= 1 : true),
+        test: (value) => (number().is(value) ? value >= 1 : true),
       })
       expect(validator.validate(null).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(false)
@@ -254,7 +254,7 @@ describe('Schema', () => {
     it('Should check its constraints', () => {
       const validator = optional(number()).rule({
         type: 'test.min',
-        validate: (value) => (number().is(value) ? value >= 1 : true),
+        test: (value) => (number().is(value) ? value >= 1 : true),
       })
       expect(validator.validate(undefined).valid).toBe(true)
       expect(validator.validate(0).valid).toBe(false)

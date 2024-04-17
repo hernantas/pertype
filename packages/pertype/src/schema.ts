@@ -2,9 +2,9 @@ import { AnyObject, Key } from './util/alias'
 import { ImmutableBuilder } from './util/builder'
 
 /**
- * Function to check if value is valid
+ * Function to test if value is within constraint
  */
-export type Validate<T> = (value: T) => boolean
+export type TestConstraint<T> = (value: T) => boolean
 
 /** Constraint to determine valid value */
 export interface Constraint<T> {
@@ -23,8 +23,8 @@ export interface Constraint<T> {
    */
   readonly args?: AnyObject
 
-  /** Check if given value is valid */
-  readonly validate: Validate<T>
+  /** Check if given value is not violating the constraint */
+  readonly test: TestConstraint<T>
 }
 
 /**
@@ -105,7 +105,7 @@ export abstract class Schema<
    */
   public validate(value: T): ValidationResult<T> {
     const violations = this.constraints
-      .filter((constraint) => !constraint.validate(value))
+      .filter((constraint) => !constraint.test(value))
       .map((constraint) => ({
         type: constraint.type,
         message: constraint.message,
@@ -190,7 +190,7 @@ export class NumberSchema extends Schema<number> {
     return this.rule({
       type: `number.min`,
       args: { limit },
-      validate: (v) => v >= limit,
+      test: (v) => v >= limit,
       message,
     })
   }
@@ -209,7 +209,7 @@ export class NumberSchema extends Schema<number> {
     return this.rule({
       type: `number.max`,
       args: { limit },
-      validate: (v) => v <= limit,
+      test: (v) => v <= limit,
       message,
     })
   }
@@ -229,7 +229,7 @@ export class NumberSchema extends Schema<number> {
     return this.rule({
       type: `number.greater`,
       args: { limit },
-      validate: (v) => v > limit,
+      test: (v) => v > limit,
       message,
     })
   }
@@ -249,7 +249,7 @@ export class NumberSchema extends Schema<number> {
     return this.rule({
       type: `number.less`,
       args: { limit },
-      validate: (v) => v < limit,
+      test: (v) => v < limit,
       message,
     })
   }
@@ -264,7 +264,7 @@ export class NumberSchema extends Schema<number> {
   public positive(message: string = `must be positive number`): this {
     return this.rule({
       type: `number.positive`,
-      validate: (v) => v > 0,
+      test: (v) => v > 0,
       message,
     })
   }
@@ -279,7 +279,7 @@ export class NumberSchema extends Schema<number> {
   public negative(message: string = `must be negative number`): this {
     return this.rule({
       type: `number.negative`,
-      validate: (v) => v < 0,
+      test: (v) => v < 0,
       message: message,
     })
   }
@@ -319,7 +319,7 @@ export class StringSchema extends Schema<string> {
     return this.rule({
       type: `string.length`,
       args: { limit },
-      validate: (v) => v.length === limit,
+      test: (v) => v.length === limit,
       message,
     })
   }
@@ -338,7 +338,7 @@ export class StringSchema extends Schema<string> {
     return this.rule({
       type: `string.length.min`,
       args: { limit },
-      validate: (v) => v.length >= limit,
+      test: (v) => v.length >= limit,
       message,
     })
   }
@@ -357,7 +357,7 @@ export class StringSchema extends Schema<string> {
     return this.rule({
       type: `string.length.max`,
       args: { limit },
-      validate: (v) => v.length <= limit,
+      test: (v) => v.length <= limit,
       message,
     })
   }
@@ -371,7 +371,7 @@ export class StringSchema extends Schema<string> {
   public notEmpty(message: string = `must not empty`): this {
     return this.rule({
       type: `string.not.empty`,
-      validate: (v) => v.length > 0,
+      test: (v) => v.length > 0,
       message,
     })
   }
@@ -391,7 +391,7 @@ export class StringSchema extends Schema<string> {
     return this.rule({
       type: `string.pattern`,
       args: { pattern },
-      validate: (v) => pattern.test(v),
+      test: (v) => pattern.test(v),
       message,
     })
   }
@@ -511,7 +511,7 @@ export class ArraySchema<S extends Schema> extends Schema<
     return this.rule({
       type: `array.length`,
       args: { limit },
-      validate: (value) => value.length === limit,
+      test: (value) => value.length === limit,
       message,
     })
   }
@@ -530,7 +530,7 @@ export class ArraySchema<S extends Schema> extends Schema<
     return this.rule({
       type: `array.length.min`,
       args: { limit },
-      validate: (value) => value.length >= limit,
+      test: (value) => value.length >= limit,
       message,
     })
   }
@@ -549,7 +549,7 @@ export class ArraySchema<S extends Schema> extends Schema<
     return this.rule({
       type: `array.length.max`,
       args: { limit },
-      validate: (value) => value.length <= limit,
+      test: (value) => value.length <= limit,
       message,
     })
   }
