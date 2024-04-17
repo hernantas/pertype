@@ -564,10 +564,10 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
   return new ArraySchema({ inner: schema })
 }
 
-// # Optional
+// # Nullable
 
 export interface NullableDefinition<S extends Schema>
-  extends Definition<S | null> {
+  extends Definition<TypeOf<S> | null> {
   readonly inner: S
 }
 
@@ -622,7 +622,7 @@ export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
 // # Optional
 
 export interface OptionalDefinition<S extends Schema>
-  extends Definition<S | undefined> {
+  extends Definition<TypeOf<S> | undefined> {
   readonly inner: S
 }
 
