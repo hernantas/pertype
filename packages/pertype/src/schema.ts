@@ -469,7 +469,7 @@ export class ArraySchema<S extends Schema> extends Schema<
   public override is(value: unknown): value is TypeOf<S>[] {
     return (
       Array.isArray(value) &&
-      value.find((v) => !this.innerSchema.is(v)) === false
+      value.find((v) => !this.innerSchema.is(v)) === undefined
     )
   }
 
