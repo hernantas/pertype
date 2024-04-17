@@ -143,7 +143,12 @@ export abstract class Schema<
 /**
  * Infer the represented type by the schema
  */
-export type TypeOf<S extends Schema> = S extends Schema<infer R> ? R : never
+export type TypeOf<S> =
+  S extends Schema<infer R>
+    ? R
+    : {
+        [K in keyof S]: TypeOf<S[K]>
+      }
 
 // # Boolean
 
