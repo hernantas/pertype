@@ -201,6 +201,13 @@ describe('Schema', () => {
       expect(validator.validate([0, 1]).valid).toBe(true)
       expect(validator.validate([0]).valid).toBe(true)
     })
+
+    it('Should checks its inner schema constraints', () => {
+      const validator = array(number().max(1))
+      expect(validator.validate([0]).valid).toBe(true)
+      expect(validator.validate([0, 1]).valid).toBe(true)
+      expect(validator.validate([0, 1, 2]).valid).toBe(false)
+    })
   })
 
   describe('NullableSchema', () => {

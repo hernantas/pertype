@@ -473,6 +473,23 @@ export class ArraySchema<S extends Schema> extends Schema<
     )
   }
 
+  public override validate(value: TypeOf<S>[]): ValidationResult<TypeOf<S>[]> {
+    const violations: Violation[] = []
+
+    const result = super.validate(value)
+    if (!result.valid) {
+      violations.push(...result.violations)
+    }
+
+    const innerViolations = value
+      .map((v) => this.innerSchema.validate(v))
+      .flatMap((result) => (result.valid ? [] : result.violations))
+    violations.push(...innerViolations)
+    return violations.length === 0
+      ? { valid: true, value }
+      : { valid: false, violations }
+  }
+
   /**
    * Inner schema
    */
