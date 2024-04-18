@@ -1,4 +1,4 @@
-import { AnyObject, Key } from './util/alias'
+import { AnyObject, Key, Tuple } from './util/alias'
 import { ImmutableBuilder } from './util/builder'
 
 /**
@@ -701,6 +701,50 @@ export function unknown(): UnknownSchema {
   return unknownInstance
 }
 const unknownInstance = new UnknownSchema({})
+
+// # Tuple
+
+/**
+ * {@link Schema} that represent `tuple`
+ */
+export interface TupleDefinition<S extends Tuple<Schema>>
+  extends Definition<TypeOf<S>> {
+  readonly items: S
+}
+
+export class TupleSchema<S extends Tuple<Schema>> extends Schema<
+  TypeOf<S>,
+  TupleDefinition<S>
+> {
+  public override is(value: unknown): value is TypeOf<S> {
+    return (
+      Array.isArray(value) &&
+      this.items.find((member, index) => !member.is(value[index])) === undefined
+    )
+  }
+
+  public override check(value: TypeOf<S>): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...this.items.flatMap((member, index) => member.check(value[index])),
+      )
+  }
+
+  public get items(): S {
+    return this.get('items')
+  }
+}
+
+/**
+ * Create new instances of {@link TupleSchema}
+ *
+ * @param members inner {@link Schema} members
+ * @returns A new instances
+ */
+export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
+  return new TupleSchema({ items: members })
+}
 
 // # Member
 

@@ -10,6 +10,7 @@ import {
   number,
   optional,
   string,
+  tuple,
   union,
   unknown,
 } from './schema'
@@ -278,6 +279,49 @@ describe('Schema', () => {
 
   describe('UnknownSchema', () => {
     it('Should be compatible with Schema', () => expectType<Schema>(unknown()))
+  })
+
+  describe('TupleSchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(tuple(string(), number(), boolean())))
+
+    it('Should narrow as tuple type', () => {
+      expect(tuple(string(), number(), boolean()).is(['', 0, false])).toBe(true)
+      expect(tuple(string(), number(), boolean()).is(['', 0])).toBe(false)
+      expect(tuple(string(), number(), boolean()).is([''])).toBe(false)
+      expect(tuple(string(), number(), boolean()).is('')).toBe(false)
+      expect(tuple(string(), number(), boolean()).is(null)).toBe(false)
+      expect(tuple(string(), number(), boolean()).is(undefined)).toBe(false)
+    })
+
+    it('Should check its constraint', () => {
+      const validator = tuple(string(), number()).rule({
+        type: 'test.size',
+        test: (value) => value[0].length === 1 && value[1] >= 1,
+      })
+      expect(validator.test(['', 0])).toBe(false)
+      expect(validator.test(['', 1])).toBe(false)
+      expect(validator.test(['', 2])).toBe(false)
+      expect(validator.test(['1', 0])).toBe(false)
+      expect(validator.test(['1', 1])).toBe(true)
+      expect(validator.test(['1', 2])).toBe(true)
+      expect(validator.test(['12', 0])).toBe(false)
+      expect(validator.test(['12', 1])).toBe(false)
+      expect(validator.test(['12', 2])).toBe(false)
+    })
+
+    it('Should checks its inner schema constraints', () => {
+      const validator = tuple(string().length(1), number().min(1))
+      expect(validator.test(['', 0])).toBe(false)
+      expect(validator.test(['', 1])).toBe(false)
+      expect(validator.test(['', 2])).toBe(false)
+      expect(validator.test(['1', 0])).toBe(false)
+      expect(validator.test(['1', 1])).toBe(true)
+      expect(validator.test(['1', 2])).toBe(true)
+      expect(validator.test(['12', 0])).toBe(false)
+      expect(validator.test(['12', 1])).toBe(false)
+      expect(validator.test(['12', 2])).toBe(false)
+    })
   })
 
   describe('UnionSchema', () => {
