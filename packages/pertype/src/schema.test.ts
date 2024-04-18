@@ -6,6 +6,7 @@ import {
   array,
   bool,
   boolean,
+  literal,
   nullable,
   number,
   object,
@@ -235,6 +236,26 @@ describe('Schema', () => {
 
   describe('UnknownSchema', () => {
     it('Should be compatible with Schema', () => expectType<Schema>(unknown()))
+  })
+
+  describe('LiteralSchema', () => {
+    it('Should be compatible with Schema', () => {
+      expectType<Schema>(literal('value'))
+      expectType<Schema>(literal(1))
+      expectType<Schema>(literal(true))
+    })
+
+    it('Should narrow literal as literal', () => {
+      expect(literal('value').is('value')).toBe(true)
+      expect(literal('value').is(1)).toBe(false)
+      expect(literal('value').is(true)).toBe(false)
+      expect(literal(1).is('value')).toBe(false)
+      expect(literal(1).is(1)).toBe(true)
+      expect(literal(1).is(true)).toBe(false)
+      expect(literal(true).is('value')).toBe(false)
+      expect(literal(true).is(1)).toBe(false)
+      expect(literal(true).is(true)).toBe(true)
+    })
   })
 
   describe('ArraySchema', () => {

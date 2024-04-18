@@ -1,4 +1,4 @@
-import { AnyRecord, Key, Member, Tuple } from './util/alias'
+import { AnyRecord, Key, Literal, Member, Tuple } from './util/alias'
 import { ImmutableBuilder } from './util/builder'
 
 /**
@@ -515,6 +515,29 @@ export function unknown(): UnknownSchema {
   return unknownInstance
 }
 const unknownInstance = new UnknownSchema({})
+
+// # Literal
+
+export interface LiteralDefinition<T extends Literal> extends Definition<T> {
+  readonly value: T
+}
+
+export class LiteralSchema<T extends Literal> extends Schema<
+  T,
+  LiteralDefinition<T>
+> {
+  public override is(value: unknown): value is T {
+    return this.value === value
+  }
+
+  public get value(): T {
+    return this.get('value')
+  }
+}
+
+export function literal<T extends Literal>(value: T): LiteralSchema<T> {
+  return new LiteralSchema({ value })
+}
 
 // # Array
 
