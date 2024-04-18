@@ -793,3 +793,69 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
 export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
   return new UnionSchema({ members })
 }
+
+// # Object
+
+export interface ObjectDefinition<S extends AnyRecord<Schema>>
+  extends Definition<TypeOf<S>> {
+  readonly properties: S
+}
+
+/**
+ * {@link Schema} that represent `object` with properties
+ */
+export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
+  TypeOf<S>,
+  ObjectDefinition<S>
+> {
+  public override is(value: unknown): value is TypeOf<S> {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      this.entries.find(
+        ([key, prop]) => !prop.is((value as TypeOf<S>)[key]),
+      ) === undefined
+    )
+  }
+
+  public override check(value: TypeOf<S>): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...this.entries.flatMap(([key, prop]) =>
+          prop.check((value as TypeOf<S>)[key]),
+        ),
+      )
+  }
+
+  public get properties(): S {
+    return this.get('properties')
+  }
+
+  public get props(): S {
+    return this.get('properties')
+  }
+
+  public get keys(): string[] {
+    return Object.keys(this.props)
+  }
+
+  public get values(): Schema[] {
+    return Object.values(this.props)
+  }
+
+  public get entries(): [string, Schema][] {
+    return Object.entries(this.properties)
+  }
+}
+
+/**
+ * Create new instances of {@link ObjectSchema}
+ *
+ * @returns A new instances
+ */
+export function object<S extends AnyRecord<Schema>>(
+  properties: S,
+): ObjectSchema<S> {
+  return new ObjectSchema({ properties })
+}

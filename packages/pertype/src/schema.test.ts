@@ -8,6 +8,7 @@ import {
   boolean,
   nullable,
   number,
+  object,
   optional,
   string,
   tuple,
@@ -168,6 +169,64 @@ describe('Schema', () => {
   describe('UndefinedSchema', () => {
     it('Should be compatible with Schema', () =>
       expectType<Schema>(_undefined()))
+  })
+
+  describe('ObjectSchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(
+        object({
+          _string: string(),
+          _number: number(),
+        }),
+      ))
+
+    it('Should narrow object as object', () => {
+      const schema = object({
+        _string: string(),
+        _number: number(),
+      })
+      expect(schema.is({ _string: '', _number: 0 })).toBe(true)
+      expect(schema.is({ _string: '' })).toBe(false)
+      expect(schema.is({ _number: 0 })).toBe(false)
+      expect(schema.is({})).toBe(false)
+      expect(schema.is(null)).toBe(false)
+      expect(schema.is(undefined)).toBe(false)
+    })
+
+    it('Should check its constraint', () => {
+      const schema = object({
+        _string: string(),
+        _number: number(),
+      }).rule({
+        type: 'property.length',
+        test: (value) => value._string.length === 1 && value._number >= 1,
+      })
+      expect(schema.test({ _string: '', _number: 0 })).toBe(false)
+      expect(schema.test({ _string: '', _number: 1 })).toBe(false)
+      expect(schema.test({ _string: '', _number: 2 })).toBe(false)
+      expect(schema.test({ _string: '1', _number: 0 })).toBe(false)
+      expect(schema.test({ _string: '1', _number: 1 })).toBe(true)
+      expect(schema.test({ _string: '1', _number: 2 })).toBe(true)
+      expect(schema.test({ _string: '12', _number: 0 })).toBe(false)
+      expect(schema.test({ _string: '12', _number: 1 })).toBe(false)
+      expect(schema.test({ _string: '12', _number: 2 })).toBe(false)
+    })
+
+    it('Should checks its inner schema constraints', () => {
+      const schema = object({
+        _string: string().length(1),
+        _number: number().min(1),
+      })
+      expect(schema.test({ _string: '', _number: 0 })).toBe(false)
+      expect(schema.test({ _string: '', _number: 1 })).toBe(false)
+      expect(schema.test({ _string: '', _number: 2 })).toBe(false)
+      expect(schema.test({ _string: '1', _number: 0 })).toBe(false)
+      expect(schema.test({ _string: '1', _number: 1 })).toBe(true)
+      expect(schema.test({ _string: '1', _number: 2 })).toBe(true)
+      expect(schema.test({ _string: '12', _number: 0 })).toBe(false)
+      expect(schema.test({ _string: '12', _number: 1 })).toBe(false)
+      expect(schema.test({ _string: '12', _number: 2 })).toBe(false)
+    })
   })
 
   describe('AnySchema', () => {
