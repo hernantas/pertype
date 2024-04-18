@@ -14,6 +14,10 @@ export type Key = string | number | symbol
 export type AnyRecord<T = unknown> = Record<Key, T>
 
 /**
+ * Alias for literal type
+ */
+export type Literal = string | number | boolean
+/**
  * Alias for `tuple` object
  */
 export type Tuple<T> = [T, ...T[]]
