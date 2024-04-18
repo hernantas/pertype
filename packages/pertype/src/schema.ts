@@ -748,8 +748,13 @@ export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
 
 // # Union
 
+/**
+ * Convert {@link Member} type into union
+ */
+export type UnionOf<T extends Member<any>> = T[number]
+
 export interface UnionDefinition<S extends Member<Schema>>
-  extends Definition<TypeOf<S>[number]> {
+  extends Definition<UnionOf<TypeOf<S>>> {
   readonly members: S
 }
 
@@ -757,14 +762,14 @@ export interface UnionDefinition<S extends Member<Schema>>
  * {@link Schema} that represent `union`
  */
 export class UnionSchema<S extends Member<Schema>> extends Schema<
-  TypeOf<S>[number],
+  UnionOf<TypeOf<S>>,
   UnionDefinition<S>
 > {
-  public override is(value: unknown): value is TypeOf<S>[number] {
+  public override is(value: unknown): value is UnionOf<TypeOf<S>> {
     return this.members.find((member) => member.is(value)) !== undefined
   }
 
-  public override check(value: TypeOf<S>[number]): Violation[] {
+  public override check(value: UnionOf<TypeOf<S>>): Violation[] {
     return super
       .check(value)
       .concat(
