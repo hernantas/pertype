@@ -170,6 +170,14 @@ describe('Schema', () => {
       expectType<Schema>(_undefined()))
   })
 
+  describe('AnySchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(any()))
+  })
+
+  describe('UnknownSchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(unknown()))
+  })
+
   describe('ArraySchema', () => {
     it('Should be compatible with Schema', () =>
       expectType<Schema>(array(unknown())))
@@ -271,14 +279,6 @@ describe('Schema', () => {
       expect(validator.test(1)).toBe(true)
       expect(validator.test(2)).toBe(true)
     })
-  })
-
-  describe('AnySchema', () => {
-    it('Should be compatible with Schema', () => expectType<Schema>(any()))
-  })
-
-  describe('UnknownSchema', () => {
-    it('Should be compatible with Schema', () => expectType<Schema>(unknown()))
   })
 
   describe('TupleSchema', () => {

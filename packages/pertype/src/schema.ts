@@ -474,6 +474,48 @@ export function _undefined(): UndefinedSchema {
 }
 const undefinedInstance = new UndefinedSchema({})
 
+// # Any
+
+/**
+ * {@link Schema} that represent `any`
+ */
+export class AnySchema extends Schema<any> {
+  public override is(_: unknown): _ is any {
+    return true
+  }
+}
+
+/**
+ * Create new instances of {@link AnySchema}
+ *
+ * @returns A new instances
+ */
+export function any(): AnySchema {
+  return anyInstance
+}
+const anyInstance = new AnySchema({})
+
+// # Unknown
+
+/**
+ * {@link Schema} that represent `unknown`
+ */
+export class UnknownSchema extends Schema<unknown> {
+  public override is(_: unknown): _ is unknown {
+    return true
+  }
+}
+
+/**
+ * Create new instances of {@link UnknownSchema}
+ *
+ * @returns A new instances
+ */
+export function unknown(): UnknownSchema {
+  return unknownInstance
+}
+const unknownInstance = new UnknownSchema({})
+
 // # Array
 
 export interface ArrayDefinition<S extends Schema>
@@ -659,48 +701,6 @@ export class OptionalSchema<S extends Schema> extends Schema<
 export function optional<S extends Schema>(schema: S): OptionalSchema<S> {
   return new OptionalSchema({ inner: schema })
 }
-
-// # Any
-
-/**
- * {@link Schema} that represent `any`
- */
-export class AnySchema extends Schema<any> {
-  public override is(_: unknown): _ is any {
-    return true
-  }
-}
-
-/**
- * Create new instances of {@link AnySchema}
- *
- * @returns A new instances
- */
-export function any(): AnySchema {
-  return anyInstance
-}
-const anyInstance = new AnySchema({})
-
-// # Unknown
-
-/**
- * {@link Schema} that represent `unknown`
- */
-export class UnknownSchema extends Schema<unknown> {
-  public override is(_: unknown): _ is unknown {
-    return true
-  }
-}
-
-/**
- * Create new instances of {@link UnknownSchema}
- *
- * @returns A new instances
- */
-export function unknown(): UnknownSchema {
-  return unknownInstance
-}
-const unknownInstance = new UnknownSchema({})
 
 // # Tuple
 
