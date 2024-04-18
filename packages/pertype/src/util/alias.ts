@@ -19,3 +19,8 @@ export type AnyObject = {
  * Alias for `tuple` object
  */
 export type Tuple<T> = [T, ...T[]]
+
+/**
+ * Similar to {@link Tuple} but must have at least 2 types
+ */
+export type Member<T> = [T, T, ...T[]]

@@ -1,4 +1,4 @@
-import { AnyObject, Key, Tuple } from './util/alias'
+import { AnyObject, Key, Member, Tuple } from './util/alias'
 import { ImmutableBuilder } from './util/builder'
 
 /**
@@ -746,13 +746,9 @@ export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
   return new TupleSchema({ items: members })
 }
 
-// # Member
+// # Union
 
-export type MemberSchema = [Schema, Schema, ...Schema[]]
-
-// ## Union
-
-export interface UnionDefinition<S extends MemberSchema>
+export interface UnionDefinition<S extends Member<Schema>>
   extends Definition<TypeOf<S>[number]> {
   readonly members: S
 }
@@ -760,7 +756,7 @@ export interface UnionDefinition<S extends MemberSchema>
 /**
  * {@link Schema} that represent `union`
  */
-export class UnionSchema<S extends MemberSchema> extends Schema<
+export class UnionSchema<S extends Member<Schema>> extends Schema<
   TypeOf<S>[number],
   UnionDefinition<S>
 > {
@@ -789,6 +785,6 @@ export class UnionSchema<S extends MemberSchema> extends Schema<
  * @param members inner schema members of this union
  * @returns A new instances
  */
-export function union<S extends MemberSchema>(...members: S): UnionSchema<S> {
+export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
   return new UnionSchema({ members })
 }
