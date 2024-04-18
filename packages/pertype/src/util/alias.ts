@@ -11,9 +11,7 @@ export type Key = string | number | symbol
 /**
  * Alias for any object with properties
  */
-export type AnyObject = {
-  [key: Key]: unknown
-}
+export type AnyRecord<T = unknown> = Record<Key, T>
 
 /**
  * Alias for `tuple` object

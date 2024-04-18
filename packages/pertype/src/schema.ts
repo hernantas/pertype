@@ -1,4 +1,4 @@
-import { AnyObject, Key, Member, Tuple } from './util/alias'
+import { AnyRecord, Key, Member, Tuple } from './util/alias'
 import { ImmutableBuilder } from './util/builder'
 
 /**
@@ -21,7 +21,7 @@ export interface Constraint<T> {
   /**
    * Optional arguments used for this constraint
    */
-  readonly args?: AnyObject
+  readonly args?: AnyRecord
 
   /** Check if given value is not violating the constraint */
   readonly test: TestConstraint<T>
@@ -44,7 +44,7 @@ export interface Violation {
   /**
    * Optional arguments used in the constraint
    */
-  readonly args?: AnyObject | undefined
+  readonly args?: AnyRecord | undefined
 }
 
 export type ValidationResult<T> =
