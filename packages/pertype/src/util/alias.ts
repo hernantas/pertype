@@ -14,3 +14,8 @@ export type Key = string | number | symbol
 export type AnyObject = {
   [key: Key]: unknown
 }
+
+/**
+ * Alias for `tuple` object
+ */
+export type Tuple<T> = [T, ...T[]]
