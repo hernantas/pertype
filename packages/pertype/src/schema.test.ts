@@ -8,6 +8,7 @@ import {
   boolean,
   intersect,
   literal,
+  map,
   nullable,
   number,
   object,
@@ -322,6 +323,60 @@ describe('Schema', () => {
       expect(validator.test([0])).toBe(true)
       expect(validator.test([0, 1])).toBe(true)
       expect(validator.test([0, 1, 2])).toBe(false)
+    })
+  })
+
+  describe('MapSchema', () => {
+    it('Should be compatible with Schema', () => {
+      expectType<Schema>(map(string(), unknown()))
+      expectType<Schema>(map(number(), unknown()))
+      expectType<Schema>(map(symbol(), unknown()))
+    })
+
+    it('Should narrow map as map type', () => {
+      expect(map(string(), string()).is(new Map([['key', 'value']]))).toBe(true)
+      expect(map(string(), string()).is(new Map([[0, 'value']]))).toBe(false)
+      expect(
+        map(string(), string()).is(new Map([[Symbol.for('for'), 'value']])),
+      ).toBe(false)
+      expect(map(number(), string()).is(new Map([['key', 'value']]))).toBe(
+        false,
+      )
+      expect(map(number(), string()).is(new Map([[0, 'value']]))).toBe(true)
+      expect(
+        map(number(), string()).is(new Map([[Symbol.for('for'), 'value']])),
+      ).toBe(false)
+      expect(map(symbol(), string()).is(new Map([['key', 'value']]))).toBe(
+        false,
+      )
+      expect(map(symbol(), string()).is(new Map([[0, 'value']]))).toBe(false)
+      expect(
+        map(symbol(), string()).is(new Map([[Symbol.for('for'), 'value']])),
+      ).toBe(true)
+    })
+
+    it('Size constraint should check if map size is equal to limit', () => {
+      const validator = map(string(), number()).size(1)
+      expect(validator.test(new Map())).toBe(false)
+      expect(validator.test(new Map([['1', 1]]))).toBe(true)
+      expect(
+        validator.test(
+          new Map([
+            ['1', 1],
+            ['0', 0],
+          ]),
+        ),
+      ).toBe(false)
+    })
+
+    it('Should check its inner schema constraints', () => {
+      const validator = map(string().length(1), number().min(1))
+      expect(validator.test(new Map([['12', 1]]))).toBe(false)
+      expect(validator.test(new Map([['12', 0]]))).toBe(false)
+      expect(validator.test(new Map([['1', 1]]))).toBe(true)
+      expect(validator.test(new Map([['1', 0]]))).toBe(false)
+      expect(validator.test(new Map([['', 1]]))).toBe(false)
+      expect(validator.test(new Map([['', 0]]))).toBe(false)
     })
   })
 

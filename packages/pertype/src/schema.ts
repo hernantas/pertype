@@ -685,6 +685,81 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
   return new ArraySchema({ inner: schema })
 }
 
+// # Map
+
+type KeySchema = StringSchema | NumberSchema | SymbolSchema
+
+export interface MapDefinition<K extends KeySchema, V extends Schema>
+  extends Definition<Map<TypeOf<K>, TypeOf<V>>> {
+  readonly key: K
+  readonly value: V
+}
+
+export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
+  Map<TypeOf<K>, TypeOf<V>>,
+  MapDefinition<K, V>
+> {
+  public override is(value: unknown): value is Map<TypeOf<K>, TypeOf<V>> {
+    return (
+      value instanceof Map &&
+      Array.from(value.entries()).find(
+        ([key, value]) => !(this.key.is(key) && this.value.is(value)),
+      ) === undefined
+    )
+  }
+
+  public override check(value: Map<TypeOf<K>, TypeOf<V>>): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...Array.from(value.entries()).flatMap(([key, value]) =>
+          this.key.check(key as never).concat(this.value.check(value)),
+        ),
+      )
+  }
+
+  public get key(): K {
+    return this.get('key')
+  }
+
+  public get value(): V {
+    return this.get('value')
+  }
+
+  /**
+   * Add new validation constraint to check map size (`=`)
+   *
+   * @param limit Limit of map size
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public size(
+    limit: number,
+    message: string = `must be at ${limit} size`,
+  ): this {
+    return this.rule({
+      type: 'map.size',
+      args: { limit },
+      test: (value) => value.size === limit,
+      message,
+    })
+  }
+}
+
+/**
+ * Create new instances of {@link MapSchema}
+ *
+ * @param key Schema used for the key
+ * @param value Schema used for the value
+ * @returns A new instances
+ */
+export function map<K extends KeySchema, V extends Schema>(
+  key: K,
+  value: V,
+): MapSchema<K, V> {
+  return new MapSchema({ key, value })
+}
+
 // # Nullable
 
 export interface NullableDefinition<S extends Schema>
