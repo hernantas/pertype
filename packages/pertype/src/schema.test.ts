@@ -6,6 +6,7 @@ import {
   array,
   bool,
   boolean,
+  intersect,
   literal,
   nullable,
   number,
@@ -436,6 +437,48 @@ describe('Schema', () => {
       expect(validator.test(0)).toBe(false)
       expect(validator.test(1)).toBe(true)
       expect(validator.test(2)).toBe(true)
+    })
+  })
+
+  describe('IntersectSchema', () => {
+    it('Should be compatible with Schema', () =>
+      expectType<Schema>(
+        intersect(object({ _string: string() }), object({ _number: number() })),
+      ))
+
+    it('Should be compatible with Schema', () => {
+      const schema = intersect(
+        object({ _string: string() }),
+        object({ _number: number() }),
+      )
+      expect(schema.is({ _string: 'string', _number: 1 })).toBe(true)
+      expect(schema.is({ value: 1 })).toBe(false)
+      expect(schema.is({ _string: 'string' })).toBe(false)
+    })
+
+    it('Should checks its constraints', () => {
+      const validator = intersect(
+        object({ _string: string() }),
+        object({ _number: number() }),
+      ).rule({
+        type: 'test.min',
+        test: (value) => value._string.length === 1 && value._number >= 1,
+      })
+      expect(validator.test({ _string: '1', _number: 1 })).toBe(true)
+      expect(validator.test({ _string: '1', _number: 0 })).toBe(false)
+      expect(validator.test({ _string: '', _number: 1 })).toBe(false)
+      expect(validator.test({ _string: '', _number: 0 })).toBe(false)
+    })
+
+    it('Should checks its inner schema constraints', () => {
+      const validator = intersect(
+        object({ _string: string().length(1) }),
+        object({ _number: number().min(1) }),
+      )
+      expect(validator.test({ _string: '1', _number: 1 })).toBe(true)
+      expect(validator.test({ _string: '1', _number: 0 })).toBe(false)
+      expect(validator.test({ _string: '', _number: 1 })).toBe(false)
+      expect(validator.test({ _string: '', _number: 0 })).toBe(false)
     })
   })
 })

@@ -817,6 +817,60 @@ export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
   return new UnionSchema({ members })
 }
 
+// # Intersect
+
+// Inspired by https://stackoverflow.com/questions/50374908/transform-union-type-to-intersection-type
+type UnionToIntersect<T> = (T extends any ? (t: T) => void : never) extends (
+  p: infer P,
+) => void
+  ? P
+  : never
+
+/**
+ * Convert {@link Member} type into intersect
+ */
+export type IntersectOf<T extends Member<any>> = UnionToIntersect<UnionOf<T>>
+
+export interface IntersectDefinition<S extends Member<Schema>>
+  extends Definition<IntersectOf<TypeOf<S>>> {
+  readonly members: S
+}
+
+/**
+ * {@link Schema} that represent `intersection`
+ */
+export class IntersectSchema<S extends Member<Schema>> extends Schema<
+  IntersectOf<TypeOf<S>>,
+  IntersectDefinition<S>
+> {
+  public override is(value: unknown): value is IntersectOf<TypeOf<S>> {
+    return this.members.find((member) => !member.is(value)) === undefined
+  }
+
+  public override check(
+    value: UnionToIntersect<UnionOf<TypeOf<S>>>,
+  ): Violation[] {
+    return super
+      .check(value)
+      .concat(...this.members.flatMap((member) => member.check(value)))
+  }
+
+  public get members(): S {
+    return this.get('members')
+  }
+}
+
+/**
+ * Create new instances of {@link IntersectSchema}
+ *
+ * @returns A new instances
+ */
+export function intersect<S extends Member<Schema>>(
+  ...members: S
+): IntersectSchema<S> {
+  return new IntersectSchema({ members })
+}
+
 // # Object
 
 export interface ObjectDefinition<S extends AnyRecord<Schema>>
