@@ -13,6 +13,7 @@ import {
   object,
   optional,
   string,
+  symbol,
   tuple,
   union,
   unknown,
@@ -161,6 +162,28 @@ describe('Schema', () => {
       expect(validator.test('')).toBe(false)
       expect(validator.test('email@email')).toBe(false)
       expect(validator.test('user_name')).toBe(false)
+    })
+  })
+
+  describe('SymbolSchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(symbol()))
+
+    it('Should narrow symbol as symbol', () => {
+      expect(symbol().is(Symbol.for('for'))).toBe(true)
+      expect(symbol().is(Symbol('for'))).toBe(true)
+    })
+
+    it('Instance Of constraint should check its symbol equality', () => {
+      expect(
+        symbol().instanceOf(Symbol.for('for')).test(Symbol.for('for')),
+      ).toBe(true)
+      expect(symbol().instanceOf(Symbol.for('for')).test(Symbol('for'))).toBe(
+        false,
+      )
+      expect(symbol().instanceOf(Symbol('for')).test(Symbol.for('for'))).toBe(
+        false,
+      )
+      expect(symbol().instanceOf(Symbol('for')).test(Symbol('for'))).toBe(false)
     })
   })
 

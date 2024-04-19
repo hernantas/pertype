@@ -432,6 +432,48 @@ export function string(): StringSchema {
 }
 const stringInstance = new StringSchema({})
 
+// # Symbol
+
+/**
+ * {@link Schema} that represent `symbol`
+ */
+export class SymbolSchema extends Schema<symbol> {
+  public override is(value: unknown): value is symbol {
+    return typeof value === 'symbol'
+  }
+
+  /**
+   * Add new validation constraint that check if symbol instance is equal.
+   * Please note that symbol has unique reference check which define its
+   * equality rules
+   *
+   * @param symbol Symbol instance for validation
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public instanceOf(
+    symbol: symbol,
+    message: string = `must be instance of passed "${symbol.description}" symbol`,
+  ): this {
+    return this.rule({
+      type: 'symbol.instance',
+      args: { symbol },
+      test: (value) => symbol === value,
+      message,
+    })
+  }
+}
+
+/**
+ * Create new instances of {@link SymbolSchema}
+ *
+ * @returns A new instances
+ */
+export function symbol(): SymbolSchema {
+  return symbolInstance
+}
+const symbolInstance = new SymbolSchema({})
+
 // # Null
 
 /**
