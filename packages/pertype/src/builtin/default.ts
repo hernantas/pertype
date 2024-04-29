@@ -1,5 +1,11 @@
 import { Codec } from '../codec'
-import { BooleanSchema, NumberSchema, StringSchema } from '../schema'
+import { UnsupportedValueError, UnsupportedTypeError } from '../error'
+import {
+  BooleanSchema,
+  DateSchema,
+  NumberSchema,
+  StringSchema,
+} from '../schema'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
   public decode(value: unknown): boolean {
@@ -51,5 +57,27 @@ export class StringCodec implements Codec<StringSchema> {
 
   public encode(value: string): unknown {
     return value
+  }
+}
+
+export class DateCodec implements Codec<DateSchema> {
+  public decode(value: unknown): Date {
+    if (typeof value === 'string') {
+      const date = new Date(value)
+      if (isNaN(date.getTime())) {
+        throw new UnsupportedValueError(value)
+      }
+      return date
+    }
+
+    if (value instanceof Date) {
+      return value
+    }
+
+    throw new UnsupportedTypeError(value)
+  }
+
+  public encode(value: Date): unknown {
+    return value.toUTCString()
   }
 }
