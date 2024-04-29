@@ -1,14 +1,17 @@
 import { Codec } from '../codec'
 import { UnsupportedTypeError, UnsupportedValueError } from '../error'
 import {
+  ArraySchema,
   BooleanSchema,
   DateSchema,
   LiteralSchema,
   NumberSchema,
+  Schema,
   StringSchema,
   SymbolSchema,
 } from '../schema'
 import { Literal } from '../util/alias'
+import { TypeOf } from '../util/type'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
   public decode(value: unknown): boolean {
@@ -121,5 +124,22 @@ export class LiteralCodec<T extends Literal>
 
   public encode(value: T): unknown {
     return value
+  }
+}
+
+export class ArrayCodec<S extends Schema> implements Codec<ArraySchema<S>> {
+  public constructor(private readonly codec: Codec<S>) {}
+
+  public decode(value: unknown): TypeOf<S>[] {
+    const values = Array.isArray(value)
+      ? value
+      : value !== undefined && value !== null
+        ? [value]
+        : []
+    return values.map((value) => this.codec.decode(value))
+  }
+
+  public encode(value: TypeOf<S>[]): unknown {
+    return value.map((value) => this.codec.encode(value))
   }
 }
