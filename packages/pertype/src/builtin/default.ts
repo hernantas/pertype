@@ -7,6 +7,7 @@ import {
   KeySchema,
   LiteralSchema,
   MapSchema,
+  NullableSchema,
   NumberSchema,
   Schema,
   SetSchema,
@@ -205,5 +206,19 @@ export class SetCodec<V extends Schema> implements Codec<SetSchema<V>> {
     return Array.from(value.values()).map((item) =>
       this.valueCodec.encode(item),
     )
+  }
+}
+
+export class NullableCodec<S extends Schema>
+  implements Codec<NullableSchema<S>>
+{
+  public constructor(private readonly codec: Codec<S>) {}
+
+  public decode(value: unknown): TypeOf<S> | null {
+    return value === null ? null : this.codec.decode(value)
+  }
+
+  public encode(value: TypeOf<S> | null): unknown {
+    return value === null ? null : this.codec.encode(value)
   }
 }

@@ -4,6 +4,7 @@ import {
   DateCodec,
   LiteralCodec,
   MapCodec,
+  NullableCodec,
   NumberCodec,
   SetCodec,
   StringCodec,
@@ -287,5 +288,21 @@ describe('Default Builtin', () => {
         expect(result[2]).toBe(3)
       }
     })
+  })
+
+  describe('NullableCodec', () => {
+    const codec = new NullableCodec(new StringCodec())
+
+    it('Should decode null as null', () =>
+      expect(codec.decode(null)).toBe(null))
+
+    it('Should decode non-null as non-null', () =>
+      expect(codec.decode(1)).toBe('1'))
+
+    it('Should encode null as null', () =>
+      expect(codec.encode(null)).toBe(null))
+
+    it('Should encode non-null as non-null', () =>
+      expect(codec.encode('1')).toBe('1'))
   })
 })
