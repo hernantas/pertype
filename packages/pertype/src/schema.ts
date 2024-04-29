@@ -7,6 +7,7 @@ import {
   Tuple,
 } from './util/alias'
 import { ImmutableBuilder } from './util/builder'
+import { Type, TypeOf } from './util/type'
 
 /**
  * Function to test if value is within constraint
@@ -83,10 +84,12 @@ export interface Definition<T> {
  * Runtime type that represent some type and can be used to identify and
  * validate the value
  */
-export abstract class Schema<
-  T = any,
-  D extends Definition<T> = Definition<T>,
-> extends ImmutableBuilder<D> {
+export abstract class Schema<T = any, D extends Definition<T> = Definition<T>>
+  extends ImmutableBuilder<D>
+  implements Type<T>
+{
+  public readonly __type!: T
+
   /**
    * List of constraints of current schema
    */
@@ -156,16 +159,6 @@ export abstract class Schema<
    */
   public abstract is(value: unknown): value is T
 }
-
-/**
- * Infer the represented type by the schema
- */
-export type TypeOf<S> =
-  S extends Schema<infer R>
-    ? R
-    : {
-        [K in keyof S]: TypeOf<S[K]>
-      }
 
 // # Boolean
 
