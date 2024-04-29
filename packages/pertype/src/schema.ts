@@ -1,4 +1,11 @@
-import { AnyRecord, Key, Literal, Member, Tuple } from './util/alias'
+import {
+  AnyRecord,
+  Constructor,
+  Key,
+  Literal,
+  Member,
+  Tuple,
+} from './util/alias'
 import { ImmutableBuilder } from './util/builder'
 
 /**
@@ -1151,4 +1158,40 @@ export function object<S extends AnyRecord<Schema>>(
   properties: S,
 ): ObjectSchema<S> {
   return new ObjectSchema({ properties })
+}
+
+// # Type
+
+export interface TypeDefinition<T, Args extends any[]> extends Definition<T> {
+  readonly ctor: Constructor<T, Args>
+}
+
+/**
+ * {@link Schema} that represent `class` object
+ */
+export class TypeSchema<T, Args extends any[]> extends Schema<
+  T,
+  TypeDefinition<T, Args>
+> {
+  public override is(value: unknown): value is T {
+    return value instanceof this.ctor
+  }
+
+  /**
+   * Get constructor of the type
+   */
+  public get ctor(): Constructor<T, Args> {
+    return this.get('ctor')
+  }
+}
+
+/**
+ * Create new instances of {@link TypeSchema}
+ *
+ * @returns A new instances
+ */
+export function type<T, Args extends any[]>(
+  ctor: Constructor<T, Args>,
+): TypeSchema<T, Args> {
+  return new TypeSchema({ ctor })
 }
