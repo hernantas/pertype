@@ -5,6 +5,7 @@ import {
   LiteralCodec,
   MapCodec,
   NumberCodec,
+  SetCodec,
   StringCodec,
   SymbolCodec,
 } from './default'
@@ -262,6 +263,29 @@ describe('Default Builtin', () => {
       expect(result).toHaveProperty('1', 11)
       expect(result).toHaveProperty('2', 22)
       expect(result).toHaveProperty('3', 33)
+    })
+  })
+
+  describe('SetCodec', () => {
+    const codec = new SetCodec(new NumberCodec())
+
+    it('Decoding an array will decode each items into a set', () => {
+      const result = codec.decode([1, 2, 3, 1])
+      expect(result.size).toBe(3)
+      expect(result.has(1)).toBe(true)
+      expect(result.has(2)).toBe(true)
+      expect(result.has(3)).toBe(true)
+    })
+
+    it('Encoding will return an array', () => {
+      const result = codec.encode(new Set([1, 2, 3]))
+      expect(Array.isArray(result)).toBe(true)
+      if (Array.isArray(result)) {
+        expect(result.length).toBe(3)
+        expect(result[0]).toBe(1)
+        expect(result[1]).toBe(2)
+        expect(result[2]).toBe(3)
+      }
     })
   })
 })

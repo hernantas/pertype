@@ -9,6 +9,7 @@ import {
   MapSchema,
   NumberSchema,
   Schema,
+  SetSchema,
   StringSchema,
   SymbolSchema,
 } from '../schema'
@@ -186,5 +187,23 @@ export class MapCodec<K extends KeySchema, V extends Schema>
     }
 
     throw new UnsupportedTypeError(value)
+  }
+}
+
+export class SetCodec<V extends Schema> implements Codec<SetSchema<V>> {
+  public constructor(private readonly valueCodec: Codec<V>) {}
+
+  public decode(value: unknown): Set<TypeOf<V>> {
+    if (Array.isArray(value)) {
+      return new Set(value.map((item) => this.valueCodec.decode(item)))
+    }
+
+    throw new UnsupportedTypeError(value)
+  }
+
+  public encode(value: Set<TypeOf<V>>): unknown {
+    return Array.from(value.values()).map((item) =>
+      this.valueCodec.encode(item),
+    )
   }
 }
