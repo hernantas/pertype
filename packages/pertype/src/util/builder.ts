@@ -40,4 +40,16 @@ export class ImmutableBuilder<T extends AnyRecord> {
       [key]: value,
     })
   }
+
+  /**
+   * Load plugin to be used to modify current class
+   *
+   * @param plugin Plugin to be used
+   * @returns A new instance of current class
+   */
+  public use<R>(plugin: BuilderPlugin<this, R>): R {
+    return plugin(this)
+  }
 }
+
+export type BuilderPlugin<T, R> = (builder: T) => R
