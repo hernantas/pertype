@@ -1,5 +1,5 @@
 import { Codec } from '../codec'
-import { BooleanSchema, NumberSchema } from '../schema'
+import { BooleanSchema, NumberSchema, StringSchema } from '../schema'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
   public decode(value: unknown): boolean {
@@ -32,6 +32,24 @@ export class NumberCodec implements Codec<NumberSchema> {
   }
 
   public encode(value: number): unknown {
+    return value
+  }
+}
+
+export class StringCodec implements Codec<StringSchema> {
+  public decode(value: unknown): string {
+    if (typeof value === 'string') {
+      return value
+    }
+
+    if (value === null || value === undefined) {
+      return ''
+    }
+
+    return String(value)
+  }
+
+  public encode(value: string): unknown {
     return value
   }
 }
