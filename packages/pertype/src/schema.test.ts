@@ -6,6 +6,7 @@ import {
   array,
   bool,
   boolean,
+  date,
   intersect,
   literal,
   map,
@@ -110,6 +111,42 @@ describe('Schema', () => {
       expect(validator.test(0)).toBe(false)
       expect(validator.test(1)).toBe(false)
       expect(validator.test(Number.MAX_SAFE_INTEGER)).toBe(false)
+    })
+  })
+
+  describe('DateSchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(date()))
+
+    it('Should narrow date as date', () => {
+      expect(date().is(new Date())).toBe(true)
+    })
+
+    it('Min constraint should limit its minimum value using greater or equal operator', () => {
+      const validator = date().min(new Date(2024, 1, 5))
+      expect(validator.test(new Date(2024, 1, 6))).toBe(true)
+      expect(validator.test(new Date(2024, 1, 5))).toBe(true)
+      expect(validator.test(new Date(2024, 1, 4))).toBe(false)
+    })
+
+    it('Max constraint should limit its maximum value using less or equal operator', () => {
+      const validator = date().max(new Date(2024, 1, 5))
+      expect(validator.test(new Date(2024, 1, 4))).toBe(true)
+      expect(validator.test(new Date(2024, 1, 5))).toBe(true)
+      expect(validator.test(new Date(2024, 1, 6))).toBe(false)
+    })
+
+    it('Greater constraint should check value using greater operator', () => {
+      const validator = date().greater(new Date(2024, 1, 5))
+      expect(validator.test(new Date(2024, 1, 6))).toBe(true)
+      expect(validator.test(new Date(2024, 1, 5))).toBe(false)
+      expect(validator.test(new Date(2024, 1, 4))).toBe(false)
+    })
+
+    it('Less constraint should check value using less operator', () => {
+      const validator = date().less(new Date(2024, 1, 5))
+      expect(validator.test(new Date(2024, 1, 4))).toBe(true)
+      expect(validator.test(new Date(2024, 1, 5))).toBe(false)
+      expect(validator.test(new Date(2024, 1, 6))).toBe(false)
     })
   })
 

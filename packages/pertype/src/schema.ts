@@ -432,6 +432,105 @@ export function string(): StringSchema {
 }
 const stringInstance = new StringSchema({})
 
+// # Date
+
+/**
+ * {@link Schema} that represent `date`
+ */
+export class DateSchema extends Schema<Date> {
+  public override is(value: unknown): value is Date {
+    return value instanceof Date
+  }
+
+  /**
+   * Add new validation constraint that check minimum date (`>=`)
+   *
+   * @param limit Minimum date
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public min(
+    limit: Date,
+    message: string = `must greater than or equal to ${limit}`,
+  ): this {
+    return this.rule({
+      type: `date.min`,
+      args: { limit },
+      test: (v) => v.getTime() >= limit.getTime(),
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check maximum date (`<=`)
+   *
+   * @param limit Maximum date
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public max(
+    limit: Date,
+    message: string = `must be less than or equal to ${limit}`,
+  ): this {
+    return this.rule({
+      type: `date.max`,
+      args: { limit },
+      test: (v) => v.getTime() <= limit.getTime(),
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check date to be greater than given
+   * date (`>`)
+   *
+   * @param limit Limit date
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public greater(
+    limit: Date,
+    message: string = `must be greater than ${limit}`,
+  ): this {
+    return this.rule({
+      type: `date.greater`,
+      args: { limit },
+      test: (v) => v.getTime() > limit.getTime(),
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check date to be less than given
+   * date (`<`)
+   *
+   * @param limit Limit date
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public less(
+    limit: Date,
+    message: string = `must be less than ${limit}`,
+  ): this {
+    return this.rule({
+      type: `date.less`,
+      args: { limit },
+      test: (v) => v.getTime() < limit.getTime(),
+      message,
+    })
+  }
+}
+
+/**
+ * Create new instances of {@link DateSchema}
+ *
+ * @returns A new instances
+ */
+export function date(): DateSchema {
+  return dateInstance
+}
+const dateInstance = new DateSchema({})
+
 // # Symbol
 
 /**
