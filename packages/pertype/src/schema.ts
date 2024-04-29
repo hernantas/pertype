@@ -1019,6 +1019,15 @@ export class OptionalSchema<S extends Schema> extends Schema<
   public get innerSchema(): S {
     return this.get('inner')
   }
+
+  /**
+   * Make this schema required
+   *
+   * @returns Inner schema
+   */
+  public required(): S {
+    return this.innerSchema
+  }
 }
 
 /**
