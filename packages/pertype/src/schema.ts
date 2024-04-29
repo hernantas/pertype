@@ -978,6 +978,15 @@ export class NullableSchema<S extends Schema> extends Schema<
   public get innerSchema(): S {
     return this.get('inner')
   }
+
+  /**
+   * Make this schema non nullable
+   *
+   * @returns inner schema
+   */
+  public nonNullable(): S {
+    return this.innerSchema
+  }
 }
 
 /**
