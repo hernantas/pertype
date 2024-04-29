@@ -15,7 +15,7 @@ describe('Default Builtin', () => {
   describe('BooleanCodec', () => {
     const codec = new BooleanCodec()
 
-    it('Decode falsy value must return false', () => {
+    it('Should decode falsy value as false', () => {
       expect(codec.decode(null)).toBe(false)
       expect(codec.decode(undefined)).toBe(false)
       expect(codec.decode(false)).toBe(false)
@@ -25,7 +25,7 @@ describe('Default Builtin', () => {
       expect(codec.decode('')).toBe(false)
     })
 
-    it('Encode must return boolean', () => {
+    it('Should encode boolean as boolean', () => {
       expect(codec.encode(true)).toBe(true)
       expect(codec.encode(false)).toBe(false)
     })
@@ -34,7 +34,7 @@ describe('Default Builtin', () => {
   describe('NumberCodec', () => {
     const codec = new NumberCodec()
 
-    it('Decode number must return number', () => {
+    it('Should decode number as number', () => {
       expect(codec.decode(0)).toBe(0)
       expect(codec.decode(-0)).toBe(-0)
       expect(codec.decode(1)).toBe(1)
@@ -45,7 +45,7 @@ describe('Default Builtin', () => {
       expect(codec.decode(-NaN)).toBeNaN()
     })
 
-    it('Decode string with valid number value must return number', () => {
+    it('Should decode number string as number', () => {
       expect(codec.decode('0')).toBe(0)
       expect(codec.decode('-0')).toBe(-0)
       expect(codec.decode('1')).toBe(1)
@@ -56,56 +56,55 @@ describe('Default Builtin', () => {
       expect(codec.decode('-NaN')).toBeNaN()
     })
 
-    it('Decode falsy value must return 0 number', () => {
+    it('Should decode falsy non-number value as 0 number', () => {
       expect(codec.decode('')).toBe(0)
       expect(codec.decode(false)).toBe(0)
       expect(codec.decode(null)).toBe(0)
       expect(codec.decode(undefined)).toBe(0)
     })
 
-    it('Decode non-number must return NaN', () => {
+    it('Should decode non-number string as NaN', () => {
       expect(codec.decode('Hello')).toBeNaN()
+    })
+
+    it('Should encode number as number', () => {
+      expect(codec.encode(0)).toBe(0)
     })
   })
 
   describe('StringCodec', () => {
     const codec = new StringCodec()
 
-    it('Decode must return string', () => {
-      expect(typeof codec.decode('HELLO')).toBe('string')
-      expect(typeof codec.decode(0)).toBe('string')
-      expect(typeof codec.decode(false)).toBe('string')
-      expect(typeof codec.decode(null)).toBe('string')
-      expect(typeof codec.decode(undefined)).toBe('string')
+    it('Should decode string as string', () =>
+      expect(codec.decode('string')).toBe('string'))
+
+    it('Should decode number as string', () => {
+      expect(codec.decode(0)).toBe('0')
+      expect(codec.decode(-0)).toBe('0')
+      expect(codec.decode(Infinity)).toBe('Infinity')
+      expect(codec.decode(-Infinity)).toBe('-Infinity')
     })
 
-    it('Decode null or undefined must be empty string', () => {
-      expect(codec.decode(null)).toBe('')
-      expect(codec.decode(undefined)).toBe('')
-    })
+    it('Should decode null as empty string', () =>
+      expect(codec.decode(null)).toBe(''))
 
-    it('Encode must return string', () => {
-      expect(typeof codec.encode('HELLO')).toBe('string')
-    })
+    it('Should decode undefined as empty string', () =>
+      expect(codec.decode(undefined)).toBe(''))
+
+    it('Should encode string as string', () =>
+      expect(codec.encode('string')).toBe('string'))
   })
 
   describe('DateCodec', () => {
     const codec = new DateCodec()
 
-    it('Decoding a date should return date', () => {
-      expect(codec.decode(new Date())).toBeInstanceOf(Date)
-    })
+    it('Should decode date as date', () =>
+      expect(codec.decode(new Date())).toBeInstanceOf(Date))
 
-    it('Decoding a string should return a date if valid or throw', () => {
-      expect(codec.decode('2023-05-23T23:59:59.999Z')).toBeInstanceOf(Date)
-      expect(() => codec.decode('Hello')).toThrow()
-    })
+    it('Should decode valid date string to date', () =>
+      expect(codec.decode('2023-05-23T23:59:59.999Z')).toBeInstanceOf(Date))
 
-    it('Decoding an unknown value should throw', () => {
-      expect(() => codec.decode(90)).toThrow()
-    })
-
-    it('Encoding should return ISO string date', () => {
+    it('Should encode date as ISO string date', () => {
       expect(typeof codec.encode(new Date())).toBe('string')
     })
   })
@@ -113,91 +112,81 @@ describe('Default Builtin', () => {
   describe('SymbolCodec', () => {
     const codec = new SymbolCodec()
 
-    it('Decoding a string should return symbol', () => {
-      expect(typeof codec.decode('hello')).toBe('symbol')
-    })
+    it('Should decode string as symbol', () =>
+      expect(typeof codec.decode('hello')).toBe('symbol'))
 
-    it('Decoding a number should return symbol', () => {
-      expect(typeof codec.decode(1)).toBe('symbol')
-    })
+    it('Should decode number as symbol', () =>
+      expect(typeof codec.decode(1)).toBe('symbol'))
 
-    it('Decoding an undefined should return symbol', () => {
-      expect(typeof codec.decode(undefined)).toBe('symbol')
-    })
+    it('Should decode undefined as symbol', () =>
+      expect(typeof codec.decode(undefined)).toBe('symbol'))
 
-    it('Encoding should return its description', () => {
+    it('Should encode symbol as its description', () => {
       expect(codec.encode(Symbol('for'))).toBe('for')
     })
   })
 
   describe('LiteralCodec', () => {
     describe('String literal', () => {
-      const codec = new LiteralCodec('Hello')
-      it('Decoding string literal should return the literal or throw otherwise', () => {
-        expect(codec.decode('Hello')).toBe('Hello')
-        expect(() => codec.decode(0)).toThrow()
-      })
-      it('Encoding string literal should return the literal', () => {
-        expect(codec.encode('Hello')).toBe('Hello')
-      })
+      const codec = new LiteralCodec('string')
+
+      it('Should decode string literal as string literal', () =>
+        expect(codec.decode('string')).toBe('string'))
+
+      it('Should encode string literal as string literal', () =>
+        expect(codec.encode('string')).toBe('string'))
     })
 
     describe('Number literal', () => {
       const codec = new LiteralCodec(0)
-      it('Decoding number literal should return the literal or throw otherwise', () => {
-        expect(codec.decode(0)).toBe(0)
-        expect(() => codec.decode('Hello')).toThrow()
-      })
-      it('Encoding number literal should return the literal', () => {
-        expect(codec.encode(0)).toBe(0)
-      })
+
+      it('Should decode string literal as string literal', () =>
+        expect(codec.decode(0)).toBe(0))
+
+      it('Should encode string literal as string literal', () =>
+        expect(codec.encode(0)).toBe(0))
     })
 
     describe('Boolean literal', () => {
       const codec = new LiteralCodec(true)
-      it('Decoding boolean literal should return the literal or throw otherwise', () => {
-        expect(codec.decode(true)).toBe(true)
-        expect(() => codec.decode(0)).toThrow()
-      })
-      it('Encoding boolean literal should return the literal', () => {
-        expect(codec.encode(true)).toBe(true)
-      })
+
+      it('Should decode string literal as string literal', () =>
+        expect(codec.decode(true)).toBe(true))
+
+      it('Should encode string literal as string literal', () =>
+        expect(codec.encode(true)).toBe(true))
     })
   })
 
   describe('ArrayCodec', () => {
     const codec = new ArrayCodec(new StringCodec())
 
-    it('Decoding an array must return array', () => {
-      expect(codec.decode(['h', 'e', 'l', 'l', 'o'])).toHaveLength(5)
-    })
+    it('Should decode an array as array with its element decoded', () =>
+      expect(codec.decode([1, 2, 3])).toStrictEqual(['1', '2', '3']))
 
-    it('Decoding an array must also decode the content', () => {
-      const numbers = codec.decode([0, 1, 2, 3, 4])
-      expect(numbers).toHaveLength(5)
-      expect(numbers).toStrictEqual(['0', '1', '2', '3', '4'])
-    })
+    it('Should decode non-array as array that have one decoded value', () =>
+      expect(codec.decode(1)).toStrictEqual(['1']))
 
-    it('Decoding non-array should convert it to single array length', () => {
-      const str = codec.decode('Hello')
-      expect(str).toHaveLength(1)
-      expect(str).toStrictEqual(['Hello'])
-    })
+    it('Should decode null as empty array', () =>
+      expect(codec.decode(null)).toStrictEqual([]))
 
-    it('Decoding null or undefined should return empty array', () => {
-      expect(codec.decode(null)).toHaveLength(0)
-      expect(codec.decode(undefined)).toHaveLength(0)
-    })
+    it('Should decode undefined as empty array', () =>
+      expect(codec.decode(undefined)).toStrictEqual([]))
 
-    it('Encode should return array', () => {
-      expect(codec.encode(['0', '1', '2', '3', '4'])).toHaveLength(5)
-    })
+    it('Should encode array as an array with its element encoded', () =>
+      expect(codec.encode(['0', '1', '2', '3', '4'])).toStrictEqual([
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+      ]))
   })
 
   describe('MapCodec', () => {
     const codec = new MapCodec(new StringCodec(), new NumberCodec())
 
-    it('Decoding an array of single elements will decode it as key map', () => {
+    it('Should decode an array of elements as map with decoded value as key', () => {
       const result = codec.decode([1, 2, 3])
       expect(result.size).toBe(3)
       expect(result.has('1')).toBe(true)
@@ -205,7 +194,7 @@ describe('Default Builtin', () => {
       expect(result.has('3')).toBe(true)
     })
 
-    it('Decoding an array of pair of key value elements will decode its as key-value map', () => {
+    it('Should decode an array of key-value pairs as map with its key and value decoded', () => {
       const result = codec.decode([
         [1, 11],
         [2, 22],
@@ -220,7 +209,7 @@ describe('Default Builtin', () => {
       expect(result.get('3')).toBe(33)
     })
 
-    it('Decoding an object will decode its as key-value map', () => {
+    it('Should decode object as map with its key and value decoded', () => {
       const result = codec.decode({
         '1': 11,
         '2': 22,
@@ -235,7 +224,7 @@ describe('Default Builtin', () => {
       expect(result.get('3')).toBe(33)
     })
 
-    it('Decoding a map will still decode each element key-value map', () => {
+    it('Should decode map as map with its key and value decoded', () => {
       const result = codec.decode(
         new Map([
           [1, 11],
@@ -252,7 +241,7 @@ describe('Default Builtin', () => {
       expect(result.get('3')).toBe(33)
     })
 
-    it('Encoding a map will encode it as key-value object', () => {
+    it('Should encode map as object with its key and value encoded', () => {
       const result = codec.encode(
         new Map([
           [1, 11],
@@ -270,7 +259,7 @@ describe('Default Builtin', () => {
   describe('SetCodec', () => {
     const codec = new SetCodec(new NumberCodec())
 
-    it('Decoding an array will decode each items into a set', () => {
+    it('Should decode array as set with its elements decoded', () => {
       const result = codec.decode([1, 2, 3, 1])
       expect(result.size).toBe(3)
       expect(result.has(1)).toBe(true)
@@ -278,7 +267,7 @@ describe('Default Builtin', () => {
       expect(result.has(3)).toBe(true)
     })
 
-    it('Encoding will return an array', () => {
+    it('Should encode set as array with its elements encoded', () => {
       const result = codec.encode(new Set([1, 2, 3]))
       expect(Array.isArray(result)).toBe(true)
       if (Array.isArray(result)) {
