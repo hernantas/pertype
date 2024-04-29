@@ -3,10 +3,12 @@ import { UnsupportedTypeError, UnsupportedValueError } from '../error'
 import {
   BooleanSchema,
   DateSchema,
+  LiteralSchema,
   NumberSchema,
   StringSchema,
   SymbolSchema,
 } from '../schema'
+import { Literal } from '../util/alias'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
   public decode(value: unknown): boolean {
@@ -102,5 +104,22 @@ export class SymbolCodec implements Codec<SymbolSchema> {
 
   public encode(value: symbol): unknown {
     return value.description
+  }
+}
+
+export class LiteralCodec<T extends Literal>
+  implements Codec<LiteralSchema<T>>
+{
+  public constructor(private readonly literal: T) {}
+
+  public decode(value: unknown): T {
+    if (this.literal === value) {
+      return this.literal
+    }
+    throw new UnsupportedValueError(value)
+  }
+
+  public encode(value: T): unknown {
+    return value
   }
 }
