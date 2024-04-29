@@ -813,7 +813,7 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
 
 // # Map
 
-type KeySchema = StringSchema | NumberSchema | SymbolSchema
+export type KeySchema = StringSchema | NumberSchema | SymbolSchema
 
 export interface MapDefinition<K extends KeySchema, V extends Schema>
   extends Definition<Map<TypeOf<K>, TypeOf<V>>> {
