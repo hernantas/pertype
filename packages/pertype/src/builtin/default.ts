@@ -1,10 +1,11 @@
 import { Codec } from '../codec'
-import { UnsupportedValueError, UnsupportedTypeError } from '../error'
+import { UnsupportedTypeError, UnsupportedValueError } from '../error'
 import {
   BooleanSchema,
   DateSchema,
   NumberSchema,
   StringSchema,
+  SymbolSchema,
 } from '../schema'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
@@ -79,5 +80,27 @@ export class DateCodec implements Codec<DateSchema> {
 
   public encode(value: Date): unknown {
     return value.toUTCString()
+  }
+}
+
+export class SymbolCodec implements Codec<SymbolSchema> {
+  public decode(value: unknown): symbol {
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      value === undefined
+    ) {
+      return Symbol(value)
+    }
+
+    if (typeof value === 'symbol') {
+      return value
+    }
+
+    throw new UnsupportedTypeError(value)
+  }
+
+  public encode(value: symbol): unknown {
+    return value.description
   }
 }

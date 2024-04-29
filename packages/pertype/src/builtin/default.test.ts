@@ -1,4 +1,10 @@
-import { BooleanCodec, DateCodec, NumberCodec, StringCodec } from './default'
+import {
+  BooleanCodec,
+  DateCodec,
+  NumberCodec,
+  StringCodec,
+  SymbolCodec,
+} from './default'
 
 describe('Default Builtin', () => {
   describe('BooleanCodec', () => {
@@ -96,6 +102,26 @@ describe('Default Builtin', () => {
 
     it('Encoding should return ISO string date', () => {
       expect(typeof codec.encode(new Date())).toBe('string')
+    })
+  })
+
+  describe('SymbolCodec', () => {
+    const codec = new SymbolCodec()
+
+    it('Decoding a string should return symbol', () => {
+      expect(typeof codec.decode('hello')).toBe('symbol')
+    })
+
+    it('Decoding a number should return symbol', () => {
+      expect(typeof codec.decode(1)).toBe('symbol')
+    })
+
+    it('Decoding an undefined should return symbol', () => {
+      expect(typeof codec.decode(undefined)).toBe('symbol')
+    })
+
+    it('Encoding should return its description', () => {
+      expect(codec.encode(Symbol('for'))).toBe('for')
     })
   })
 })
