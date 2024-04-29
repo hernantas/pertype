@@ -158,6 +158,33 @@ export abstract class Schema<T = any, D extends Definition<T> = Definition<T>>
    * @param value Value to be narrowed
    */
   public abstract is(value: unknown): value is T
+
+  /**
+   * Wrap this {@link Schema} instance with {@link ArraySchema}
+   *
+   * @returns A new instance of {@link ArraySchema}
+   */
+  public array(): ArraySchema<this> {
+    return array(this)
+  }
+
+  /**
+   * Wrap this {@link Schema} instance with {@link OptionalSchema}
+   *
+   * @returns A new instance of {@link OptionalSchema}
+   */
+  public optional(): OptionalSchema<this> {
+    return optional(this)
+  }
+
+  /**
+   * Wrap this {@link Schema} instance with {@link NullableSchema}
+   *
+   * @returns A new instance of {@link NullableSchema}
+   */
+  public nullable(): NullableSchema<this> {
+    return nullable(this)
+  }
 }
 
 // # Boolean

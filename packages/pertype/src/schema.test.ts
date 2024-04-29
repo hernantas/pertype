@@ -264,8 +264,10 @@ describe('Schema', () => {
   })
 
   describe('ArraySchema', () => {
-    it('Should be compatible with Schema', () =>
-      expectType<Schema>(array(unknown())))
+    it('Should be compatible with Schema', () => {
+      expectType<Schema>(array(unknown()))
+      expectType<Schema>(unknown().array())
+    })
 
     it('Should narrow array as array', () => {
       expect(array(unknown()).is([])).toBe(true)
@@ -361,8 +363,10 @@ describe('Schema', () => {
   })
 
   describe('NullableSchema', () => {
-    it('Should be compatible with Schema', () =>
-      expectType<Schema>(nullable(unknown())))
+    it('Should be compatible with Schema', () => {
+      expectType<Schema>(nullable(unknown()))
+      expectType<Schema>(unknown().nullable())
+    })
 
     it('Should narrow as nullable type', () => {
       expect(nullable(number()).is(undefined)).toBe(false)
@@ -391,8 +395,10 @@ describe('Schema', () => {
   })
 
   describe('OptionalSchema', () => {
-    it('Should be compatible with Schema', () =>
-      expectType<Schema>(optional(unknown())))
+    it('Should be compatible with Schema', () => {
+      expectType<Schema>(optional(unknown()))
+      expectType<Schema>(unknown().optional())
+    })
 
     it('Should narrow as optional type', () => {
       expect(optional(number()).is(undefined)).toBe(true)
