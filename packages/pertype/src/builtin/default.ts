@@ -4,7 +4,9 @@ import {
   ArraySchema,
   BooleanSchema,
   DateSchema,
+  KeySchema,
   LiteralSchema,
+  MapSchema,
   NumberSchema,
   Schema,
   StringSchema,
@@ -141,5 +143,48 @@ export class ArrayCodec<S extends Schema> implements Codec<ArraySchema<S>> {
 
   public encode(value: TypeOf<S>[]): unknown {
     return value.map((value) => this.codec.encode(value))
+  }
+}
+
+export class MapCodec<K extends KeySchema, V extends Schema>
+  implements Codec<MapSchema<K, V>>
+{
+  public constructor(
+    private readonly keyCodec: Codec<K>,
+    private readonly valueCodec: Codec<V>,
+  ) {}
+
+  public decode(value: unknown): Map<TypeOf<K>, TypeOf<V>> {
+    const entries = this.toEntries(value).map(
+      ([key, value]) =>
+        [this.keyCodec.decode(key), this.valueCodec.decode(value)] as const,
+    )
+    return new Map(entries)
+  }
+
+  public encode(value: Map<TypeOf<K>, TypeOf<V>>): unknown {
+    const entries = Array.from(value.entries()).map(([key, value]) => [
+      this.keyCodec.encode(key),
+      this.valueCodec.encode(value),
+    ])
+    return Object.fromEntries(entries)
+  }
+
+  private toEntries(value: unknown): [any, any][] {
+    if (Array.isArray(value)) {
+      return value.map((item) =>
+        Array.isArray(item) ? [item[0], item[1]] : [item, undefined],
+      )
+    }
+
+    if (value instanceof Map) {
+      return Array.from(value.entries())
+    }
+
+    if (typeof value === 'object' && value !== null) {
+      return Object.entries(value)
+    }
+
+    throw new UnsupportedTypeError(value)
   }
 }

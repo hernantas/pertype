@@ -3,6 +3,7 @@ import {
   BooleanCodec,
   DateCodec,
   LiteralCodec,
+  MapCodec,
   NumberCodec,
   StringCodec,
   SymbolCodec,
@@ -188,6 +189,79 @@ describe('Default Builtin', () => {
 
     it('Encode should return array', () => {
       expect(codec.encode(['0', '1', '2', '3', '4'])).toHaveLength(5)
+    })
+  })
+
+  describe('MapCodec', () => {
+    const codec = new MapCodec(new StringCodec(), new NumberCodec())
+
+    it('Decoding an array of single elements will decode it as key map', () => {
+      const result = codec.decode([1, 2, 3])
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+    })
+
+    it('Decoding an array of pair of key value elements will decode its as key-value map', () => {
+      const result = codec.decode([
+        [1, 11],
+        [2, 22],
+        [3, 33],
+      ])
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+      expect(result.get('1')).toBe(11)
+      expect(result.get('2')).toBe(22)
+      expect(result.get('3')).toBe(33)
+    })
+
+    it('Decoding an object will decode its as key-value map', () => {
+      const result = codec.decode({
+        '1': 11,
+        '2': 22,
+        '3': 33,
+      })
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+      expect(result.get('1')).toBe(11)
+      expect(result.get('2')).toBe(22)
+      expect(result.get('3')).toBe(33)
+    })
+
+    it('Decoding a map will still decode each element key-value map', () => {
+      const result = codec.decode(
+        new Map([
+          [1, 11],
+          [2, 22],
+          [3, 33],
+        ]),
+      )
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+      expect(result.get('1')).toBe(11)
+      expect(result.get('2')).toBe(22)
+      expect(result.get('3')).toBe(33)
+    })
+
+    it('Encoding a map will encode it as key-value object', () => {
+      const result = codec.encode(
+        new Map([
+          [1, 11],
+          [2, 22],
+          [3, 33],
+        ]),
+      )
+      expect(typeof result).toBe('object')
+      expect(result).toHaveProperty('1', 11)
+      expect(result).toHaveProperty('2', 22)
+      expect(result).toHaveProperty('3', 33)
     })
   })
 })
