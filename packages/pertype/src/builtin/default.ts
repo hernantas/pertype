@@ -9,6 +9,7 @@ import {
   MapSchema,
   NullableSchema,
   NumberSchema,
+  OptionalSchema,
   Schema,
   SetSchema,
   StringSchema,
@@ -220,5 +221,19 @@ export class NullableCodec<S extends Schema>
 
   public encode(value: TypeOf<S> | null): unknown {
     return value === null ? null : this.codec.encode(value)
+  }
+}
+
+export class OptionalCodec<S extends Schema>
+  implements Codec<OptionalSchema<S>>
+{
+  public constructor(private readonly codec: Codec<S>) {}
+
+  public decode(value: unknown): TypeOf<S> | undefined {
+    return value === undefined ? undefined : this.codec.decode(value)
+  }
+
+  public encode(value: TypeOf<S> | undefined): unknown {
+    return value === undefined ? undefined : this.codec.encode(value)
   }
 }

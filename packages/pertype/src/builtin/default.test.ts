@@ -6,6 +6,7 @@ import {
   MapCodec,
   NullableCodec,
   NumberCodec,
+  OptionalCodec,
   SetCodec,
   StringCodec,
   SymbolCodec,
@@ -292,6 +293,22 @@ describe('Default Builtin', () => {
       expect(codec.encode(null)).toBe(null))
 
     it('Should encode non-null as non-null', () =>
+      expect(codec.encode('1')).toBe('1'))
+  })
+
+  describe('OptionalCodec', () => {
+    const codec = new OptionalCodec(new StringCodec())
+
+    it('Should decode undefined as undefined', () =>
+      expect(codec.decode(undefined)).toBe(undefined))
+
+    it('Should decode non-undefined as defined', () =>
+      expect(codec.decode(1)).toBe('1'))
+
+    it('Should encode undefined as undefined', () =>
+      expect(codec.encode(undefined)).toBe(undefined))
+
+    it('Should encode non-undefined as defined', () =>
       expect(codec.encode('1')).toBe('1'))
   })
 })
