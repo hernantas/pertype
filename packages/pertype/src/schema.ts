@@ -886,6 +886,69 @@ export function map<K extends KeySchema, V extends Schema>(
   return new MapSchema({ key, value })
 }
 
+// # Set
+
+export interface SetDefinition<V extends Schema>
+  extends Definition<Set<TypeOf<V>>> {
+  readonly value: V
+}
+
+export class SetSchema<V extends Schema> extends Schema<
+  Set<TypeOf<V>>,
+  SetDefinition<V>
+> {
+  public override is(value: unknown): value is Set<TypeOf<V>> {
+    return (
+      value instanceof Set &&
+      Array.from(value.values()).find((value) => !this.value.is(value)) ===
+        undefined
+    )
+  }
+
+  public override check(value: Set<TypeOf<V>>): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...Array.from(value.values()).flatMap((value) =>
+          this.value.check(value),
+        ),
+      )
+  }
+
+  public get value(): V {
+    return this.get('value')
+  }
+
+  /**
+   * Add new validation constraint to check set size (`=`)
+   *
+   * @param limit Limit of set size
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public size(
+    limit: number,
+    message: string = `must be at ${limit} size`,
+  ): this {
+    return this.rule({
+      type: 'set.size',
+      args: { limit },
+      test: (value) => value.size === limit,
+      message,
+    })
+  }
+}
+
+/**
+ * Create new instances of {@link Set}
+ *
+ * @param value Schema used for the value
+ * @returns A new instances
+ */
+export function set<V extends Schema>(value: V): SetSchema<V> {
+  return new SetSchema({ value })
+}
+
 // # Nullable
 
 export interface NullableDefinition<S extends Schema>

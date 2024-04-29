@@ -14,6 +14,7 @@ import {
   number,
   object,
   optional,
+  set,
   string,
   symbol,
   tuple,
@@ -359,6 +360,30 @@ describe('Schema', () => {
       expect(validator.test(new Map([['1', 0]]))).toBe(false)
       expect(validator.test(new Map([['', 1]]))).toBe(false)
       expect(validator.test(new Map([['', 0]]))).toBe(false)
+    })
+  })
+
+  describe('SetSchema', () => {
+    it('Should be compatible with Schema', () => {
+      expectType<Schema>(set(unknown()))
+    })
+
+    it('Should narrow map as map type', () => {
+      expect(set(number()).is(new Set([0, 1, 2]))).toBe(true)
+    })
+
+    it('Size constraint should check if map size is equal to limit', () => {
+      const validator = set(number()).size(2)
+      expect(validator.test(new Set([0]))).toBe(false)
+      expect(validator.test(new Set([0, 1]))).toBe(true)
+      expect(validator.test(new Set([0, 1, 2]))).toBe(false)
+    })
+
+    it('Should check its inner schema constraints', () => {
+      const validator = set(number().min(1))
+      expect(validator.test(new Set([2]))).toBe(true)
+      expect(validator.test(new Set([1, 2]))).toBe(true)
+      expect(validator.test(new Set([0, 1, 2]))).toBe(false)
     })
   })
 
