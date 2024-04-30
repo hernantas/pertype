@@ -4,6 +4,7 @@ import {
   literal,
   map,
   number,
+  object,
   set,
   string,
   symbol,
@@ -18,6 +19,7 @@ import {
   MapCodec,
   NullableCodec,
   NumberCodec,
+  ObjectCodec,
   OptionalCodec,
   SetCodec,
   StringCodec,
@@ -367,5 +369,30 @@ describe('Default Builtin', () => {
       expect(codec.encode(1)).toBe(1)
       expect(codec.encode('hello')).toBe('hello')
     })
+  })
+
+  describe('ObjectCodec', () => {
+    const codec = new ObjectCodec(
+      object({
+        id: number(),
+        name: string(),
+      }),
+      {
+        id: new NumberCodec(number()),
+        name: new StringCodec(string()),
+      },
+    )
+
+    it('Should decode object as object', () =>
+      expect(codec.decode({ id: '1', name: 'Adam' })).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
+
+    it('Should encode object as object', () =>
+      expect(codec.encode({ id: 1, name: 'Adam' })).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
   })
 })

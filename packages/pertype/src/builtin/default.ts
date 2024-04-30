@@ -9,6 +9,7 @@ import {
   MapSchema,
   NullableSchema,
   NumberSchema,
+  ObjectSchema,
   OptionalSchema,
   Schema,
   SetSchema,
@@ -18,7 +19,7 @@ import {
   UnionOf,
   UnionSchema,
 } from '../schema'
-import { Literal, Member, Tuple } from '../util/alias'
+import { AnyRecord, Literal, Member, Tuple } from '../util/alias'
 import { TypeOf } from '../util/type'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
@@ -321,5 +322,31 @@ export class UnionCodec<M extends Member<Schema>>
       }
     }
     throw new UnsupportedTypeError(value)
+  }
+}
+
+export class ObjectCodec<R extends AnyRecord<Schema>>
+  implements Codec<ObjectSchema<R>>
+{
+  public constructor(
+    public readonly schema: ObjectSchema<R>,
+    private readonly codecs: CodecMap<R>,
+  ) {}
+
+  public decode(value: unknown): TypeOf<R> {
+    if (typeof value === 'object' && value !== null) {
+      const entries = Object.entries<Codec<Schema>>(this.codecs).map(
+        ([key, codec]) => [key, codec.decode((value as AnyRecord)[key])],
+      )
+      return Object.fromEntries(entries)
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public encode(value: TypeOf<R>): unknown {
+    const entries = Object.entries<Codec<Schema>>(this.codecs).map(
+      ([key, codec]) => [key, codec.encode(value[key])],
+    )
+    return Object.fromEntries(entries)
   }
 }
