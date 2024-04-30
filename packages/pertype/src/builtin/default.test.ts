@@ -246,9 +246,9 @@ describe('Default Builtin', () => {
     it('Should encode map as object with its key and value encoded', () => {
       const result = codec.encode(
         new Map([
-          [1, 11],
-          [2, 22],
-          [3, 33],
+          ['1', 11],
+          ['2', 22],
+          ['3', 33],
         ]),
       )
       expect(typeof result).toBe('object')
