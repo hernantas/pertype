@@ -12,3 +12,7 @@ export interface Encoder<S extends Schema, O = unknown> {
 export interface Codec<S extends Schema, O = unknown, I = unknown>
   extends Decoder<S, I>,
     Encoder<S, O> {}
+
+export type CodecMap<T> = {
+  [K in keyof T]: T[K] extends Schema ? Codec<T[K]> : never
+}
