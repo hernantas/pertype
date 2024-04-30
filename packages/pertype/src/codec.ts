@@ -15,6 +15,6 @@ export interface Codec<S extends Schema = Schema, O = unknown, I = unknown>
   get schema(): S
 }
 
-export type CodecMap<T> = {
+export type CodecOf<T> = {
   [K in keyof T]: T[K] extends Schema ? Codec<T[K]> : never
 }

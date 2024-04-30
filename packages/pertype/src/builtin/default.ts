@@ -1,4 +1,4 @@
-import { Codec, CodecMap } from '../codec'
+import { Codec, CodecOf } from '../codec'
 import { UnsupportedTypeError, UnsupportedValueError } from '../error'
 import {
   ArraySchema,
@@ -275,7 +275,7 @@ export class TupleCodec<T extends Tuple<Schema>>
 {
   public constructor(
     public readonly schema: TupleSchema<T>,
-    private readonly codecs: CodecMap<T>,
+    private readonly codecs: CodecOf<T>,
   ) {}
 
   public decode(value: unknown): TypeOf<T> {
@@ -297,7 +297,7 @@ export class UnionCodec<M extends Member<Schema>>
 {
   public constructor(
     public readonly schema: UnionSchema<M>,
-    private readonly codecs: CodecMap<M>,
+    private readonly codecs: CodecOf<M>,
   ) {}
 
   public decode(value: unknown): UnionOf<TypeOf<M>> {
@@ -332,7 +332,7 @@ export class IntersectCodec<M extends Member<Schema>>
 {
   public constructor(
     public readonly schema: IntersectSchema<M>,
-    private readonly codecs: CodecMap<M>,
+    private readonly codecs: CodecOf<M>,
   ) {}
 
   public decode(value: unknown): IntersectOf<TypeOf<M>> {
@@ -369,7 +369,7 @@ export class ObjectCodec<R extends AnyRecord<Schema>>
 {
   public constructor(
     public readonly schema: ObjectSchema<R>,
-    private readonly codecs: CodecMap<R>,
+    private readonly codecs: CodecOf<R>,
   ) {}
 
   public decode(value: unknown): TypeOf<R> {
