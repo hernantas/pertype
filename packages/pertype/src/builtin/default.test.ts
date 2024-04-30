@@ -1,4 +1,15 @@
 import {
+  boolean,
+  date,
+  literal,
+  map,
+  number,
+  set,
+  string,
+  symbol,
+  tuple,
+} from '../schema'
+import {
   ArrayCodec,
   BooleanCodec,
   DateCodec,
@@ -15,7 +26,7 @@ import {
 
 describe('Default Builtin', () => {
   describe('BooleanCodec', () => {
-    const codec = new BooleanCodec()
+    const codec = new BooleanCodec(boolean())
 
     it('Should decode falsy value as false', () => {
       expect(codec.decode(null)).toBe(false)
@@ -34,7 +45,7 @@ describe('Default Builtin', () => {
   })
 
   describe('NumberCodec', () => {
-    const codec = new NumberCodec()
+    const codec = new NumberCodec(number())
 
     it('Should decode number as number', () => {
       expect(codec.decode(0)).toBe(0)
@@ -75,7 +86,7 @@ describe('Default Builtin', () => {
   })
 
   describe('StringCodec', () => {
-    const codec = new StringCodec()
+    const codec = new StringCodec(string())
 
     it('Should decode string as string', () =>
       expect(codec.decode('string')).toBe('string'))
@@ -98,7 +109,7 @@ describe('Default Builtin', () => {
   })
 
   describe('DateCodec', () => {
-    const codec = new DateCodec()
+    const codec = new DateCodec(date())
 
     it('Should decode date as date', () =>
       expect(codec.decode(new Date())).toBeInstanceOf(Date))
@@ -112,7 +123,7 @@ describe('Default Builtin', () => {
   })
 
   describe('SymbolCodec', () => {
-    const codec = new SymbolCodec()
+    const codec = new SymbolCodec(symbol())
 
     it('Should decode string as symbol', () =>
       expect(typeof codec.decode('hello')).toBe('symbol'))
@@ -130,7 +141,7 @@ describe('Default Builtin', () => {
 
   describe('LiteralCodec', () => {
     describe('String literal', () => {
-      const codec = new LiteralCodec('string')
+      const codec = new LiteralCodec(literal('string'), 'string')
 
       it('Should decode string literal as string literal', () =>
         expect(codec.decode('string')).toBe('string'))
@@ -140,7 +151,7 @@ describe('Default Builtin', () => {
     })
 
     describe('Number literal', () => {
-      const codec = new LiteralCodec(0)
+      const codec = new LiteralCodec(literal(0), 0)
 
       it('Should decode string literal as string literal', () =>
         expect(codec.decode(0)).toBe(0))
@@ -150,7 +161,7 @@ describe('Default Builtin', () => {
     })
 
     describe('Boolean literal', () => {
-      const codec = new LiteralCodec(true)
+      const codec = new LiteralCodec(literal(true), true)
 
       it('Should decode string literal as string literal', () =>
         expect(codec.decode(true)).toBe(true))
@@ -161,7 +172,7 @@ describe('Default Builtin', () => {
   })
 
   describe('ArrayCodec', () => {
-    const codec = new ArrayCodec(new StringCodec())
+    const codec = new ArrayCodec(string().array(), new StringCodec(string()))
 
     it('Should decode an array as array with its element decoded', () =>
       expect(codec.decode([1, 2, 3])).toStrictEqual(['1', '2', '3']))
@@ -186,7 +197,11 @@ describe('Default Builtin', () => {
   })
 
   describe('MapCodec', () => {
-    const codec = new MapCodec(new StringCodec(), new NumberCodec())
+    const codec = new MapCodec(
+      map(string(), number()),
+      new StringCodec(string()),
+      new NumberCodec(number()),
+    )
 
     it('Should decode an array of elements as map with decoded value as key', () => {
       const result = codec.decode([1, 2, 3])
@@ -259,7 +274,7 @@ describe('Default Builtin', () => {
   })
 
   describe('SetCodec', () => {
-    const codec = new SetCodec(new NumberCodec())
+    const codec = new SetCodec(set(number()), new NumberCodec(number()))
 
     it('Should decode array as set with its elements decoded', () => {
       const result = codec.decode([1, 2, 3, 1])
@@ -282,7 +297,10 @@ describe('Default Builtin', () => {
   })
 
   describe('NullableCodec', () => {
-    const codec = new NullableCodec(new StringCodec())
+    const codec = new NullableCodec(
+      string().nullable(),
+      new StringCodec(string()),
+    )
 
     it('Should decode null as null', () =>
       expect(codec.decode(null)).toBe(null))
@@ -298,7 +316,10 @@ describe('Default Builtin', () => {
   })
 
   describe('OptionalCodec', () => {
-    const codec = new OptionalCodec(new StringCodec())
+    const codec = new OptionalCodec(
+      string().optional(),
+      new StringCodec(string()),
+    )
 
     it('Should decode undefined as undefined', () =>
       expect(codec.decode(undefined)).toBe(undefined))
@@ -314,7 +335,10 @@ describe('Default Builtin', () => {
   })
 
   describe('TupleCodec', () => {
-    const codec = new TupleCodec([new StringCodec(), new NumberCodec()])
+    const codec = new TupleCodec(tuple(string(), number()), [
+      new StringCodec(string()),
+      new NumberCodec(number()),
+    ])
 
     it('Should decode array as tuple with each item decoded', () =>
       expect(codec.decode([1, 2])).toStrictEqual(['1', 2]))

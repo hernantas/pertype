@@ -20,6 +20,8 @@ import { Literal, Tuple } from '../util/alias'
 import { TypeOf } from '../util/type'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
+  public constructor(public readonly schema: BooleanSchema) {}
+
   public decode(value: unknown): boolean {
     return !!value
   }
@@ -30,6 +32,8 @@ export class BooleanCodec implements Codec<BooleanSchema> {
 }
 
 export class NumberCodec implements Codec<NumberSchema> {
+  public constructor(public readonly schema: NumberSchema) {}
+
   public decode(value: unknown): number {
     if (typeof value === 'number') {
       return value
@@ -55,6 +59,8 @@ export class NumberCodec implements Codec<NumberSchema> {
 }
 
 export class StringCodec implements Codec<StringSchema> {
+  public constructor(public readonly schema: StringSchema) {}
+
   public decode(value: unknown): string {
     if (typeof value === 'string') {
       return value
@@ -73,6 +79,8 @@ export class StringCodec implements Codec<StringSchema> {
 }
 
 export class DateCodec implements Codec<DateSchema> {
+  public constructor(public readonly schema: DateSchema) {}
+
   public decode(value: unknown): Date {
     if (typeof value === 'string') {
       const date = new Date(value)
@@ -95,6 +103,8 @@ export class DateCodec implements Codec<DateSchema> {
 }
 
 export class SymbolCodec implements Codec<SymbolSchema> {
+  public constructor(public readonly schema: SymbolSchema) {}
+
   public decode(value: unknown): symbol {
     if (
       typeof value === 'string' ||
@@ -119,7 +129,10 @@ export class SymbolCodec implements Codec<SymbolSchema> {
 export class LiteralCodec<T extends Literal>
   implements Codec<LiteralSchema<T>>
 {
-  public constructor(private readonly literal: T) {}
+  public constructor(
+    public readonly schema: LiteralSchema<T>,
+    private readonly literal: T,
+  ) {}
 
   public decode(value: unknown): T {
     if (this.literal === value) {
@@ -134,7 +147,10 @@ export class LiteralCodec<T extends Literal>
 }
 
 export class ArrayCodec<S extends Schema> implements Codec<ArraySchema<S>> {
-  public constructor(private readonly codec: Codec<S>) {}
+  public constructor(
+    public readonly schema: ArraySchema<S>,
+    private readonly codec: Codec<S>,
+  ) {}
 
   public decode(value: unknown): TypeOf<S>[] {
     const values = Array.isArray(value)
@@ -154,6 +170,7 @@ export class MapCodec<K extends KeySchema, V extends Schema>
   implements Codec<MapSchema<K, V>>
 {
   public constructor(
+    public readonly schema: MapSchema<K, V>,
     private readonly keyCodec: Codec<K>,
     private readonly valueCodec: Codec<V>,
   ) {}
@@ -194,7 +211,10 @@ export class MapCodec<K extends KeySchema, V extends Schema>
 }
 
 export class SetCodec<V extends Schema> implements Codec<SetSchema<V>> {
-  public constructor(private readonly valueCodec: Codec<V>) {}
+  public constructor(
+    public readonly schema: SetSchema<V>,
+    private readonly valueCodec: Codec<V>,
+  ) {}
 
   public decode(value: unknown): Set<TypeOf<V>> {
     if (Array.isArray(value)) {
@@ -214,7 +234,10 @@ export class SetCodec<V extends Schema> implements Codec<SetSchema<V>> {
 export class NullableCodec<S extends Schema>
   implements Codec<NullableSchema<S>>
 {
-  public constructor(private readonly codec: Codec<S>) {}
+  public constructor(
+    public readonly schema: NullableSchema<S>,
+    private readonly codec: Codec<S>,
+  ) {}
 
   public decode(value: unknown): TypeOf<S> | null {
     return value === null ? null : this.codec.decode(value)
@@ -228,7 +251,10 @@ export class NullableCodec<S extends Schema>
 export class OptionalCodec<S extends Schema>
   implements Codec<OptionalSchema<S>>
 {
-  public constructor(private readonly codec: Codec<S>) {}
+  public constructor(
+    public readonly schema: OptionalSchema<S>,
+    private readonly codec: Codec<S>,
+  ) {}
 
   public decode(value: unknown): TypeOf<S> | undefined {
     return value === undefined ? undefined : this.codec.decode(value)
@@ -242,7 +268,10 @@ export class OptionalCodec<S extends Schema>
 export class TupleCodec<T extends Tuple<Schema>>
   implements Codec<TupleSchema<T>>
 {
-  public constructor(private readonly codecs: CodecMap<T>) {}
+  public constructor(
+    public readonly schema: TupleSchema<T>,
+    private readonly codecs: CodecMap<T>,
+  ) {}
 
   public decode(value: unknown): TypeOf<T> {
     if (Array.isArray(value)) {
