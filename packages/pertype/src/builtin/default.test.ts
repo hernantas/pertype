@@ -8,6 +8,7 @@ import {
   string,
   symbol,
   tuple,
+  union,
 } from '../schema'
 import {
   ArrayCodec,
@@ -22,6 +23,7 @@ import {
   StringCodec,
   SymbolCodec,
   TupleCodec,
+  UnionCodec,
 } from './default'
 
 describe('Default Builtin', () => {
@@ -348,5 +350,22 @@ describe('Default Builtin', () => {
 
     it('Should encode tuple as array', () =>
       expect(codec.encode(['1', 2])).toStrictEqual(['1', 2]))
+  })
+
+  describe('UnionCodec', () => {
+    const codec = new UnionCodec(union(number(), string()), [
+      new NumberCodec(number()),
+      new StringCodec(string()),
+    ])
+
+    it('Should decode the elements based on the order schema declaration', () => {
+      expect(codec.decode(1)).toBe(1)
+      expect(codec.decode('hello')).toBe('hello')
+    })
+
+    it('Should encode the elements based on the order of schema declaration', () => {
+      expect(codec.encode(1)).toBe(1)
+      expect(codec.encode('hello')).toBe('hello')
+    })
   })
 })

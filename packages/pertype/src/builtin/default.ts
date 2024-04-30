@@ -15,8 +15,10 @@ import {
   StringSchema,
   SymbolSchema,
   TupleSchema,
+  UnionOf,
+  UnionSchema,
 } from '../schema'
-import { Literal, Tuple } from '../util/alias'
+import { Literal, Member, Tuple } from '../util/alias'
 import { TypeOf } from '../util/type'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
@@ -284,5 +286,40 @@ export class TupleCodec<T extends Tuple<Schema>>
 
   public encode(value: TypeOf<T>): unknown {
     return this.codecs.map((codec, index) => codec.encode(value[index]))
+  }
+}
+
+export class UnionCodec<M extends Member<Schema>>
+  implements Codec<UnionSchema<M>>
+{
+  public constructor(
+    public readonly schema: UnionSchema<M>,
+    private readonly codecs: CodecMap<M>,
+  ) {}
+
+  public decode(value: unknown): UnionOf<TypeOf<M>> {
+    // decode using its schema
+    for (const codec of this.codecs) {
+      if (codec.schema.is(value)) {
+        return codec.decode(value)
+      }
+    }
+
+    // brute force decoding
+    for (const codec of this.codecs) {
+      try {
+        return codec.decode(value)
+      } catch (e) {}
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public encode(value: UnionOf<TypeOf<M>>): unknown {
+    for (const codec of this.codecs) {
+      if (codec.schema.is(value)) {
+        return codec.encode(value)
+      }
+    }
+    throw new UnsupportedTypeError(value)
   }
 }
