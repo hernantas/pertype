@@ -4,6 +4,8 @@ import {
   ArraySchema,
   BooleanSchema,
   DateSchema,
+  IntersectOf,
+  IntersectSchema,
   KeySchema,
   LiteralSchema,
   MapSchema,
@@ -322,6 +324,43 @@ export class UnionCodec<M extends Member<Schema>>
       }
     }
     throw new UnsupportedTypeError(value)
+  }
+}
+
+export class IntersectCodec<M extends Member<Schema>>
+  implements Codec<IntersectSchema<M>>
+{
+  public constructor(
+    public readonly schema: IntersectSchema<M>,
+    private readonly codecs: CodecMap<M>,
+  ) {}
+
+  public decode(value: unknown): IntersectOf<TypeOf<M>> {
+    return this.codecs
+      .map((codec) => codec.decode(value))
+      .filter((v) => typeof v === 'object')
+      .reduce((result, v) => merge(result, v), {})
+  }
+
+  public encode(value: IntersectOf<TypeOf<M>>): unknown {
+    return this.codecs
+      .map((codec) => codec.encode(value))
+      .filter((v) => typeof v === 'object')
+      .reduce((result, v) => merge(result, v), {})
+  }
+}
+
+/**
+ * Merge 2 given object
+ *
+ * @param base Base to be merged
+ * @param target Target to be merged
+ * @returns A new object from the merger
+ */
+function merge<T, U>(base: T, target: U): T & U {
+  return {
+    ...target,
+    ...base,
   }
 }
 

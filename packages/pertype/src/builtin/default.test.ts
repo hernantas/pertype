@@ -1,6 +1,7 @@
 import {
   boolean,
   date,
+  intersect,
   literal,
   map,
   number,
@@ -15,6 +16,7 @@ import {
   ArrayCodec,
   BooleanCodec,
   DateCodec,
+  IntersectCodec,
   LiteralCodec,
   MapCodec,
   NullableCodec,
@@ -369,6 +371,42 @@ describe('Default Builtin', () => {
       expect(codec.encode(1)).toBe(1)
       expect(codec.encode('hello')).toBe('hello')
     })
+  })
+
+  describe('IntersectCodec', () => {
+    const codec = new IntersectCodec(
+      intersect(object({ id: number() }), object({ name: string() })),
+      [
+        new ObjectCodec(
+          object({
+            id: number(),
+          }),
+          {
+            id: new NumberCodec(number()),
+          },
+        ),
+        new ObjectCodec(
+          object({
+            name: string(),
+          }),
+          {
+            name: new StringCodec(string()),
+          },
+        ),
+      ],
+    )
+
+    it('Should decode an intersect as intersect', () =>
+      expect(codec.decode({ id: '1', name: 'Adam' })).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
+
+    it('Should encode an intersect as intersect', () =>
+      expect(codec.encode({ id: 1, name: 'Adam' })).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
   })
 
   describe('ObjectCodec', () => {
