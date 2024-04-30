@@ -10,6 +10,7 @@ import {
   SetCodec,
   StringCodec,
   SymbolCodec,
+  TupleCodec,
 } from './default'
 
 describe('Default Builtin', () => {
@@ -310,5 +311,18 @@ describe('Default Builtin', () => {
 
     it('Should encode non-undefined as defined', () =>
       expect(codec.encode('1')).toBe('1'))
+  })
+
+  describe('TupleCodec', () => {
+    const codec = new TupleCodec([new StringCodec(), new NumberCodec()])
+
+    it('Should decode array as tuple with each item decoded', () =>
+      expect(codec.decode([1, 2])).toStrictEqual(['1', 2]))
+
+    it('Should decode excess array as tuple by removing excess items', () =>
+      expect(codec.decode([1, 2, 3, 4])).toStrictEqual(['1', 2]))
+
+    it('Should encode tuple as array', () =>
+      expect(codec.encode(['1', 2])).toStrictEqual(['1', 2]))
   })
 })

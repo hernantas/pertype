@@ -1,4 +1,4 @@
-import { Codec } from '../codec'
+import { Codec, CodecMap } from '../codec'
 import { UnsupportedTypeError, UnsupportedValueError } from '../error'
 import {
   ArraySchema,
@@ -14,8 +14,9 @@ import {
   SetSchema,
   StringSchema,
   SymbolSchema,
+  TupleSchema,
 } from '../schema'
-import { Literal } from '../util/alias'
+import { Literal, Tuple } from '../util/alias'
 import { TypeOf } from '../util/type'
 
 export class BooleanCodec implements Codec<BooleanSchema> {
@@ -235,5 +236,24 @@ export class OptionalCodec<S extends Schema>
 
   public encode(value: TypeOf<S> | undefined): unknown {
     return value === undefined ? undefined : this.codec.encode(value)
+  }
+}
+
+export class TupleCodec<T extends Tuple<Schema>>
+  implements Codec<TupleSchema<T>>
+{
+  public constructor(private readonly codecs: CodecMap<T>) {}
+
+  public decode(value: unknown): TypeOf<T> {
+    if (Array.isArray(value)) {
+      return this.codecs.map((codec, index) =>
+        codec.decode(value[index]),
+      ) as TypeOf<T>
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public encode(value: TypeOf<T>): unknown {
+    return this.codecs.map((codec, index) => codec.encode(value[index]))
   }
 }
