@@ -1171,9 +1171,7 @@ export class IntersectSchema<S extends Member<Schema>> extends Schema<
     return this.members.find((member) => !member.is(value)) === undefined
   }
 
-  public override check(
-    value: UnionToIntersect<UnionOf<TypeOf<S>>>,
-  ): Violation[] {
+  public override check(value: IntersectOf<TypeOf<S>>): Violation[] {
     return super
       .check(value)
       .concat(...this.members.flatMap((member) => member.check(value)))
