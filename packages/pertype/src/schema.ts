@@ -888,15 +888,12 @@ export class ArraySchema<S extends Schema> extends Schema<
 > {
   public override is(value: unknown): value is TypeOf<S>[] {
     return (
-      Array.isArray(value) &&
-      value.find((v) => !this.innerSchema.is(v)) === undefined
+      Array.isArray(value) && value.find((v) => !this.inner.is(v)) === undefined
     )
   }
 
   public override check(value: TypeOf<S>[]): Violation[] {
-    return super
-      .check(value)
-      .concat(...value.map((v) => this.innerSchema.check(v)))
+    return super.check(value).concat(...value.map((v) => this.inner.check(v)))
   }
 
   public override decode(value: unknown): TypeOf<S>[] {
@@ -905,17 +902,17 @@ export class ArraySchema<S extends Schema> extends Schema<
       : value !== undefined && value !== null
         ? [value]
         : []
-    return values.map((value) => this.innerSchema.decode(value))
+    return values.map((value) => this.inner.decode(value))
   }
 
   public override encode(value: TypeOf<S>[]): OutputOf<S>[] {
-    return value.map((value) => this.innerSchema.encode(value))
+    return value.map((value) => this.inner.encode(value))
   }
 
   /**
    * Inner schema
    */
-  public get innerSchema(): S {
+  public get inner(): S {
     return this.get('inner')
   }
 
@@ -1193,26 +1190,24 @@ export class NullableSchema<S extends Schema> extends Schema<
   NullableDefinition<S>
 > {
   public override is(value: unknown): value is TypeOf<S> | null {
-    return value === null || this.innerSchema.is(value)
+    return value === null || this.inner.is(value)
   }
 
   public override check(value: TypeOf<S> | null): Violation[] {
     return super
       .check(value)
-      .concat(
-        ...(this.innerSchema.is(value) ? this.innerSchema.check(value) : []),
-      )
+      .concat(...(this.inner.is(value) ? this.inner.check(value) : []))
   }
 
   public override decode(value: unknown): TypeOf<S> | null {
-    return value === null ? null : this.innerSchema.decode(value)
+    return value === null ? null : this.inner.decode(value)
   }
 
   public override encode(value: TypeOf<S> | null): OutputOf<S> | null {
-    return value === null ? null : this.innerSchema.encode(value)
+    return value === null ? null : this.inner.encode(value)
   }
 
-  public get innerSchema(): S {
+  public get inner(): S {
     return this.get('inner')
   }
 
@@ -1222,7 +1217,7 @@ export class NullableSchema<S extends Schema> extends Schema<
    * @returns inner schema
    */
   public nonNullable(): S {
-    return this.innerSchema
+    return this.inner
   }
 }
 
@@ -1253,28 +1248,26 @@ export class OptionalSchema<S extends Schema> extends Schema<
   OptionalDefinition<S>
 > {
   public override is(value: unknown): value is TypeOf<S> | undefined {
-    return value === undefined || this.innerSchema.is(value)
+    return value === undefined || this.inner.is(value)
   }
 
   public override check(value: TypeOf<S> | undefined): Violation[] {
     return super
       .check(value)
-      .concat(
-        ...(this.innerSchema.is(value) ? this.innerSchema.check(value) : []),
-      )
+      .concat(...(this.inner.is(value) ? this.inner.check(value) : []))
   }
 
   public override decode(value: unknown): TypeOf<S> | undefined {
-    return value === undefined ? undefined : this.innerSchema.decode(value)
+    return value === undefined ? undefined : this.inner.decode(value)
   }
 
   public override encode(
     value: TypeOf<S> | undefined,
   ): OutputOf<S> | undefined {
-    return value === undefined ? undefined : this.innerSchema.encode(value)
+    return value === undefined ? undefined : this.inner.encode(value)
   }
 
-  public get innerSchema(): S {
+  public get inner(): S {
     return this.get('inner')
   }
 
@@ -1284,7 +1277,7 @@ export class OptionalSchema<S extends Schema> extends Schema<
    * @returns Inner schema
    */
   public required(): S {
-    return this.innerSchema
+    return this.inner
   }
 }
 
