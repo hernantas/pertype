@@ -1,3 +1,4 @@
+import { UnsupportedTypeError, UnsupportedValueError } from './error'
 import {
   AnyRecord,
   Constructor,
@@ -7,7 +8,7 @@ import {
   Tuple,
 } from './util/alias'
 import { ImmutableBuilder } from './util/builder'
-import { Type, TypeOf } from './util/type'
+import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
  * Function to test if value is within constraint
@@ -84,11 +85,18 @@ export interface Definition<T> {
  * Runtime type that represent some type and can be used to identify and
  * validate the value
  */
-export abstract class Schema<T = any, D extends Definition<T> = Definition<T>>
+export abstract class Schema<
+    T = any,
+    O = T,
+    I = unknown,
+    D extends Definition<T> = Definition<T>,
+  >
   extends ImmutableBuilder<D>
-  implements Type<T>
+  implements Type<T>, Output<O>, Input<I>
 {
   public readonly __type!: T
+  public readonly __output!: O
+  public readonly __input!: I
 
   /**
    * List of constraints of current schema
@@ -160,6 +168,20 @@ export abstract class Schema<T = any, D extends Definition<T> = Definition<T>>
   public abstract is(value: unknown): value is T
 
   /**
+   * Coerced given input value of `I` type to `T` type
+   *
+   * @param value Input to be coerced
+   */
+  public abstract decode(value: I): T
+
+  /**
+   * Coerced given value of `T` type to `O` output type
+   *
+   * @param value Value to be coerced
+   */
+  public abstract encode(value: T): O
+
+  /**
    * Wrap this {@link Schema} instance with {@link ArraySchema}
    *
    * @returns A new instance of {@link ArraySchema}
@@ -196,6 +218,14 @@ export class BooleanSchema extends Schema<boolean> {
   public override is(value: unknown): value is boolean {
     return typeof value === 'boolean'
   }
+
+  public override decode(value: unknown): boolean {
+    return !!value
+  }
+
+  public override encode(value: boolean): boolean {
+    return value
+  }
 }
 
 /**
@@ -226,6 +256,29 @@ const booleanInstance = new BooleanSchema({})
 export class NumberSchema extends Schema<number> {
   public override is(value: unknown): value is number {
     return typeof value === 'number'
+  }
+
+  public override decode(value: unknown): number {
+    if (typeof value === 'number') {
+      return value
+    }
+
+    if (value === undefined) {
+      return 0
+    }
+
+    if (value === 'NaN') {
+      return NaN
+    } else if (value === '-NaN') {
+      return -NaN
+    }
+
+    // try automatic conversion
+    return Number(value)
+  }
+
+  public override encode(value: number): number {
+    return value
   }
 
   /**
@@ -357,6 +410,22 @@ export class StringSchema extends Schema<string> {
     return typeof value === 'string'
   }
 
+  public override decode(value: unknown): string {
+    if (typeof value === 'string') {
+      return value
+    }
+
+    if (value === null || value === undefined) {
+      return ''
+    }
+
+    return String(value)
+  }
+
+  public override encode(value: string): string {
+    return value
+  }
+
   /**
    * Add new validation constraint that check character length
    *
@@ -464,9 +533,29 @@ const stringInstance = new StringSchema({})
 /**
  * {@link Schema} that represent `date`
  */
-export class DateSchema extends Schema<Date> {
+export class DateSchema extends Schema<Date, string> {
   public override is(value: unknown): value is Date {
     return value instanceof Date
+  }
+
+  public override decode(value: unknown): Date {
+    if (typeof value === 'string') {
+      const date = new Date(value)
+      if (isNaN(date.getTime())) {
+        throw new UnsupportedValueError(value)
+      }
+      return date
+    }
+
+    if (value instanceof Date) {
+      return value
+    }
+
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: Date): string {
+    return value.toUTCString()
   }
 
   /**
@@ -563,9 +652,29 @@ const dateInstance = new DateSchema({})
 /**
  * {@link Schema} that represent `symbol`
  */
-export class SymbolSchema extends Schema<symbol> {
+export class SymbolSchema extends Schema<symbol, string> {
   public override is(value: unknown): value is symbol {
     return typeof value === 'symbol'
+  }
+
+  public override decode(value: unknown): symbol {
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      value === undefined
+    ) {
+      return Symbol(value)
+    }
+
+    if (typeof value === 'symbol') {
+      return value
+    }
+
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: symbol): string {
+    return value.description ?? ''
   }
 
   /**
@@ -609,6 +718,17 @@ export class NullSchema extends Schema<null> {
   public override is(value: unknown): value is null {
     return value === null
   }
+
+  public override decode(value: unknown): null {
+    if (this.is(value)) {
+      return value
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: null): null {
+    return value
+  }
 }
 
 /**
@@ -629,6 +749,17 @@ const nullInstance = new NullSchema({})
 export class UndefinedSchema extends Schema<undefined> {
   public override is(value: unknown): value is undefined {
     return value === undefined
+  }
+
+  public override decode(value: unknown): undefined {
+    if (this.is(value)) {
+      return value
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: undefined): undefined {
+    return value
   }
 }
 
@@ -651,6 +782,14 @@ export class AnySchema extends Schema<any> {
   public override is(_: unknown): _ is any {
     return true
   }
+
+  public override decode(value: unknown): any {
+    return value
+  }
+
+  public override encode(value: any): any {
+    return value
+  }
 }
 
 /**
@@ -672,6 +811,14 @@ export class UnknownSchema extends Schema<unknown> {
   public override is(_: unknown): _ is unknown {
     return true
   }
+
+  public override decode(value: unknown): unknown {
+    return value
+  }
+
+  public override encode(value: unknown): unknown {
+    return value
+  }
 }
 
 /**
@@ -692,10 +839,23 @@ export interface LiteralDefinition<T extends Literal> extends Definition<T> {
 
 export class LiteralSchema<T extends Literal> extends Schema<
   T,
+  T,
+  unknown,
   LiteralDefinition<T>
 > {
   public override is(value: unknown): value is T {
     return this.value === value
+  }
+
+  public override decode(value: unknown): T {
+    if (this.value === value) {
+      return this.value
+    }
+    throw new UnsupportedValueError(value)
+  }
+
+  public override encode(value: T): T {
+    return value
   }
 
   public get value(): T {
@@ -722,6 +882,8 @@ export interface ArrayDefinition<S extends Schema>
  */
 export class ArraySchema<S extends Schema> extends Schema<
   TypeOf<S>[],
+  OutputOf<S>[],
+  unknown,
   ArrayDefinition<S>
 > {
   public override is(value: unknown): value is TypeOf<S>[] {
@@ -735,6 +897,19 @@ export class ArraySchema<S extends Schema> extends Schema<
     return super
       .check(value)
       .concat(...value.map((v) => this.innerSchema.check(v)))
+  }
+
+  public override decode(value: unknown): TypeOf<S>[] {
+    const values = Array.isArray(value)
+      ? value
+      : value !== undefined && value !== null
+        ? [value]
+        : []
+    return values.map((value) => this.innerSchema.decode(value))
+  }
+
+  public override encode(value: TypeOf<S>[]): OutputOf<S>[] {
+    return value.map((value) => this.innerSchema.encode(value))
   }
 
   /**
@@ -823,6 +998,8 @@ export interface MapDefinition<K extends KeySchema, V extends Schema>
 
 export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
   Map<TypeOf<K>, TypeOf<V>>,
+  Record<OutputOf<K>, OutputOf<V>>,
+  unknown,
   MapDefinition<K, V>
 > {
   public override is(value: unknown): value is Map<TypeOf<K>, TypeOf<V>> {
@@ -842,6 +1019,42 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
           this.key.check(key as never).concat(this.value.check(value)),
         ),
       )
+  }
+
+  public override decode(value: unknown): Map<TypeOf<K>, TypeOf<V>> {
+    const entries = this.toEntries(value).map(
+      ([key, value]) =>
+        [this.key.decode(key), this.value.decode(value)] as const,
+    )
+    return new Map(entries) as Map<TypeOf<K>, TypeOf<V>>
+  }
+
+  public override encode(
+    value: Map<TypeOf<K>, TypeOf<V>>,
+  ): Record<OutputOf<K>, OutputOf<V>> {
+    const entries = Array.from(value.entries()).map(([key, value]) => [
+      this.key.encode(key as never),
+      this.value.encode(value),
+    ])
+    return Object.fromEntries(entries)
+  }
+
+  private toEntries(value: unknown): [any, any][] {
+    if (Array.isArray(value)) {
+      return value.map((item) =>
+        Array.isArray(item) ? [item[0], item[1]] : [item, undefined],
+      )
+    }
+
+    if (value instanceof Map) {
+      return Array.from(value.entries())
+    }
+
+    if (typeof value === 'object' && value !== null) {
+      return Object.entries(value)
+    }
+
+    throw new UnsupportedTypeError(value)
   }
 
   public get key(): K {
@@ -895,6 +1108,8 @@ export interface SetDefinition<V extends Schema>
 
 export class SetSchema<V extends Schema> extends Schema<
   Set<TypeOf<V>>,
+  OutputOf<V>[],
+  unknown,
   SetDefinition<V>
 > {
   public override is(value: unknown): value is Set<TypeOf<V>> {
@@ -913,6 +1128,18 @@ export class SetSchema<V extends Schema> extends Schema<
           this.value.check(value),
         ),
       )
+  }
+
+  public override decode(value: unknown): Set<TypeOf<V>> {
+    if (Array.isArray(value)) {
+      return new Set(value.map((item) => this.value.decode(item)))
+    }
+
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: Set<TypeOf<V>>): OutputOf<V>[] {
+    return Array.from(value.values()).map((item) => this.value.encode(item))
   }
 
   public get value(): V {
@@ -961,6 +1188,8 @@ export interface NullableDefinition<S extends Schema>
  */
 export class NullableSchema<S extends Schema> extends Schema<
   TypeOf<S> | null,
+  OutputOf<S> | null,
+  unknown,
   NullableDefinition<S>
 > {
   public override is(value: unknown): value is TypeOf<S> | null {
@@ -973,6 +1202,14 @@ export class NullableSchema<S extends Schema> extends Schema<
       .concat(
         ...(this.innerSchema.is(value) ? this.innerSchema.check(value) : []),
       )
+  }
+
+  public override decode(value: unknown): TypeOf<S> | null {
+    return value === null ? null : this.innerSchema.decode(value)
+  }
+
+  public override encode(value: TypeOf<S> | null): OutputOf<S> | null {
+    return value === null ? null : this.innerSchema.encode(value)
   }
 
   public get innerSchema(): S {
@@ -1011,6 +1248,8 @@ export interface OptionalDefinition<S extends Schema>
  */
 export class OptionalSchema<S extends Schema> extends Schema<
   TypeOf<S> | undefined,
+  OutputOf<S> | undefined,
+  unknown,
   OptionalDefinition<S>
 > {
   public override is(value: unknown): value is TypeOf<S> | undefined {
@@ -1023,6 +1262,16 @@ export class OptionalSchema<S extends Schema> extends Schema<
       .concat(
         ...(this.innerSchema.is(value) ? this.innerSchema.check(value) : []),
       )
+  }
+
+  public override decode(value: unknown): TypeOf<S> | undefined {
+    return value === undefined ? undefined : this.innerSchema.decode(value)
+  }
+
+  public override encode(
+    value: TypeOf<S> | undefined,
+  ): OutputOf<S> | undefined {
+    return value === undefined ? undefined : this.innerSchema.encode(value)
   }
 
   public get innerSchema(): S {
@@ -1061,6 +1310,8 @@ export interface TupleDefinition<S extends Tuple<Schema>>
 
 export class TupleSchema<S extends Tuple<Schema>> extends Schema<
   TypeOf<S>,
+  OutputOf<S>,
+  unknown,
   TupleDefinition<S>
 > {
   public override is(value: unknown): value is TypeOf<S> {
@@ -1076,6 +1327,21 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
       .concat(
         ...this.items.flatMap((member, index) => member.check(value[index])),
       )
+  }
+
+  public override decode(value: unknown): TypeOf<S> {
+    if (Array.isArray(value)) {
+      return this.items.map((schema, index) =>
+        schema.decode(value[index]),
+      ) as TypeOf<S>
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: TypeOf<S>): OutputOf<S> {
+    return this.items.map((schema, index) =>
+      schema.encode(value[index]),
+    ) as OutputOf<S>
   }
 
   public get items(): S {
@@ -1110,6 +1376,8 @@ export interface UnionDefinition<S extends Member<Schema>>
  */
 export class UnionSchema<S extends Member<Schema>> extends Schema<
   UnionOf<TypeOf<S>>,
+  UnionOf<OutputOf<S>>,
+  unknown,
   UnionDefinition<S>
 > {
   public override is(value: unknown): value is UnionOf<TypeOf<S>> {
@@ -1124,6 +1392,32 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
           member.is(value) ? member.check(value) : [],
         ),
       )
+  }
+
+  public override decode(value: unknown): UnionOf<TypeOf<S>> {
+    // decode using its schema
+    for (const member of this.members) {
+      if (member.is(value)) {
+        return member.decode(value)
+      }
+    }
+
+    // brute force decoding
+    for (const member of this.members) {
+      try {
+        return member.decode(value)
+      } catch (e) {}
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: UnionOf<TypeOf<S>>): UnionOf<OutputOf<S>> {
+    for (const member of this.members) {
+      if (member.is(value)) {
+        return member.encode(value)
+      }
+    }
+    throw new UnsupportedTypeError(value)
   }
 
   public get members(): S {
@@ -1165,6 +1459,8 @@ export interface IntersectDefinition<S extends Member<Schema>>
  */
 export class IntersectSchema<S extends Member<Schema>> extends Schema<
   IntersectOf<TypeOf<S>>,
+  IntersectOf<OutputOf<S>>,
+  unknown,
   IntersectDefinition<S>
 > {
   public override is(value: unknown): value is IntersectOf<TypeOf<S>> {
@@ -1177,8 +1473,38 @@ export class IntersectSchema<S extends Member<Schema>> extends Schema<
       .concat(...this.members.flatMap((member) => member.check(value)))
   }
 
+  public override decode(value: unknown): IntersectOf<TypeOf<S>> {
+    return this.members
+      .map((member) => member.decode(value))
+      .filter((v) => typeof v === 'object')
+      .reduce((result, v) => merge(result, v), {})
+  }
+
+  public override encode(
+    value: IntersectOf<TypeOf<S>>,
+  ): IntersectOf<OutputOf<S>> {
+    return this.members
+      .map((member) => member.encode(value))
+      .filter((v) => typeof v === 'object')
+      .reduce((result, v) => merge(result, v), {})
+  }
+
   public get members(): S {
     return this.get('members')
+  }
+}
+
+/**
+ * Merge 2 given object
+ *
+ * @param base Base to be merged
+ * @param target Target to be merged
+ * @returns A new object from the merger
+ */
+function merge<T, U>(base: T, target: U): T & U {
+  return {
+    ...target,
+    ...base,
   }
 }
 
@@ -1205,6 +1531,8 @@ export interface ObjectDefinition<S extends AnyRecord<Schema>>
  */
 export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
   TypeOf<S>,
+  OutputOf<S>,
+  unknown,
   ObjectDefinition<S>
 > {
   public override is(value: unknown): value is TypeOf<S> {
@@ -1225,6 +1553,25 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
           prop.check((value as TypeOf<S>)[key]),
         ),
       )
+  }
+
+  public override decode(value: unknown): TypeOf<S> {
+    if (typeof value === 'object' && value !== null) {
+      const entries = Object.entries(this.properties).map(([key, schema]) => [
+        key,
+        schema.decode((value as AnyRecord)[key]),
+      ])
+      return Object.fromEntries(entries)
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: TypeOf<S>): OutputOf<S> {
+    const entries = Object.entries(this.properties).map(([key, schema]) => [
+      key,
+      schema.encode(value[key]),
+    ])
+    return Object.fromEntries(entries)
   }
 
   public get properties(): S {
@@ -1270,10 +1617,20 @@ export interface TypeDefinition<T, Args extends any[]> extends Definition<T> {
  */
 export class TypeSchema<T, Args extends any[]> extends Schema<
   T,
+  T,
+  unknown,
   TypeDefinition<T, Args>
 > {
   public override is(value: unknown): value is T {
     return value instanceof this.ctor
+  }
+
+  public override decode(value: unknown): T {
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: T): T {
+    throw new UnsupportedTypeError(value)
   }
 
   /**

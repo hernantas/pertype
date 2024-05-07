@@ -40,6 +40,21 @@ describe('Schema', () => {
       expect(boolean().is('true')).toBe(false)
       expect(boolean().is('false')).toBe(false)
     })
+
+    it('Should decode falsy value as false', () => {
+      expect(boolean().decode(null)).toBe(false)
+      expect(boolean().decode(undefined)).toBe(false)
+      expect(boolean().decode(false)).toBe(false)
+      expect(boolean().decode(NaN)).toBe(false)
+      expect(boolean().decode(0)).toBe(false)
+      expect(boolean().decode(-0)).toBe(false)
+      expect(boolean().decode('')).toBe(false)
+    })
+
+    it('Should encode boolean as boolean', () => {
+      expect(boolean().encode(true)).toBe(true)
+      expect(boolean().encode(false)).toBe(false)
+    })
   })
 
   describe('NumberSchema', () => {
@@ -58,6 +73,43 @@ describe('Schema', () => {
       expect(number().is(-Infinity)).toBe(true)
       expect(number().is('0')).toBe(false)
       expect(number().is('3')).toBe(false)
+    })
+
+    it('Should decode number as number', () => {
+      expect(number().decode(0)).toBe(0)
+      expect(number().decode(-0)).toBe(-0)
+      expect(number().decode(1)).toBe(1)
+      expect(number().decode(-1)).toBe(-1)
+      expect(number().decode(Infinity)).toBe(Infinity)
+      expect(number().decode(-Infinity)).toBe(-Infinity)
+      expect(number().decode(NaN)).toBeNaN()
+      expect(number().decode(-NaN)).toBeNaN()
+    })
+
+    it('Should decode number string as number', () => {
+      expect(number().decode('0')).toBe(0)
+      expect(number().decode('-0')).toBe(-0)
+      expect(number().decode('1')).toBe(1)
+      expect(number().decode('-1')).toBe(-1)
+      expect(number().decode('Infinity')).toBe(Infinity)
+      expect(number().decode('-Infinity')).toBe(-Infinity)
+      expect(number().decode('NaN')).toBeNaN()
+      expect(number().decode('-NaN')).toBeNaN()
+    })
+
+    it('Should decode falsy non-number value as 0 number', () => {
+      expect(number().decode('')).toBe(0)
+      expect(number().decode(false)).toBe(0)
+      expect(number().decode(null)).toBe(0)
+      expect(number().decode(undefined)).toBe(0)
+    })
+
+    it('Should decode non-number string as NaN', () => {
+      expect(number().decode('Hello')).toBeNaN()
+    })
+
+    it('Should encode number as number', () => {
+      expect(number().encode(0)).toBe(0)
     })
 
     it('Min constraint should limit its minimum value using greater or equal operator', () => {
@@ -123,6 +175,15 @@ describe('Schema', () => {
       expect(date().is(new Date())).toBe(true)
     })
 
+    it('Should decode date as date', () =>
+      expect(date().decode(new Date())).toBeInstanceOf(Date))
+
+    it('Should decode valid date string to date', () =>
+      expect(date().decode('2023-05-23T23:59:59.999Z')).toBeInstanceOf(Date))
+
+    it('Should encode date as ISO string date', () =>
+      expect(typeof date().encode(new Date())).toBe('string'))
+
     it('Min constraint should limit its minimum value using greater or equal operator', () => {
       const validator = date().min(new Date(2024, 1, 5))
       expect(validator.test(new Date(2024, 1, 6))).toBe(true)
@@ -162,6 +223,25 @@ describe('Schema', () => {
       expect(string().is(0)).toBe(false)
       expect(string().is(false)).toBe(false)
     })
+
+    it('Should decode string as string', () =>
+      expect(string().decode('string')).toBe('string'))
+
+    it('Should decode number as string', () => {
+      expect(string().decode(0)).toBe('0')
+      expect(string().decode(-0)).toBe('0')
+      expect(string().decode(Infinity)).toBe('Infinity')
+      expect(string().decode(-Infinity)).toBe('-Infinity')
+    })
+
+    it('Should decode null as empty string', () =>
+      expect(string().decode(null)).toBe(''))
+
+    it('Should decode undefined as empty string', () =>
+      expect(string().decode(undefined)).toBe(''))
+
+    it('Should encode string as string', () =>
+      expect(string().encode('string')).toBe('string'))
 
     it('Length constraint should check string length to be equal with limit', () => {
       const validator = string().length(3)
@@ -213,6 +293,18 @@ describe('Schema', () => {
       expect(symbol().is(Symbol('for'))).toBe(true)
     })
 
+    it('Should decode string as symbol', () =>
+      expect(typeof symbol().decode('hello')).toBe('symbol'))
+
+    it('Should decode number as symbol', () =>
+      expect(typeof symbol().decode(1)).toBe('symbol'))
+
+    it('Should decode undefined as symbol', () =>
+      expect(typeof symbol().decode(undefined)).toBe('symbol'))
+
+    it('Should encode symbol as its description', () =>
+      expect(symbol().encode(Symbol('for'))).toBe('for'))
+
     it('Instance Of constraint should check its symbol equality', () => {
       expect(
         symbol().instanceOf(Symbol.for('for')).test(Symbol.for('for')),
@@ -262,6 +354,36 @@ describe('Schema', () => {
       expect(literal(true).is(1)).toBe(false)
       expect(literal(true).is(true)).toBe(true)
     })
+
+    describe('String literal', () => {
+      const schema = literal('string')
+
+      it('Should decode string literal as string literal', () =>
+        expect(schema.decode('string')).toBe('string'))
+
+      it('Should encode string literal as string literal', () =>
+        expect(schema.encode('string')).toBe('string'))
+    })
+
+    describe('Number literal', () => {
+      const schema = literal(0)
+
+      it('Should decode string literal as string literal', () =>
+        expect(schema.decode(0)).toBe(0))
+
+      it('Should encode string literal as string literal', () =>
+        expect(schema.encode(0)).toBe(0))
+    })
+
+    describe('Boolean literal', () => {
+      const schema = literal(true)
+
+      it('Should decode string literal as string literal', () =>
+        expect(schema.decode(true)).toBe(true))
+
+      it('Should encode string literal as string literal', () =>
+        expect(schema.encode(true)).toBe(true))
+    })
   })
 
   describe('ArraySchema', () => {
@@ -279,6 +401,27 @@ describe('Schema', () => {
       expect(array(unknown()).is(null)).toBe(false)
       expect(array(unknown()).is(undefined)).toBe(false)
     })
+
+    it('Should decode an array as array with its element decoded', () =>
+      expect(string().array().decode([1, 2, 3])).toStrictEqual(['1', '2', '3']))
+
+    it('Should decode non-array as array that have one decoded value', () =>
+      expect(string().array().decode(1)).toStrictEqual(['1']))
+
+    it('Should decode null as empty array', () =>
+      expect(string().array().decode(null)).toStrictEqual([]))
+
+    it('Should decode undefined as empty array', () =>
+      expect(string().array().decode(undefined)).toStrictEqual([]))
+
+    it('Should encode array as an array with its element encoded', () =>
+      expect(string().array().encode(['0', '1', '2', '3', '4'])).toStrictEqual([
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+      ]))
 
     it('Length constraint should check if array length is equal to limit', () => {
       const validator = array(unknown()).length(2)
@@ -338,6 +481,75 @@ describe('Schema', () => {
       ).toBe(true)
     })
 
+    it('Should decode an array of elements as map with decoded value as key', () => {
+      const result = map(string(), number()).decode([1, 2, 3])
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+    })
+
+    it('Should decode an array of key-value pairs as map with its key and value decoded', () => {
+      const result = map(string(), number()).decode([
+        [1, 11],
+        [2, 22],
+        [3, 33],
+      ])
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+      expect(result.get('1')).toBe(11)
+      expect(result.get('2')).toBe(22)
+      expect(result.get('3')).toBe(33)
+    })
+
+    it('Should decode object as map with its key and value decoded', () => {
+      const result = map(string(), number()).decode({
+        '1': 11,
+        '2': 22,
+        '3': 33,
+      })
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+      expect(result.get('1')).toBe(11)
+      expect(result.get('2')).toBe(22)
+      expect(result.get('3')).toBe(33)
+    })
+
+    it('Should decode map as map with its key and value decoded', () => {
+      const result = map(string(), number()).decode(
+        new Map([
+          [1, 11],
+          [2, 22],
+          [3, 33],
+        ]),
+      )
+      expect(result.size).toBe(3)
+      expect(result.has('1')).toBe(true)
+      expect(result.has('2')).toBe(true)
+      expect(result.has('3')).toBe(true)
+      expect(result.get('1')).toBe(11)
+      expect(result.get('2')).toBe(22)
+      expect(result.get('3')).toBe(33)
+    })
+
+    it('Should encode map as object with its key and value encoded', () => {
+      const result = map(string(), number()).encode(
+        new Map([
+          ['1', 11],
+          ['2', 22],
+          ['3', 33],
+        ]),
+      )
+      expect(typeof result).toBe('object')
+      expect(result).toHaveProperty('1', 11)
+      expect(result).toHaveProperty('2', 22)
+      expect(result).toHaveProperty('3', 33)
+    })
+
     it('Size constraint should check if map size is equal to limit', () => {
       const validator = map(string(), number()).size(1)
       expect(validator.test(new Map())).toBe(false)
@@ -372,6 +584,25 @@ describe('Schema', () => {
       expect(set(number()).is(new Set([0, 1, 2]))).toBe(true)
     })
 
+    it('Should decode array as set with its elements decoded', () => {
+      const result = set(number()).decode([1, 2, 3, 1])
+      expect(result.size).toBe(3)
+      expect(result.has(1)).toBe(true)
+      expect(result.has(2)).toBe(true)
+      expect(result.has(3)).toBe(true)
+    })
+
+    it('Should encode set as array with its elements encoded', () => {
+      const result = set(number()).encode(new Set([1, 2, 3]))
+      expect(Array.isArray(result)).toBe(true)
+      if (Array.isArray(result)) {
+        expect(result.length).toBe(3)
+        expect(result[0]).toBe(1)
+        expect(result[1]).toBe(2)
+        expect(result[2]).toBe(3)
+      }
+    })
+
     it('Size constraint should check if map size is equal to limit', () => {
       const validator = set(number()).size(2)
       expect(validator.test(new Set([0]))).toBe(false)
@@ -398,6 +629,18 @@ describe('Schema', () => {
       expect(nullable(number()).is(null)).toBe(true)
       expect(nullable(number()).is(1)).toBe(true)
     })
+
+    it('Should decode null as null', () =>
+      expect(string().nullable().decode(null)).toBe(null))
+
+    it('Should decode non-null as non-null', () =>
+      expect(string().nullable().decode(1)).toBe('1'))
+
+    it('Should encode null as null', () =>
+      expect(string().nullable().encode(null)).toBe(null))
+
+    it('Should encode non-null as non-null', () =>
+      expect(string().nullable().encode('1')).toBe('1'))
 
     it('Should check its constraints', () => {
       const validator = nullable(number()).rule({
@@ -431,6 +674,18 @@ describe('Schema', () => {
       expect(optional(number()).is(1)).toBe(true)
     })
 
+    it('Should decode undefined as undefined', () =>
+      expect(string().optional().decode(undefined)).toBe(undefined))
+
+    it('Should decode non-undefined as defined', () =>
+      expect(string().optional().decode(1)).toBe('1'))
+
+    it('Should encode undefined as undefined', () =>
+      expect(string().optional().encode(undefined)).toBe(undefined))
+
+    it('Should encode non-undefined as defined', () =>
+      expect(string().optional().encode('1')).toBe('1'))
+
     it('Should check its constraints', () => {
       const validator = optional(number()).rule({
         type: 'test.min',
@@ -463,6 +718,21 @@ describe('Schema', () => {
       expect(tuple(string(), number(), boolean()).is(null)).toBe(false)
       expect(tuple(string(), number(), boolean()).is(undefined)).toBe(false)
     })
+
+    it('Should decode array as tuple with each item decoded', () =>
+      expect(tuple(string(), number()).decode([1, 2])).toStrictEqual(['1', 2]))
+
+    it('Should decode excess array as tuple by removing excess items', () =>
+      expect(tuple(string(), number()).decode([1, 2, 3, 4])).toStrictEqual([
+        '1',
+        2,
+      ]))
+
+    it('Should encode tuple as array', () =>
+      expect(tuple(string(), number()).encode(['1', 2])).toStrictEqual([
+        '1',
+        2,
+      ]))
 
     it('Should check its constraint', () => {
       const validator = tuple(string(), number()).rule({
@@ -505,6 +775,16 @@ describe('Schema', () => {
       expect(union(string(), number()).is(undefined)).toBe(false)
     })
 
+    it('Should decode the elements based on the order schema declaration', () => {
+      expect(union(number(), string()).decode(1)).toBe(1)
+      expect(union(number(), string()).decode('hello')).toBe('hello')
+    })
+
+    it('Should encode the elements based on the order of schema declaration', () => {
+      expect(union(number(), string()).encode(1)).toBe(1)
+      expect(union(number(), string()).encode('hello')).toBe('hello')
+    })
+
     it('Should check its constraints', () => {
       const validator = union(string(), number()).rule({
         type: 'test.size',
@@ -544,6 +824,28 @@ describe('Schema', () => {
       expect(schema.is({ value: 1 })).toBe(false)
       expect(schema.is({ _string: 'string' })).toBe(false)
     })
+
+    it('Should decode an intersect as intersect', () =>
+      expect(
+        intersect(object({ id: number() }), object({ name: string() })).decode({
+          id: '1',
+          name: 'Adam',
+        }),
+      ).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
+
+    it('Should encode an intersect as intersect', () =>
+      expect(
+        intersect(object({ id: number() }), object({ name: string() })).encode({
+          id: 1,
+          name: 'Adam',
+        }),
+      ).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
 
     it('Should checks its constraints', () => {
       const validator = intersect(
@@ -592,6 +894,28 @@ describe('Schema', () => {
       expect(schema.is(null)).toBe(false)
       expect(schema.is(undefined)).toBe(false)
     })
+
+    it('Should decode object as object', () =>
+      expect(
+        object({
+          id: number(),
+          name: string(),
+        }).decode({ id: '1', name: 'Adam' }),
+      ).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
+
+    it('Should encode object as object', () =>
+      expect(
+        object({
+          id: number(),
+          name: string(),
+        }).encode({ id: 1, name: 'Adam' }),
+      ).toStrictEqual({
+        id: 1,
+        name: 'Adam',
+      }))
 
     it('Should check its constraint', () => {
       const schema = object({
