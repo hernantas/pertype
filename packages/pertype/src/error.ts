@@ -1,4 +1,24 @@
-import { Violation } from './schema'
+import { AnyRecord } from './util/alias'
+
+/**
+ * Violation information that describe the constraint that being violated
+ */
+export interface Violation {
+  /**
+   * The type of violation
+   */
+  readonly type: string
+
+  /**
+   * Optional message string used to describe the violation
+   */
+  readonly message?: string | undefined
+
+  /**
+   * Optional arguments used in the constraint
+   */
+  readonly args?: AnyRecord | undefined
+}
 
 /** This error indicate parse is failed because input value type is not supported */
 export class UnsupportedTypeError extends Error {

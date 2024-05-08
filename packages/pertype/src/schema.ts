@@ -1,4 +1,4 @@
-import { UnsupportedTypeError, UnsupportedValueError } from './error'
+import { UnsupportedTypeError, UnsupportedValueError, Violation } from './error'
 import {
   AnyRecord,
   Constructor,
@@ -16,44 +16,9 @@ import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 export type TestConstraint<T> = (value: T) => boolean
 
 /** Constraint to determine valid value */
-export interface Constraint<T> {
-  /**
-   * The type of constraint to differentiate with other constraint
-   */
-  readonly type: string
-
-  /**
-   * Optional message string used to describe the constraint
-   */
-  readonly message?: string
-
-  /**
-   * Optional arguments used for this constraint
-   */
-  readonly args?: AnyRecord
-
+export interface Constraint<T> extends Violation {
   /** Check if given value is not violating the constraint */
   readonly test: TestConstraint<T>
-}
-
-/**
- * Violation information that describe the constraint that being violated
- */
-export interface Violation {
-  /**
-   * The type of violation
-   */
-  readonly type: string
-
-  /**
-   * Optional message string used to describe the violation
-   */
-  readonly message?: string | undefined
-
-  /**
-   * Optional arguments used in the constraint
-   */
-  readonly args?: AnyRecord | undefined
 }
 
 export interface ValidationSuccess<T> {
