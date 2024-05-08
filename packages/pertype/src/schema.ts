@@ -56,15 +56,17 @@ export interface Violation {
   readonly args?: AnyRecord | undefined
 }
 
-export type ValidationResult<T> =
-  | {
-      readonly valid: true
-      readonly value: T
-    }
-  | {
-      readonly valid: false
-      readonly violations: Violation[]
-    }
+export interface ValidationSuccess<T> {
+  readonly valid: true
+  readonly value: T
+}
+
+export interface ValidationFailed {
+  readonly valid: false
+  readonly violations: Violation[]
+}
+
+export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailed
 
 /**
  * Key value store used in schema
