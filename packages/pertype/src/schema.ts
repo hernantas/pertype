@@ -779,6 +779,12 @@ export function _null(): NullSchema {
  * {@link Schema} that represent `null`
  */
 export class UndefinedSchema extends Schema<undefined> {
+  private static readonly instance = new UndefinedSchema({})
+
+  public static create(): UndefinedSchema {
+    return this.instance
+  }
+
   public override is(value: unknown): value is undefined {
     return value === undefined
   }
@@ -801,9 +807,8 @@ export class UndefinedSchema extends Schema<undefined> {
  * @returns A new instances
  */
 export function _undefined(): UndefinedSchema {
-  return undefinedInstance
+  return UndefinedSchema.create()
 }
-const undefinedInstance = new UndefinedSchema({})
 
 // # Any
 
