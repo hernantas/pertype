@@ -675,6 +675,12 @@ export function date(): DateSchema {
  * {@link Schema} that represent `symbol`
  */
 export class SymbolSchema extends Schema<symbol, string> {
+  private static readonly instance = new SymbolSchema({})
+
+  public static create(): SymbolSchema {
+    return this.instance
+  }
+
   public override is(value: unknown): value is symbol {
     return typeof value === 'symbol'
   }
@@ -727,9 +733,8 @@ export class SymbolSchema extends Schema<symbol, string> {
  * @returns A new instances
  */
 export function symbol(): SymbolSchema {
-  return symbolInstance
+  return SymbolSchema.create()
 }
-const symbolInstance = new SymbolSchema({})
 
 // # Null
 
