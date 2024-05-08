@@ -1659,6 +1659,16 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
       ) as Pick<S, K>,
     )
   }
+
+  public omit<K extends keyof S>(...keys: K[]): ObjectSchema<Omit<S, K>> {
+    return ObjectSchema.create(
+      Object.fromEntries(
+        Object.entries(this.properties)
+          .filter(([key]) => !keys.includes(key as K))
+          .map(([key, schema]) => [key, schema]),
+      ) as Omit<S, K>,
+    )
+  }
 }
 
 /**
