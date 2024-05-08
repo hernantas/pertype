@@ -1255,6 +1255,10 @@ export class NullableSchema<S extends Schema> extends Schema<
   unknown,
   NullableDefinition<S>
 > {
+  public static create<S extends Schema>(schema: S): NullableSchema<S> {
+    return new NullableSchema({ inner: schema })
+  }
+
   public override is(value: unknown): value is TypeOf<S> | null {
     return value === null || this.inner.is(value)
   }
@@ -1294,7 +1298,7 @@ export class NullableSchema<S extends Schema> extends Schema<
  * @returns A new instances
  */
 export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
-  return new NullableSchema({ inner: schema })
+  return NullableSchema.create(schema)
 }
 
 // # Optional
