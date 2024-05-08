@@ -1317,6 +1317,10 @@ export class OptionalSchema<S extends Schema> extends Schema<
   unknown,
   OptionalDefinition<S>
 > {
+  public static create<S extends Schema>(schema: S): OptionalSchema<S> {
+    return new OptionalSchema({ inner: schema })
+  }
+
   public override is(value: unknown): value is TypeOf<S> | undefined {
     return value === undefined || this.inner.is(value)
   }
@@ -1358,7 +1362,7 @@ export class OptionalSchema<S extends Schema> extends Schema<
  * @returns A new instances
  */
 export function optional<S extends Schema>(schema: S): OptionalSchema<S> {
-  return new OptionalSchema({ inner: schema })
+  return OptionalSchema.create(schema)
 }
 
 // # Tuple
