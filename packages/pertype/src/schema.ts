@@ -1713,3 +1713,27 @@ export function type<T, Args extends any[]>(
 ): TypeSchema<T, Args> {
   return TypeSchema.create(ctor)
 }
+
+export const t = {
+  boolean,
+  bool,
+  number,
+  string,
+  date,
+  symbol,
+  null: _null,
+  undefined: _undefined,
+  any,
+  unknown,
+  literal,
+  array,
+  map,
+  set,
+  nullable,
+  optional,
+  tuple,
+  union,
+  intersect,
+  object,
+  type,
+}
