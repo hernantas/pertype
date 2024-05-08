@@ -382,6 +382,7 @@ export function number(): NumberSchema {
 // # String
 
 const pattern = {
+  base64: /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/,
   email:
     /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i,
 }
@@ -503,6 +504,14 @@ export class StringSchema extends Schema<string> {
       type: `string.pattern`,
       args: { pattern },
       test: (v) => pattern.test(v),
+      message,
+    })
+  }
+
+  public base64(message: string = `must be valid base64 string`): this {
+    return this.rule({
+      type: 'string.pattern.base64',
+      test: (v) => pattern.base64.test(v),
       message,
     })
   }
