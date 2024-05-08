@@ -20,7 +20,16 @@
     "validate",
     "validation"
   ],
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.js",
+    "types": "./dist/types/index.d.ts"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "npx jest"
+    "test": "npx jest",
+    "build": "npx tsx ../../build.ts"
   }
 }
