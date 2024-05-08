@@ -1710,6 +1710,12 @@ export class TypeSchema<T, Args extends any[]> extends Schema<
   unknown,
   TypeDefinition<T, Args>
 > {
+  public static create<T, Args extends any[]>(
+    ctor: Constructor<T, Args>,
+  ): TypeSchema<T, Args> {
+    return new TypeSchema({ ctor })
+  }
+
   public override is(value: unknown): value is T {
     return value instanceof this.ctor
   }
@@ -1738,5 +1744,5 @@ export class TypeSchema<T, Args extends any[]> extends Schema<
 export function type<T, Args extends any[]>(
   ctor: Constructor<T, Args>,
 ): TypeSchema<T, Args> {
-  return new TypeSchema({ ctor })
+  return TypeSchema.create(ctor)
 }
