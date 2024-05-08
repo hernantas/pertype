@@ -1649,6 +1649,16 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
   public get entries(): [string, Schema][] {
     return Object.entries(this.properties)
   }
+
+  public pick<K extends keyof S>(...keys: K[]): ObjectSchema<Pick<S, K>> {
+    return ObjectSchema.create(
+      Object.fromEntries(
+        Object.entries(this.properties)
+          .filter(([key]) => keys.includes(key as K))
+          .map(([key, schema]) => [key, schema]),
+      ) as Pick<S, K>,
+    )
+  }
 }
 
 /**
