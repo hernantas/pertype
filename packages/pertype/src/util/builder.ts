@@ -13,7 +13,7 @@ export class ImmutableBuilder<T extends AnyRecord> {
    * wrong.
    * @param definition Key-value store object
    */
-  public constructor(private readonly definition: T) {}
+  protected constructor(private readonly definition: T) {}
 
   /**
    * Get value of store object given by the key
