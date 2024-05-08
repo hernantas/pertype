@@ -742,6 +742,12 @@ export function symbol(): SymbolSchema {
  * {@link Schema} that represent `null`
  */
 export class NullSchema extends Schema<null> {
+  private static readonly instance = new NullSchema({})
+
+  public static create(): NullSchema {
+    return this.instance
+  }
+
   public override is(value: unknown): value is null {
     return value === null
   }
@@ -764,9 +770,8 @@ export class NullSchema extends Schema<null> {
  * @returns A new instances
  */
 export function _null(): NullSchema {
-  return nullInstance
+  return NullSchema.create()
 }
-const nullInstance = new NullSchema({})
 
 // # Undefined
 
