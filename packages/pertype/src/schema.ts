@@ -523,6 +523,21 @@ export class StringSchema extends Schema<string> {
       message,
     })
   }
+
+  public url(message: string = 'must be valid url string'): this {
+    return this.rule({
+      type: 'string.pattern.url',
+      test: (v) => {
+        try {
+          new URL(v)
+          return true
+        } catch (_) {
+          return false
+        }
+      },
+      message,
+    })
+  }
 }
 
 /**
