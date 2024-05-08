@@ -218,6 +218,12 @@ export abstract class Schema<
  * {@link Schema} that represent `boolean`
  */
 export class BooleanSchema extends Schema<boolean> {
+  private static readonly instance = new BooleanSchema({})
+
+  public static create(): BooleanSchema {
+    return this.instance
+  }
+
   public override is(value: unknown): value is boolean {
     return typeof value === 'boolean'
   }
@@ -237,7 +243,7 @@ export class BooleanSchema extends Schema<boolean> {
  * @returns A new instance
  */
 export function boolean(): BooleanSchema {
-  return booleanInstance
+  return BooleanSchema.create()
 }
 
 /**
@@ -246,10 +252,8 @@ export function boolean(): BooleanSchema {
  * @returns A new instance
  */
 export function bool(): BooleanSchema {
-  return booleanInstance
+  return BooleanSchema.create()
 }
-
-const booleanInstance = new BooleanSchema({})
 
 // # Number
 
