@@ -29,6 +29,7 @@
     "dist"
   ],
   "scripts": {
+    "clean": "npx rimraf dist",
     "test": "npx jest",
     "build": "npx tsx ../../build.ts"
   }
