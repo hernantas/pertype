@@ -816,6 +816,12 @@ export function _undefined(): UndefinedSchema {
  * {@link Schema} that represent `any`
  */
 export class AnySchema extends Schema<any> {
+  private static readonly instance = new AnySchema({})
+
+  public static create(): AnySchema {
+    return this.instance
+  }
+
   public override is(_: unknown): _ is any {
     return true
   }
@@ -835,9 +841,8 @@ export class AnySchema extends Schema<any> {
  * @returns A new instances
  */
 export function any(): AnySchema {
-  return anyInstance
+  return AnySchema.create()
 }
-const anyInstance = new AnySchema({})
 
 // # Unknown
 
