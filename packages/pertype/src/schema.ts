@@ -418,6 +418,12 @@ export function number(): NumberSchema {
  * {@link Schema} that represent `string`
  */
 export class StringSchema extends Schema<string> {
+  private static readonly instance = new StringSchema({})
+
+  public static create(): StringSchema {
+    return this.instance
+  }
+
   public override is(value: unknown): value is string {
     return typeof value === 'string'
   }
@@ -536,9 +542,8 @@ export class StringSchema extends Schema<string> {
  * @returns A new instances
  */
 export function string(): StringSchema {
-  return stringInstance
+  return StringSchema.create()
 }
-const stringInstance = new StringSchema({})
 
 // # Date
 
