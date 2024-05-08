@@ -381,6 +381,11 @@ export function number(): NumberSchema {
 
 // # String
 
+const pattern = {
+  email:
+    /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i,
+}
+
 /**
  * {@link Schema} that represent `string`
  */
@@ -498,6 +503,14 @@ export class StringSchema extends Schema<string> {
       type: `string.pattern`,
       args: { pattern },
       test: (v) => pattern.test(v),
+      message,
+    })
+  }
+
+  public email(message: string = `must be valid email`): this {
+    return this.rule({
+      type: 'string.pattern.email',
+      test: (v) => pattern.email.test(v),
       message,
     })
   }
