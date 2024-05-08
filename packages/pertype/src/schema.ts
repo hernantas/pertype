@@ -261,6 +261,12 @@ export function bool(): BooleanSchema {
  * {@link Schema} that represent `number`
  */
 export class NumberSchema extends Schema<number> {
+  private static readonly instance = new NumberSchema({})
+
+  public static create(): NumberSchema {
+    return this.instance
+  }
+
   public override is(value: unknown): value is number {
     return typeof value === 'number'
   }
@@ -403,9 +409,8 @@ export class NumberSchema extends Schema<number> {
  * @returns A new instances
  */
 export function number(): NumberSchema {
-  return numberInstance
+  return NumberSchema.create()
 }
-const numberInstance = new NumberSchema({})
 
 // # String
 
