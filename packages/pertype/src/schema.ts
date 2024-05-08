@@ -1381,6 +1381,10 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
   unknown,
   TupleDefinition<S>
 > {
+  public static create<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
+    return new TupleSchema({ items: members })
+  }
+
   public override is(value: unknown): value is TypeOf<S> {
     return (
       Array.isArray(value) &&
@@ -1423,7 +1427,7 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
  * @returns A new instances
  */
 export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
-  return new TupleSchema({ items: members })
+  return TupleSchema.create(...members)
 }
 
 // # Union
