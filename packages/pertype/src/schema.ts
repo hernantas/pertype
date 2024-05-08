@@ -94,8 +94,11 @@ export abstract class Schema<
   extends ImmutableBuilder<D>
   implements Type<T>, Output<O>, Input<I>
 {
+  /** Ignore */
   public readonly __type!: T
+  /** Ignore */
   public readonly __output!: O
+  /** Ignore */
   public readonly __input!: I
 
   /**
