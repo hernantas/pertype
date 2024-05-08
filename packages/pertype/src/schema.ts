@@ -1451,6 +1451,12 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
   unknown,
   UnionDefinition<S>
 > {
+  public static create<S extends Member<Schema>>(
+    ...members: S
+  ): UnionSchema<S> {
+    return new UnionSchema({ members })
+  }
+
   public override is(value: unknown): value is UnionOf<TypeOf<S>> {
     return this.members.find((member) => member.is(value)) !== undefined
   }
@@ -1503,7 +1509,7 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
  * @returns A new instances
  */
 export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
-  return new UnionSchema({ members })
+  return UnionSchema.create(...members)
 }
 
 // # Intersect
