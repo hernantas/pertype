@@ -1540,6 +1540,12 @@ export class IntersectSchema<S extends Member<Schema>> extends Schema<
   unknown,
   IntersectDefinition<S>
 > {
+  public static create<S extends Member<Schema>>(
+    ...members: S
+  ): IntersectSchema<S> {
+    return new IntersectSchema({ members })
+  }
+
   public override is(value: unknown): value is IntersectOf<TypeOf<S>> {
     return this.members.find((member) => !member.is(value)) === undefined
   }
@@ -1593,7 +1599,7 @@ function merge<T, U>(base: T, target: U): T & U {
 export function intersect<S extends Member<Schema>>(
   ...members: S
 ): IntersectSchema<S> {
-  return new IntersectSchema({ members })
+  return IntersectSchema.create(...members)
 }
 
 // # Object
