@@ -1171,6 +1171,10 @@ export class SetSchema<V extends Schema> extends Schema<
   unknown,
   SetDefinition<V>
 > {
+  public static create<V extends Schema>(value: V): SetSchema<V> {
+    return new SetSchema({ value })
+  }
+
   public override is(value: unknown): value is Set<TypeOf<V>> {
     return (
       value instanceof Set &&
@@ -1232,7 +1236,7 @@ export class SetSchema<V extends Schema> extends Schema<
  * @returns A new instances
  */
 export function set<V extends Schema>(value: V): SetSchema<V> {
-  return new SetSchema({ value })
+  return SetSchema.create(value)
 }
 
 // # Nullable
