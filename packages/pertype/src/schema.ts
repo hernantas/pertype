@@ -1618,6 +1618,12 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
   unknown,
   ObjectDefinition<S>
 > {
+  public static create<S extends AnyRecord<Schema>>(
+    properties: S,
+  ): ObjectSchema<S> {
+    return new ObjectSchema({ properties })
+  }
+
   public override is(value: unknown): value is TypeOf<S> {
     return (
       typeof value === 'object' &&
@@ -1686,7 +1692,7 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
 export function object<S extends AnyRecord<Schema>>(
   properties: S,
 ): ObjectSchema<S> {
-  return new ObjectSchema({ properties })
+  return ObjectSchema.create(properties)
 }
 
 // # Type
