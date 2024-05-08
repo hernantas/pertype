@@ -890,6 +890,10 @@ export class LiteralSchema<T extends Literal> extends Schema<
   unknown,
   LiteralDefinition<T>
 > {
+  public static create<T extends Literal>(value: T): LiteralSchema<T> {
+    return new LiteralSchema({ value })
+  }
+
   public override is(value: unknown): value is T {
     return this.value === value
   }
@@ -911,7 +915,7 @@ export class LiteralSchema<T extends Literal> extends Schema<
 }
 
 export function literal<T extends Literal>(value: T): LiteralSchema<T> {
-  return new LiteralSchema({ value })
+  return LiteralSchema.create(value)
 }
 
 // # Array
