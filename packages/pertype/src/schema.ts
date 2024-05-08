@@ -1054,6 +1054,13 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
   unknown,
   MapDefinition<K, V>
 > {
+  public static create<K extends KeySchema, V extends Schema>(
+    key: K,
+    value: V,
+  ): MapSchema<K, V> {
+    return new MapSchema({ key, value })
+  }
+
   public override is(value: unknown): value is Map<TypeOf<K>, TypeOf<V>> {
     return (
       value instanceof Map &&
@@ -1148,7 +1155,7 @@ export function map<K extends KeySchema, V extends Schema>(
   key: K,
   value: V,
 ): MapSchema<K, V> {
-  return new MapSchema({ key, value })
+  return MapSchema.create(key, value)
 }
 
 // # Set
