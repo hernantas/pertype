@@ -937,6 +937,10 @@ export class ArraySchema<S extends Schema> extends Schema<
   unknown,
   ArrayDefinition<S>
 > {
+  public static create<S extends Schema>(schema: S): ArraySchema<S> {
+    return new ArraySchema({ inner: schema })
+  }
+
   public override is(value: unknown): value is TypeOf<S>[] {
     return (
       Array.isArray(value) && value.find((v) => !this.inner.is(v)) === undefined
@@ -1031,7 +1035,7 @@ export class ArraySchema<S extends Schema> extends Schema<
  * @returns A new instances
  */
 export function array<S extends Schema>(schema: S): ArraySchema<S> {
-  return new ArraySchema({ inner: schema })
+  return ArraySchema.create(schema)
 }
 
 // # Map
