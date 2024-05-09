@@ -20,14 +20,17 @@
     "validate",
     "validation"
   ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/types/index.d.ts",
+  "module": "./dist/esm/index.js",
   "exports": {
     "import": "./dist/esm/index.js",
     "require": "./dist/cjs/index.js",
     "types": "./dist/types/index.d.ts"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "clean": "npx rimraf dist",
     "test": "npx jest",
