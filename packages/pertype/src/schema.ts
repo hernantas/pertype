@@ -1708,6 +1708,8 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
   }
 }
 
+export type AnyObjectSchema = ObjectSchema<AnyRecord<Schema>>
+
 /**
  * Create new instances of {@link ObjectSchema}
  *
