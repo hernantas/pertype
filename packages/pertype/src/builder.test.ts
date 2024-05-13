@@ -1,4 +1,4 @@
-import { AnyRecord } from './alias'
+import { AnyRecord } from './util/alias'
 import { ImmutableBuilder } from './builder'
 
 describe('ImmutableBuilder', () => {

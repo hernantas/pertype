@@ -7,7 +7,7 @@ import {
   Member,
   Tuple,
 } from './util/alias'
-import { ImmutableBuilder } from './util/builder'
+import { ImmutableBuilder } from './builder'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**

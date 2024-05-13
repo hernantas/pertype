@@ -1,4 +1,4 @@
-import { AnyRecord, Constructor } from './alias'
+import { AnyRecord, Constructor } from './util/alias'
 
 /**
  * Builder to build `T` object map (key-value store) that create new instance
