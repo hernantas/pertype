@@ -1,7 +1,14 @@
 import { ImmutableBuilder } from './builder'
 import { UnsupportedTypeError, UnsupportedValueError, Violation } from './error'
-import { AnyRecord, Constructor, Literal, Member, Tuple } from './util/alias'
-import { IntersectOf, Merge, UnionDefinition, UnionOf } from './util/helpers'
+import {
+  AnyRecord,
+  Constructor,
+  Key,
+  Literal,
+  Member,
+  Tuple,
+} from './util/alias'
+import { UnionOf, UnionDefinition, IntersectOf, Merge } from './util/helpers'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
@@ -35,6 +42,11 @@ export interface Definition<T> {
    * List of constraints of current schema
    */
   readonly constraints?: Constraint<T>[]
+
+  /**
+   * Other kind of key value pair stored on this definition
+   */
+  readonly [key: Key]: unknown
 }
 
 /**
@@ -1654,32 +1666,38 @@ export class ObjectSchema<
   public extends<P extends AnyRecord<Schema>>(
     extension: P,
   ): ObjectSchema<Merge<S, P>> {
-    return ObjectSchema.create(
-      Object.fromEntries([
+    type Def = Omit<ObjectDefinition<S>, 'properties'>
+    return new ObjectSchema({
+      ...(this.definition as Def),
+      properties: Object.fromEntries([
         ...Object.entries(this.properties),
         ...Object.entries(extension),
       ]) as Merge<S, P>,
-    )
+    })
   }
 
   public pick<K extends keyof S>(...keys: K[]): ObjectSchema<Pick<S, K>> {
-    return ObjectSchema.create(
-      Object.fromEntries(
+    type Def = Omit<ObjectDefinition<S>, 'properties'>
+    return new ObjectSchema({
+      ...(this.definition as Def),
+      properties: Object.fromEntries(
         Object.entries(this.properties)
           .filter(([key]) => keys.includes(key as K))
           .map(([key, schema]) => [key, schema]),
       ) as Pick<S, K>,
-    )
+    })
   }
 
   public omit<K extends keyof S>(...keys: K[]): ObjectSchema<Omit<S, K>> {
-    return ObjectSchema.create(
-      Object.fromEntries(
+    type Def = Omit<ObjectDefinition<S>, 'properties'>
+    return new ObjectSchema({
+      ...(this.definition as Def),
+      properties: Object.fromEntries(
         Object.entries(this.properties)
           .filter(([key]) => !keys.includes(key as K))
           .map(([key, schema]) => [key, schema]),
       ) as Omit<S, K>,
-    )
+    })
   }
 }
 
