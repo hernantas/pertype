@@ -1583,12 +1583,9 @@ export interface ObjectDefinition<S extends AnyRecord<Schema>>
 /**
  * {@link Schema} that represent `object` with properties
  */
-export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
-  TypeOf<S>,
-  OutputOf<S>,
-  unknown,
-  ObjectDefinition<S>
-> {
+export class ObjectSchema<
+  S extends AnyRecord<Schema> = AnyRecord<Schema>,
+> extends Schema<TypeOf<S>, OutputOf<S>, unknown, ObjectDefinition<S>> {
   public static create<S extends AnyRecord<Schema>>(
     properties: S,
   ): ObjectSchema<S> {
