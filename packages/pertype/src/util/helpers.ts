@@ -1,5 +1,5 @@
 import { Definition, Schema } from '../schema'
-import { AnyRecord, Member } from './alias'
+import { AnyRecord, Key, Member } from './alias'
 import { TypeOf } from './type'
 
 /**
@@ -37,3 +37,13 @@ export type RequiredKeys<T extends AnyRecord> = {
 export type OptionalKeys<T extends AnyRecord> = {
   [K in keyof T]: undefined extends T[K] ? K : never
 }[keyof T]
+
+/**
+ * Utility type to get `T` object property by `K` key. If key do not exists,
+ * return `R`
+ */
+export type At<
+  T extends AnyRecord,
+  K extends Key,
+  R = never,
+> = K extends keyof T ? T[K] : R
