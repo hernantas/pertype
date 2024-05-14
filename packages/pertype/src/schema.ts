@@ -8,7 +8,7 @@ import {
   Member,
   Tuple,
 } from './util/alias'
-import { UnionOf, UnionDefinition } from './util/helpers'
+import { UnionOf, UnionDefinition, IntersectOf } from './util/helpers'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
@@ -1508,18 +1508,6 @@ export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
 }
 
 // # Intersect
-
-// Inspired by https://stackoverflow.com/questions/50374908/transform-union-type-to-intersection-type
-type UnionToIntersect<T> = (T extends any ? (t: T) => void : never) extends (
-  p: infer P,
-) => void
-  ? P
-  : never
-
-/**
- * Convert {@link Member} type into intersect
- */
-export type IntersectOf<T extends Member<any>> = UnionToIntersect<UnionOf<T>>
 
 export interface IntersectDefinition<S extends Member<Schema>>
   extends Definition<IntersectOf<TypeOf<S>>> {
