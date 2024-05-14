@@ -1,3 +1,4 @@
+import { ImmutableBuilder } from './builder'
 import { UnsupportedTypeError, UnsupportedValueError, Violation } from './error'
 import {
   AnyRecord,
@@ -7,7 +8,6 @@ import {
   Member,
   Tuple,
 } from './util/alias'
-import { ImmutableBuilder } from './builder'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
@@ -1685,6 +1685,19 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
 
   public get entries(): [string, Schema][] {
     return Object.entries(this.properties)
+  }
+
+  public extends<P extends AnyRecord<Schema>>(
+    extension: P,
+  ): ObjectSchema<S & P> {
+    type Def = Omit<ObjectDefinition<S>, 'properties'>
+    return new ObjectSchema({
+      ...(this.definition as Def),
+      properties: Object.fromEntries([
+        ...Object.entries(this.properties),
+        ...Object.entries(extension),
+      ]) as S & P,
+    })
   }
 
   public pick<K extends keyof S>(...keys: K[]): ObjectSchema<Pick<S, K>> {
