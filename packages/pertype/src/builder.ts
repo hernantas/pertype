@@ -1,10 +1,10 @@
-import { AnyRecord, Constructor } from './util/alias'
+import { Constructor } from './util/alias'
 
 /**
  * Builder to build `T` object map (key-value store) that create new instance
  * every time its mutated
  */
-export class ImmutableBuilder<T extends AnyRecord> {
+export class ImmutableBuilder<T extends {}> {
   /**
    * NEVER OVERRIDE CONSTRUCTOR.
    *
