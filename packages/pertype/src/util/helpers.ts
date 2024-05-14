@@ -30,3 +30,10 @@ export type IntersectOf<T extends Member<any>> = UnionToIntersect<UnionOf<T>>
 export type RequiredKeys<T extends AnyRecord> = {
   [K in keyof T]: undefined extends T[K] ? never : K
 }[keyof T]
+
+/**
+ * Utility type to get keys that have undefined
+ */
+export type OptionalKeys<T extends AnyRecord> = {
+  [K in keyof T]: undefined extends T[K] ? K : never
+}[keyof T]
