@@ -1,5 +1,5 @@
 import { Definition, Schema } from '../schema'
-import { Member } from './alias'
+import { AnyRecord, Member } from './alias'
 import { TypeOf } from './type'
 
 /**
@@ -23,3 +23,10 @@ type UnionToIntersect<T> = (T extends any ? (t: T) => void : never) extends (
  * Convert {@link Member} type into intersect
  */
 export type IntersectOf<T extends Member<any>> = UnionToIntersect<UnionOf<T>>
+
+/**
+ * Utility type to get keys that is not undefined
+ */
+export type RequiredKeys<T extends AnyRecord> = {
+  [K in keyof T]: undefined extends T[K] ? never : K
+}[keyof T]
