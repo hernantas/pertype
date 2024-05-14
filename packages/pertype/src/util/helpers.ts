@@ -49,6 +49,6 @@ export type At<
 > = K extends keyof T ? T[K] : R
 
 /** Merge both object into simple object */
-export type Merge<T1 extends AnyRecord, T2 extends AnyRecord> = {
+export type Merge<T1 extends {}, T2 extends {}> = {
   [K in keyof (T1 & T2)]: At<T1, K> | At<T2, K>
 }
