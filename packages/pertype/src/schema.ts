@@ -8,7 +8,7 @@ import {
   Member,
   Tuple,
 } from './util/alias'
-import { UnionOf, UnionDefinition, IntersectOf } from './util/helpers'
+import { UnionOf, UnionDefinition, IntersectOf, Merge } from './util/helpers'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
@@ -1668,14 +1668,14 @@ export class ObjectSchema<S extends AnyRecord<Schema>> extends Schema<
 
   public extends<P extends AnyRecord<Schema>>(
     extension: P,
-  ): ObjectSchema<S & P> {
+  ): ObjectSchema<Merge<S, P>> {
     type Def = Omit<ObjectDefinition<S>, 'properties'>
     return new ObjectSchema({
       ...(this.definition as Def),
       properties: Object.fromEntries([
         ...Object.entries(this.properties),
         ...Object.entries(extension),
-      ]) as S & P,
+      ]) as Merge<S, P>,
     })
   }
 
