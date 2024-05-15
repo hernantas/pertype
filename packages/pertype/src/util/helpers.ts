@@ -52,3 +52,15 @@ export type At<
 export type Merge<T1 extends {}, T2 extends {}> = {
   [K in keyof (T1 & T2)]: At<T1, K> | At<T2, K>
 }
+
+/**
+ * Make property that has `undefined` in its type optional
+ */
+export type OptionalOf<T extends AnyRecord> = Merge<
+  {
+    [K in RequiredKeys<T>]: T[K]
+  },
+  {
+    [K in OptionalKeys<T>]?: T[K]
+  }
+>

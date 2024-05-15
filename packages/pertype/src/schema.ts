@@ -8,7 +8,13 @@ import {
   Member,
   Tuple,
 } from './util/alias'
-import { UnionOf, UnionDefinition, IntersectOf, Merge } from './util/helpers'
+import {
+  UnionOf,
+  UnionDefinition,
+  IntersectOf,
+  Merge,
+  OptionalOf,
+} from './util/helpers'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
@@ -1610,7 +1616,7 @@ export function intersect<S extends Member<Schema>>(
 // # Object
 
 export interface ObjectDefinition<S extends AnyRecord<Schema>>
-  extends Definition<TypeOf<S>> {
+  extends Definition<OptionalOf<TypeOf<S>>> {
   readonly properties: S
 }
 
@@ -1619,14 +1625,19 @@ export interface ObjectDefinition<S extends AnyRecord<Schema>>
  */
 export class ObjectSchema<
   S extends AnyRecord<Schema> = AnyRecord<Schema>,
-> extends Schema<TypeOf<S>, OutputOf<S>, unknown, ObjectDefinition<S>> {
+> extends Schema<
+  OptionalOf<TypeOf<S>>,
+  OutputOf<S>,
+  unknown,
+  ObjectDefinition<S>
+> {
   public static create<S extends AnyRecord<Schema>>(
     properties: S,
   ): ObjectSchema<S> {
     return new ObjectSchema({ properties })
   }
 
-  public override is(value: unknown): value is TypeOf<S> {
+  public override is(value: unknown): value is OptionalOf<TypeOf<S>> {
     return (
       typeof value === 'object' &&
       value !== null &&
@@ -1636,7 +1647,7 @@ export class ObjectSchema<
     )
   }
 
-  public override check(value: TypeOf<S>): Violation[] {
+  public override check(value: OptionalOf<TypeOf<S>>): Violation[] {
     return super
       .check(value)
       .concat(
@@ -1646,7 +1657,7 @@ export class ObjectSchema<
       )
   }
 
-  public override decode(value: unknown): TypeOf<S> {
+  public override decode(value: unknown): OptionalOf<TypeOf<S>> {
     if (this.is(value)) {
       return value
     }
@@ -1660,10 +1671,10 @@ export class ObjectSchema<
     throw new UnsupportedTypeError(value)
   }
 
-  public override encode(value: TypeOf<S>): OutputOf<S> {
+  public override encode(value: OptionalOf<TypeOf<S>>): OutputOf<S> {
     const entries = Object.entries(this.properties).map(([key, schema]) => [
       key,
-      schema.encode(value[key]),
+      schema.encode(value[key as keyof OptionalOf<TypeOf<S>>]),
     ])
     return Object.fromEntries(entries)
   }
