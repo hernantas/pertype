@@ -240,7 +240,7 @@ export class NumberSchema extends Schema<number> {
   }
 
   public override decode(value: unknown): number {
-    if (typeof value === 'number') {
+    if (this.is(value)) {
       return value
     }
 
@@ -403,7 +403,7 @@ export class StringSchema extends Schema<string> {
   }
 
   public override decode(value: unknown): string {
-    if (typeof value === 'string') {
+    if (this.is(value)) {
       return value
     }
 
@@ -567,16 +567,16 @@ export class DateSchema extends Schema<Date, string> {
   }
 
   public override decode(value: unknown): Date {
+    if (this.is(value)) {
+      return value
+    }
+
     if (typeof value === 'string') {
       const date = new Date(value)
       if (isNaN(date.getTime())) {
         throw new UnsupportedValueError(value)
       }
       return date
-    }
-
-    if (value instanceof Date) {
-      return value
     }
 
     throw new UnsupportedTypeError(value)
@@ -691,16 +691,16 @@ export class SymbolSchema extends Schema<symbol, string> {
   }
 
   public override decode(value: unknown): symbol {
+    if (this.is(value)) {
+      return value
+    }
+
     if (
       typeof value === 'string' ||
       typeof value === 'number' ||
       value === undefined
     ) {
       return Symbol(value)
-    }
-
-    if (typeof value === 'symbol') {
-      return value
     }
 
     throw new UnsupportedTypeError(value)
@@ -904,8 +904,8 @@ export class LiteralSchema<T extends Literal> extends Schema<
   }
 
   public override decode(value: unknown): T {
-    if (this.value === value) {
-      return this.value
+    if (this.is(value)) {
+      return value
     }
     throw new UnsupportedValueError(value)
   }
@@ -957,6 +957,10 @@ export class ArraySchema<S extends Schema> extends Schema<
   }
 
   public override decode(value: unknown): TypeOf<S>[] {
+    if (this.is(value)) {
+      return value
+    }
+
     const values = Array.isArray(value)
       ? value
       : value !== undefined && value !== null
@@ -1086,6 +1090,9 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
   }
 
   public override decode(value: unknown): Map<TypeOf<K>, TypeOf<V>> {
+    if (this.is(value)) {
+      return value
+    }
     const entries = this.toEntries(value).map(
       ([key, value]) =>
         [this.key.decode(key), this.value.decode(value)] as const,
@@ -1199,6 +1206,10 @@ export class SetSchema<V extends Schema> extends Schema<
   }
 
   public override decode(value: unknown): Set<TypeOf<V>> {
+    if (this.is(value)) {
+      return value
+    }
+
     if (Array.isArray(value)) {
       return new Set(value.map((item) => this.value.decode(item)))
     }
@@ -1406,11 +1417,16 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
   }
 
   public override decode(value: unknown): TypeOf<S> {
+    if (this.is(value)) {
+      return value
+    }
+
     if (Array.isArray(value)) {
       return this.items.map((schema, index) =>
         schema.decode(value[index]),
       ) as TypeOf<S>
     }
+
     throw new UnsupportedTypeError(value)
   }
 
@@ -1467,6 +1483,10 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
   }
 
   public override decode(value: unknown): UnionOf<TypeOf<S>> {
+    if (this.is(value)) {
+      return value
+    }
+
     // decode using its schema
     for (const member of this.members) {
       if (member.is(value)) {
@@ -1540,10 +1560,12 @@ export class IntersectSchema<S extends Member<Schema>> extends Schema<
   }
 
   public override decode(value: unknown): IntersectOf<TypeOf<S>> {
-    return this.members
-      .map((member) => member.decode(value))
-      .filter((v) => typeof v === 'object')
-      .reduce((result, v) => merge(result, v), {})
+    return this.is(value)
+      ? value
+      : this.members
+          .map((member) => member.decode(value))
+          .filter((v) => typeof v === 'object')
+          .reduce((result, v) => merge(result, v), {})
   }
 
   public override encode(
@@ -1625,6 +1647,9 @@ export class ObjectSchema<
   }
 
   public override decode(value: unknown): TypeOf<S> {
+    if (this.is(value)) {
+      return value
+    }
     if (typeof value === 'object' && value !== null) {
       const entries = Object.entries(this.properties).map(([key, schema]) => [
         key,
