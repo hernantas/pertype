@@ -1,56 +1,27 @@
-import arg from 'arg'
-import { exec } from 'child_process'
-import { BuildOptions, Plugin, build } from 'esbuild'
-import { glob } from 'glob'
-import { join } from 'node:path'
+import { rollup } from 'rollup'
+import ts from '@rollup/plugin-typescript'
 
-const args = arg({
-  '--src': String,
-  '--out': String,
-})
+async function build() {
+  const bundle = await rollup({
+    input: './src/index.ts',
+    plugins: [ts({ outDir: './dist', exclude: './**/*.test.ts' })],
+  })
 
-const src = args['--src'] ?? './src'
-const out = args['--out'] ?? './dist'
+  await bundle.write({
+    dir: './dist',
+    format: 'esm',
+    entryFileNames: '[name].mjs',
+    preserveModules: true,
+    sourcemap: true,
+  })
 
-const entryPoints = glob.sync(join(src, '**/*.ts'), {
-  ignore: join(src, '**/*.test.ts'),
-})
-
-const addExtension = (): Plugin => ({
-  name: 'add-extension',
-  setup(build) {
-    build.onResolve({ filter: /.*/ }, (args) =>
-      args.importer ? { path: `${args.path}.js`, external: true } : undefined,
-    )
-  },
-})
-
-const baseOptions: BuildOptions = {
-  entryPoints,
-  logLevel: 'info',
-  platform: 'node',
-  sourcemap: true,
+  await bundle.write({
+    dir: './dist',
+    format: 'cjs',
+    entryFileNames: '[name].cjs',
+    preserveModules: true,
+    sourcemap: true,
+  })
 }
 
-const cjsBuild = () =>
-  build({
-    ...baseOptions,
-    outbase: src,
-    outdir: join(out, 'cjs'),
-    format: 'cjs',
-  })
-
-const esmBuild = () =>
-  build({
-    ...baseOptions,
-    bundle: true,
-    outbase: src,
-    outdir: join(out, 'esm'),
-    format: 'esm',
-    plugins: [addExtension()],
-  })
-
-const typesBuild = () =>
-  exec(`tsc --declaration --emitDeclarationOnly --outDir ${join(out, 'types')}`)
-
-Promise.all([cjsBuild(), esmBuild(), typesBuild()])
+build()
