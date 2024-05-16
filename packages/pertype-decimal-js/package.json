@@ -20,6 +20,7 @@
     "validate",
     "validation"
   ],
+  "version": "0.3.0",
   "files": [
     "dist"
   ],
