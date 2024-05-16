@@ -4,6 +4,7 @@ import {
   _undefined,
   any,
   array,
+  bigint,
   bool,
   boolean,
   date,
@@ -165,6 +166,96 @@ describe('Schema', () => {
       expect(validator.test(0)).toBe(false)
       expect(validator.test(1)).toBe(false)
       expect(validator.test(Number.MAX_SAFE_INTEGER)).toBe(false)
+    })
+  })
+
+  describe('BigIntSchema', () => {
+    it('Should be compatible with Schema', () => expectType<Schema>(bigint()))
+
+    it('Should narrow bigint as bigint', () => {
+      expect(bigint().is(0n)).toBe(true)
+      expect(bigint().is(255n)).toBe(true)
+      expect(bigint().is(-255n)).toBe(true)
+      expect(bigint().is(0xffn)).toBe(true)
+      expect(bigint().is(0b11111111n)).toBe(true)
+      expect(bigint().is('0')).toBe(false)
+      expect(bigint().is('3')).toBe(false)
+    })
+
+    it('Should decode number as bigint', () => {
+      expect(bigint().decode(0)).toBe(0n)
+      expect(bigint().decode(-0)).toBe(-0n)
+      expect(bigint().decode(1)).toBe(1n)
+      expect(bigint().decode(-1)).toBe(-1n)
+    })
+
+    it('Should decode bigint string as bigint', () => {
+      expect(bigint().decode('0')).toBe(0n)
+      expect(bigint().decode('-0')).toBe(-0n)
+      expect(bigint().decode('1')).toBe(1n)
+      expect(bigint().decode('-1')).toBe(-1n)
+    })
+
+    it('Should decode falsy non-bigint value as 0 bigint', () => {
+      expect(bigint().decode(false)).toBe(0n)
+      expect(bigint().decode(null)).toBe(0n)
+      expect(bigint().decode(undefined)).toBe(0n)
+      expect(bigint().decode(0)).toBe(0n)
+      expect(bigint().decode(-0)).toBe(0n)
+      expect(bigint().decode(0n)).toBe(0n)
+      expect(bigint().decode(NaN)).toBe(0n)
+      expect(bigint().decode('')).toBe(0n)
+    })
+
+    it('Should decode non-bigint string as throw', () => {
+      expect(() => bigint().decode('Hello')).toThrow()
+    })
+
+    it('Should encode bigint as bigint', () => {
+      expect(bigint().encode(0n)).toBe('0')
+    })
+
+    it('Min constraint should limit its minimum value using greater or equal operator', () => {
+      const validator = bigint().min(0n)
+      expect(validator.test(0n)).toBe(true)
+      expect(validator.test(0n)).toBe(true)
+      expect(validator.test(1n)).toBe(true)
+      expect(validator.test(-1n)).toBe(false)
+    })
+
+    it('Max constraint should limit its maximum value using less or equal operator', () => {
+      const validator = bigint().max(0n)
+      expect(validator.test(0n)).toBe(true)
+      expect(validator.test(-1n)).toBe(true)
+      expect(validator.test(1n)).toBe(false)
+    })
+
+    it('Greater constraint should check value using greater operator', () => {
+      const validator = bigint().greater(0n)
+      expect(validator.test(1n)).toBe(true)
+      expect(validator.test(0n)).toBe(false)
+      expect(validator.test(-1n)).toBe(false)
+    })
+
+    it('Less constraint should check value using less operator', () => {
+      const validator = bigint().less(0n)
+      expect(validator.test(-1n)).toBe(true)
+      expect(validator.test(0n)).toBe(false)
+      expect(validator.test(1n)).toBe(false)
+    })
+
+    it('Positive constraint should check for positive number', () => {
+      const validator = bigint().positive()
+      expect(validator.test(1n)).toBe(true)
+      expect(validator.test(0n)).toBe(false)
+      expect(validator.test(-1n)).toBe(false)
+    })
+
+    it('Negative constraint should check for negative number', () => {
+      const validator = bigint().negative()
+      expect(validator.test(-1n)).toBe(true)
+      expect(validator.test(0n)).toBe(false)
+      expect(validator.test(1n)).toBe(false)
     })
   })
 

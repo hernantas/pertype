@@ -386,6 +386,165 @@ export function number(): NumberSchema {
   return NumberSchema.create()
 }
 
+// # BigInt
+export class BigIntSchema extends Schema<bigint, string> {
+  private static readonly instance = new BigIntSchema({})
+
+  public static create(): BigIntSchema {
+    return this.instance
+  }
+
+  public override is(value: unknown): value is bigint {
+    return typeof value === 'bigint'
+  }
+
+  public override decode(value: unknown): bigint {
+    if (this.is(value)) {
+      return value
+    }
+    if (
+      value === false ||
+      value === null ||
+      value === undefined ||
+      value === 0 ||
+      value === -0 ||
+      value === 0n ||
+      Number.isNaN(value) ||
+      value === ''
+    ) {
+      return 0n
+    }
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      try {
+        return BigInt(value)
+      } catch {
+        throw new UnsupportedValueError(value)
+      }
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: bigint): string {
+    return value.toString()
+  }
+
+  /**
+   * Add new validation constraint that check minimum bigint (`>=`)
+   *
+   * @param limit Minimum bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public min(
+    limit: bigint,
+    message: string = `must greater than or equal to ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.min`,
+      args: { limit },
+      test: (v) => v >= limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check maximum bigint (`<=`)
+   *
+   * @param limit Maximum bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public max(
+    limit: bigint,
+    message: string = `must be less than or equal to ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.max`,
+      args: { limit },
+      test: (v) => v <= limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check bigint to be greater than given
+   * bigint (`>`)
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public greater(
+    limit: bigint,
+    message: string = `must be greater than ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.greater`,
+      args: { limit },
+      test: (v) => v > limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check bigint to be less than given
+   * bigint (`<`)
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public less(
+    limit: bigint,
+    message: string = `must be less than ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.less`,
+      args: { limit },
+      test: (v) => v < limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that bigint must be positive
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public positive(message: string = `must be positive bigint`): this {
+    return this.rule({
+      type: `bigint.positive`,
+      test: (v) => v > 0n,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that bigint must be negative
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public negative(message: string = `must be negative bigint`): this {
+    return this.rule({
+      type: `bigint.negative`,
+      test: (v) => v < 0n,
+      message: message,
+    })
+  }
+}
+
+export function bigint(): BigIntSchema {
+  return BigIntSchema.create()
+}
+
 // # String
 
 const pattern = {
