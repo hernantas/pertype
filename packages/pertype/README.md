@@ -15,10 +15,10 @@ pertype - **_[/type]_** - is a typescript-first schema declaration, validation l
 ## Installation
 
 ```
-npm install zod       # npm
-yarn add zod          # yarn
-bun add zod           # bun
-pnpm add zod          # pnpm
+npm install pertype       # npm
+yarn add pertype          # yarn
+bun add pertype           # bun
+pnpm add pertype          # pnpm
 ```
 
 ## Basic Usage
