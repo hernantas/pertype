@@ -1,0 +1,39 @@
+{
+  "name": "@pertype/decimal.js",
+  "description": "pertype support for decimal.js",
+  "type": "module",
+  "author": {
+    "name": "Zulfikar Raditya Hernanta",
+    "email": "hernantas@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hernantas/pertype.git",
+    "directory": "packages/pertype-decimal-js"
+  },
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "runtime",
+    "schema",
+    "type",
+    "validate",
+    "validation"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.mjs",
+  "exports": {
+    "require": "./dist/index.cjs",
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.mjs"
+  },
+  "scripts": {
+    "clean": "npx rimraf ./dist *.tsbuildinfo .rollup.*",
+    "test": "npx jest",
+    "build": "npx tsx ../../build.ts"
+  }
+}
