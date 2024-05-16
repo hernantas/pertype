@@ -35,5 +35,9 @@
     "clean": "npx rimraf ./dist *.tsbuildinfo .rollup.*",
     "test": "npx jest",
     "build": "npx tsx ../../build.ts"
+  },
+  "dependencies": {
+    "decimal.js": "^10.4.3",
+    "pertype": "^0.2.2"
   }
 }
