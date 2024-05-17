@@ -748,7 +748,7 @@ export class DateSchema extends Schema<Date, string> {
   }
 
   public override encode(value: Date): string {
-    return value.toUTCString()
+    return value.toISOString()
   }
 
   /**
