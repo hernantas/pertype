@@ -8,13 +8,7 @@ import {
   Member,
   Tuple,
 } from './util/alias'
-import {
-  UnionOf,
-  UnionDefinition,
-  IntersectOf,
-  Merge,
-  OptionalOf,
-} from './util/helpers'
+import { IntersectOf, Merge, OptionalOf, UnionOf } from './util/helpers'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
@@ -23,7 +17,7 @@ import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 export type TestConstraint<T> = (value: T) => boolean
 
 /** Constraint to determine valid value */
-export interface Constraint<T> extends Violation {
+export interface Constraint<T = any> extends Violation {
   /** Check if given value is not violating the constraint */
   readonly test: TestConstraint<T>
 }
@@ -43,11 +37,11 @@ export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailed
 /**
  * Key value store used in schema
  */
-export interface Definition<T> {
+export interface Definition {
   /**
    * List of constraints of current schema
    */
-  readonly constraints?: Constraint<T>[]
+  readonly constraints?: Constraint[]
 
   /**
    * Other kind of key value pair stored on this definition
@@ -63,7 +57,7 @@ export abstract class Schema<
     T = any,
     O = T,
     I = unknown,
-    D extends Definition<T> = Definition<T>,
+    D extends Definition = Definition,
   >
   extends ImmutableBuilder<D>
   implements Type<T>, Output<O>, Input<I>
@@ -78,7 +72,7 @@ export abstract class Schema<
   /**
    * List of constraints of current schema
    */
-  public get constraints(): Constraint<T>[] {
+  public get constraints(): Constraint[] {
     return this.get('constraints') ?? []
   }
 
@@ -1050,7 +1044,7 @@ export function unknown(): UnknownSchema {
 
 // # Literal
 
-export interface LiteralDefinition<T extends Literal> extends Definition<T> {
+export interface LiteralDefinition<T extends Literal> extends Definition {
   readonly value: T
 }
 
@@ -1090,8 +1084,7 @@ export function literal<T extends Literal>(value: T): LiteralSchema<T> {
 
 // # Array
 
-export interface ArrayDefinition<S extends Schema>
-  extends Definition<TypeOf<S>[]> {
+export interface ArrayDefinition<S extends Schema> extends Definition {
   /**
    * Inner schema
    */
@@ -1217,7 +1210,7 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
 export type KeySchema = StringSchema | NumberSchema | SymbolSchema
 
 export interface MapDefinition<K extends KeySchema, V extends Schema>
-  extends Definition<Map<TypeOf<K>, TypeOf<V>>> {
+  extends Definition {
   readonly key: K
   readonly value: V
 }
@@ -1337,8 +1330,7 @@ export function map<K extends KeySchema, V extends Schema>(
 
 // # Set
 
-export interface SetDefinition<V extends Schema>
-  extends Definition<Set<TypeOf<V>>> {
+export interface SetDefinition<V extends Schema> extends Definition {
   readonly value: V
 }
 
@@ -1422,8 +1414,7 @@ export function set<V extends Schema>(value: V): SetSchema<V> {
 
 // # Nullable
 
-export interface NullableDefinition<S extends Schema>
-  extends Definition<TypeOf<S> | null> {
+export interface NullableDefinition<S extends Schema> extends Definition {
   readonly inner: S
 }
 
@@ -1484,8 +1475,7 @@ export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
 
 // # Optional
 
-export interface OptionalDefinition<S extends Schema>
-  extends Definition<TypeOf<S> | undefined> {
+export interface OptionalDefinition<S extends Schema> extends Definition {
   readonly inner: S
 }
 
@@ -1551,8 +1541,7 @@ export function optional<S extends Schema>(schema: S): OptionalSchema<S> {
 /**
  * {@link Schema} that represent `tuple`
  */
-export interface TupleDefinition<S extends Tuple<Schema>>
-  extends Definition<TypeOf<S>> {
+export interface TupleDefinition<S extends Tuple<Schema>> extends Definition {
   readonly items: S
 }
 
@@ -1618,8 +1607,7 @@ export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
 
 // # Union
 
-export interface UnionDefinition<S extends Member<Schema>>
-  extends Definition<UnionOf<TypeOf<S>>> {
+export interface UnionDefinition<S extends Member<Schema>> extends Definition {
   readonly members: S
 }
 
@@ -1700,7 +1688,7 @@ export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
 // # Intersect
 
 export interface IntersectDefinition<S extends Member<Schema>>
-  extends Definition<IntersectOf<TypeOf<S>>> {
+  extends Definition {
   readonly members: S
 }
 
@@ -1780,7 +1768,7 @@ export function intersect<S extends Member<Schema>>(
 // # Object
 
 export interface ObjectDefinition<S extends AnyRecord<Schema>>
-  extends Definition<OptionalOf<TypeOf<S>>> {
+  extends Definition {
   readonly properties: S
 }
 
@@ -1916,7 +1904,7 @@ export function object<S extends AnyRecord<Schema>>(
 
 // # Type
 
-export interface TypeDefinition<T, Args extends any[]> extends Definition<T> {
+export interface TypeDefinition<T, Args extends any[]> extends Definition {
   readonly ctor: Constructor<T, Args>
 }
 
