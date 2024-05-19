@@ -1618,6 +1618,11 @@ export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
 
 // # Union
 
+export interface UnionDefinition<S extends Member<Schema>>
+  extends Definition<UnionOf<TypeOf<S>>> {
+  readonly members: S
+}
+
 /**
  * {@link Schema} that represent `union`
  */
