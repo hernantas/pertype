@@ -141,24 +141,24 @@ export abstract class Schema<
     return this.set('label', value)
   }
 
-  public getLabel(value: string): this {
-    return this.set('label', value)
+  public getLabel(): string | undefined {
+    return this.get('label')
   }
 
   public name(value: string): this {
     return this.set('name', value)
   }
 
-  public getName(value: string): this {
-    return this.set('name', value)
+  public getName(): string | undefined {
+    return this.get('name')
   }
 
   public description(value: string): this {
     return this.set('description', value)
   }
 
-  public getDescription(value: string): this {
-    return this.set('description', value)
+  public getDescription(): string | undefined {
+    return this.get('description')
   }
 
   /**
