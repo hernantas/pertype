@@ -36,5 +36,5 @@
     "test": "npx jest",
     "build": "npx tsx ../../build.ts"
   },
-  "version": "0.3.4"
+  "version": "0.3.5"
 }
