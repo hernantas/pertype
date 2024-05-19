@@ -43,6 +43,12 @@ export interface Definition {
    */
   readonly constraints?: Constraint[]
 
+  readonly label?: string
+
+  readonly name?: string
+
+  readonly description?: string
+
   /**
    * Other kind of key value pair stored on this definition
    */
@@ -129,6 +135,30 @@ export abstract class Schema<
           valid: false,
           violations,
         }
+  }
+
+  public label(value: string): this {
+    return this.set('label', value)
+  }
+
+  public getLabel(value: string): this {
+    return this.set('label', value)
+  }
+
+  public name(value: string): this {
+    return this.set('name', value)
+  }
+
+  public getName(value: string): this {
+    return this.set('name', value)
+  }
+
+  public description(value: string): this {
+    return this.set('description', value)
+  }
+
+  public getDescription(value: string): this {
+    return this.set('description', value)
   }
 
   /**
