@@ -17,6 +17,10 @@ export class DecimalSchema extends Schema<Decimal, string> {
       return value
     }
 
+    if (value === undefined || value === null) {
+      return new Decimal('0')
+    }
+
     if (typeof value === 'string' || typeof value === 'number') {
       try {
         return new Decimal(value)
