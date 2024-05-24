@@ -169,6 +169,11 @@ export abstract class Schema<
   public abstract is(value: unknown): value is T
 
   /**
+   * Get type signature of this schema in string
+   */
+  public abstract get signature(): string
+
+  /**
    * Coerced given input value of `I` type to `T` type
    *
    * @param value Input to be coerced
@@ -226,6 +231,10 @@ export class BooleanSchema extends Schema<boolean> {
     return typeof value === 'boolean'
   }
 
+  public override get signature(): string {
+    return 'boolean'
+  }
+
   public override decode(value: unknown): boolean {
     return !!value
   }
@@ -267,6 +276,10 @@ export class NumberSchema extends Schema<number> {
 
   public override is(value: unknown): value is number {
     return typeof value === 'number'
+  }
+
+  public override get signature(): string {
+    return 'number'
   }
 
   public override decode(value: unknown): number {
@@ -420,6 +433,10 @@ export class BigIntSchema extends Schema<bigint, string> {
 
   public override is(value: unknown): value is bigint {
     return typeof value === 'bigint'
+  }
+
+  public override get signature(): string {
+    return 'bigint'
   }
 
   public override decode(value: unknown): bigint {
@@ -591,6 +608,10 @@ export class StringSchema extends Schema<string> {
     return typeof value === 'string'
   }
 
+  public override get signature(): string {
+    return 'string'
+  }
+
   public override decode(value: unknown): string {
     if (this.is(value)) {
       return value
@@ -755,6 +776,10 @@ export class DateSchema extends Schema<Date, string> {
     return value instanceof Date
   }
 
+  public override get signature(): string {
+    return 'Date'
+  }
+
   public override decode(value: unknown): Date {
     if (this.is(value)) {
       return value
@@ -879,6 +904,10 @@ export class SymbolSchema extends Schema<symbol, string> {
     return typeof value === 'symbol'
   }
 
+  public override get signature(): string {
+    return 'symbol'
+  }
+
   public override decode(value: unknown): symbol {
     if (this.is(value)) {
       return value
@@ -946,6 +975,10 @@ export class NullSchema extends Schema<null> {
     return value === null
   }
 
+  public override get signature(): string {
+    return 'null'
+  }
+
   public override decode(value: unknown): null {
     if (this.is(value)) {
       return value
@@ -981,6 +1014,10 @@ export class UndefinedSchema extends Schema<undefined> {
 
   public override is(value: unknown): value is undefined {
     return value === undefined
+  }
+
+  public override get signature(): string {
+    return 'undefined'
   }
 
   public override decode(value: unknown): undefined {
@@ -1020,6 +1057,10 @@ export class AnySchema extends Schema<any> {
     return true
   }
 
+  public override get signature(): string {
+    return 'any'
+  }
+
   public override decode(value: unknown): any {
     return value
   }
@@ -1052,6 +1093,10 @@ export class UnknownSchema extends Schema<unknown> {
 
   public override is(_: unknown): _ is unknown {
     return true
+  }
+
+  public override get signature(): string {
+    return 'unknown'
   }
 
   public override decode(value: unknown): unknown {
@@ -1090,6 +1135,10 @@ export class LiteralSchema<T extends Literal> extends Schema<
 
   public override is(value: unknown): value is T {
     return this.value === value
+  }
+
+  public override get signature(): string {
+    return String(this.value)
   }
 
   public override decode(value: unknown): T {
@@ -1138,6 +1187,10 @@ export class ArraySchema<S extends Schema> extends Schema<
     return (
       Array.isArray(value) && value.find((v) => !this.inner.is(v)) === undefined
     )
+  }
+
+  public override get signature(): string {
+    return `${this.inner.signature}[]`
   }
 
   public override check(value: TypeOf<S>[]): Violation[] {
@@ -1267,6 +1320,10 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
     )
   }
 
+  public override get signature(): string {
+    return `Map<${this.key.signature},${this.value.signature}>`
+  }
+
   public override check(value: Map<TypeOf<K>, TypeOf<V>>): Violation[] {
     return super
       .check(value)
@@ -1382,6 +1439,10 @@ export class SetSchema<V extends Schema> extends Schema<
     )
   }
 
+  public override get signature(): string {
+    return `Set<${this.value.signature}>`
+  }
+
   public override check(value: Set<TypeOf<V>>): Violation[] {
     return super
       .check(value)
@@ -1465,6 +1526,10 @@ export class NullableSchema<S extends Schema> extends Schema<
     return value === null || this.inner.is(value)
   }
 
+  public override get signature(): string {
+    return `Nullable<${this.inner.signature}>`
+  }
+
   public override check(value: TypeOf<S> | null): Violation[] {
     return super
       .check(value)
@@ -1524,6 +1589,10 @@ export class OptionalSchema<S extends Schema> extends Schema<
 
   public override is(value: unknown): value is TypeOf<S> | undefined {
     return value === undefined || this.inner.is(value)
+  }
+
+  public override get signature(): string {
+    return `Optional<${this.inner.signature}>`
   }
 
   public override check(value: TypeOf<S> | undefined): Violation[] {
@@ -1592,6 +1661,10 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
     )
   }
 
+  public override get signature(): string {
+    return `[${this.items.map((item) => item.signature).join(',')}]`
+  }
+
   public override check(value: TypeOf<S>): Violation[] {
     return super
       .check(value)
@@ -1658,6 +1731,10 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
 
   public override is(value: unknown): value is UnionOf<TypeOf<S>> {
     return this.members.find((member) => member.is(value)) !== undefined
+  }
+
+  public override get signature(): string {
+    return this.members.map((member) => member.signature).join('|')
   }
 
   public override check(value: UnionOf<TypeOf<S>>): Violation[] {
@@ -1739,6 +1816,10 @@ export class IntersectSchema<S extends Member<Schema>> extends Schema<
 
   public override is(value: unknown): value is IntersectOf<TypeOf<S>> {
     return this.members.find((member) => !member.is(value)) === undefined
+  }
+
+  public override get signature(): string {
+    return this.members.map((member) => member.signature).join('&')
   }
 
   public override check(value: IntersectOf<TypeOf<S>>): Violation[] {
@@ -1827,6 +1908,10 @@ export class ObjectSchema<
         ([key, prop]) => !prop.is((value as TypeOf<S>)[key]),
       ) === undefined
     )
+  }
+
+  public override get signature(): string {
+    return `{${this.entries.map(([key, schema]) => `${key}:${schema.signature}`).join(',')}}`
   }
 
   public override check(value: OptionalOf<TypeOf<S>>): Violation[] {
@@ -1955,6 +2040,10 @@ export class TypeSchema<T, Args extends any[]> extends Schema<
 
   public override is(value: unknown): value is T {
     return value instanceof this.ctor
+  }
+
+  public override get signature(): string {
+    return this.ctor.name
   }
 
   public override decode(value: unknown): T {
