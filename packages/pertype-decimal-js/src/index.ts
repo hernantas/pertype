@@ -12,6 +12,10 @@ export class DecimalSchema extends Schema<Decimal, string> {
     return value instanceof Decimal
   }
 
+  override get signature(): string {
+    return 'Decimal'
+  }
+
   public override decode(value: unknown): Decimal {
     if (this.is(value)) {
       return value
