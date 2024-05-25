@@ -30,7 +30,7 @@ export class UnsupportedTypeError extends Error {
 
   public toViolation(): Violation {
     return {
-      type: this.name,
+      type: 'unsupported.type',
       message: this.message,
       args: {
         error: this,
@@ -52,7 +52,7 @@ export class UnsupportedValueError extends Error {
 
   public toViolation(): Violation {
     return {
-      type: this.name,
+      type: 'unsupported.value',
       message: this.message,
       args: {
         error: this,
