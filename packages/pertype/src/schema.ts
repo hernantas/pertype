@@ -1167,7 +1167,7 @@ export interface ArrayDefinition<S extends Schema> extends Definition {
   /**
    * Inner schema
    */
-  readonly inner: S
+  readonly schema: S
 }
 
 /**
@@ -1180,21 +1180,22 @@ export class ArraySchema<S extends Schema> extends Schema<
   ArrayDefinition<S>
 > {
   public static create<S extends Schema>(schema: S): ArraySchema<S> {
-    return new ArraySchema({ inner: schema })
+    return new ArraySchema({ schema: schema })
   }
 
   public override is(value: unknown): value is TypeOf<S>[] {
     return (
-      Array.isArray(value) && value.find((v) => !this.inner.is(v)) === undefined
+      Array.isArray(value) &&
+      value.find((v) => !this.schema.is(v)) === undefined
     )
   }
 
   public override get signature(): string {
-    return `${this.inner.signature}[]`
+    return `${this.schema.signature}[]`
   }
 
   public override check(value: TypeOf<S>[]): Violation[] {
-    return super.check(value).concat(...value.map((v) => this.inner.check(v)))
+    return super.check(value).concat(...value.map((v) => this.schema.check(v)))
   }
 
   public override decode(value: unknown): TypeOf<S>[] {
@@ -1207,18 +1208,18 @@ export class ArraySchema<S extends Schema> extends Schema<
       : value !== undefined && value !== null
         ? [value]
         : []
-    return values.map((value) => this.inner.decode(value))
+    return values.map((value) => this.schema.decode(value))
   }
 
   public override encode(value: TypeOf<S>[]): OutputOf<S>[] {
-    return value.map((value) => this.inner.encode(value))
+    return value.map((value) => this.schema.encode(value))
   }
 
   /**
    * Inner schema
    */
-  public get inner(): S {
-    return this.get('inner')
+  public get schema(): S {
+    return this.get('schema')
   }
 
   /**
@@ -1506,7 +1507,7 @@ export function set<V extends Schema>(value: V): SetSchema<V> {
 // # Nullable
 
 export interface NullableDefinition<S extends Schema> extends Definition {
-  readonly inner: S
+  readonly schema: S
 }
 
 /**
@@ -1519,33 +1520,33 @@ export class NullableSchema<S extends Schema> extends Schema<
   NullableDefinition<S>
 > {
   public static create<S extends Schema>(schema: S): NullableSchema<S> {
-    return new NullableSchema({ inner: schema })
+    return new NullableSchema({ schema: schema })
   }
 
   public override is(value: unknown): value is TypeOf<S> | null {
-    return value === null || this.inner.is(value)
+    return value === null || this.schema.is(value)
   }
 
   public override get signature(): string {
-    return `Nullable<${this.inner.signature}>`
+    return `Nullable<${this.schema.signature}>`
   }
 
   public override check(value: TypeOf<S> | null): Violation[] {
     return super
       .check(value)
-      .concat(...(this.inner.is(value) ? this.inner.check(value) : []))
+      .concat(...(this.schema.is(value) ? this.schema.check(value) : []))
   }
 
   public override decode(value: unknown): TypeOf<S> | null {
-    return value === null ? null : this.inner.decode(value)
+    return value === null ? null : this.schema.decode(value)
   }
 
   public override encode(value: TypeOf<S> | null): OutputOf<S> | null {
-    return value === null ? null : this.inner.encode(value)
+    return value === null ? null : this.schema.encode(value)
   }
 
-  public get inner(): S {
-    return this.get('inner')
+  public get schema(): S {
+    return this.get('schema')
   }
 
   /**
@@ -1554,7 +1555,7 @@ export class NullableSchema<S extends Schema> extends Schema<
    * @returns inner schema
    */
   public nonNullable(): S {
-    return this.inner
+    return this.schema
   }
 }
 
@@ -1571,7 +1572,7 @@ export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
 // # Optional
 
 export interface OptionalDefinition<S extends Schema> extends Definition {
-  readonly inner: S
+  readonly schema: S
 }
 
 /**
@@ -1584,35 +1585,35 @@ export class OptionalSchema<S extends Schema> extends Schema<
   OptionalDefinition<S>
 > {
   public static create<S extends Schema>(schema: S): OptionalSchema<S> {
-    return new OptionalSchema({ inner: schema })
+    return new OptionalSchema({ schema: schema })
   }
 
   public override is(value: unknown): value is TypeOf<S> | undefined {
-    return value === undefined || this.inner.is(value)
+    return value === undefined || this.schema.is(value)
   }
 
   public override get signature(): string {
-    return `Optional<${this.inner.signature}>`
+    return `Optional<${this.schema.signature}>`
   }
 
   public override check(value: TypeOf<S> | undefined): Violation[] {
     return super
       .check(value)
-      .concat(...(this.inner.is(value) ? this.inner.check(value) : []))
+      .concat(...(this.schema.is(value) ? this.schema.check(value) : []))
   }
 
   public override decode(value: unknown): TypeOf<S> | undefined {
-    return value === undefined ? undefined : this.inner.decode(value)
+    return value === undefined ? undefined : this.schema.decode(value)
   }
 
   public override encode(
     value: TypeOf<S> | undefined,
   ): OutputOf<S> | undefined {
-    return value === undefined ? undefined : this.inner.encode(value)
+    return value === undefined ? undefined : this.schema.encode(value)
   }
 
-  public get inner(): S {
-    return this.get('inner')
+  public get schema(): S {
+    return this.get('schema')
   }
 
   /**
@@ -1621,7 +1622,7 @@ export class OptionalSchema<S extends Schema> extends Schema<
    * @returns Inner schema
    */
   public required(): S {
-    return this.inner
+    return this.schema
   }
 }
 
@@ -1701,7 +1702,7 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
 /**
  * Create new instances of {@link TupleSchema}
  *
- * @param members inner {@link Schema} members
+ * @param members schema {@link Schema} members
  * @returns A new instances
  */
 export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
