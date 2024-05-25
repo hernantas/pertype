@@ -20,22 +20,35 @@ export interface Violation {
   readonly args?: AnyRecord | undefined
 }
 
-/** This error indicate parse is failed because input value type is not supported */
-export class UnsupportedTypeError extends Error {
-  public override readonly name: string = 'UnsupportedTypeError'
-
-  public constructor(value: unknown) {
-    super(`Cannot parse given "${typeof value}" value type`)
+export class ViolationError extends Error implements Violation {
+  public override readonly name: string = 'ViolationError'
+  public constructor(
+    public readonly type: string,
+    message?: string | undefined,
+    public readonly args?: AnyRecord | undefined,
+  ) {
+    super(message)
   }
 
   public toViolation(): Violation {
     return {
-      type: 'unsupported.type',
+      type: this.type,
       message: this.message,
-      args: {
-        error: this,
-      },
+      args: this.args,
     }
+  }
+}
+
+/** This error indicate parse is failed because input value type is not supported */
+export class UnsupportedTypeError extends ViolationError {
+  public override readonly name: string = 'UnsupportedTypeError'
+
+  public constructor(value: unknown) {
+    super(
+      'unsupported.type',
+      `Given value type of "${typeof value}" is not supported`,
+      { value },
+    )
   }
 }
 
@@ -43,20 +56,14 @@ export class UnsupportedTypeError extends Error {
  * This error indicate parse is failed because value is not supported or
  * invalid, but its type is supported
  */
-export class UnsupportedValueError extends Error {
+export class UnsupportedValueError extends ViolationError {
   public override readonly name: string = 'UnsupportedValueError'
 
   public constructor(public readonly value: unknown) {
-    super(`Cannot parse given value`)
-  }
-
-  public toViolation(): Violation {
-    return {
-      type: 'unsupported.value',
-      message: this.message,
-      args: {
-        error: this,
-      },
-    }
+    super(
+      'unsupported.value',
+      `Given value of "${JSON.stringify(value)}" is not supported`,
+      { value },
+    )
   }
 }
