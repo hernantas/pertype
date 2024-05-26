@@ -199,6 +199,16 @@ export abstract class Schema<
    */
   public abstract encode(value: T): O
 
+  public decodeJson(text: string): T {
+    const json = JSON.parse(text)
+    return this.decode(json)
+  }
+
+  public encodeJson(value: T): string {
+    const encoded = this.encode(value)
+    return JSON.stringify(encoded)
+  }
+
   public tryDecode(value: I): ParseResult<T> {
     try {
       return {
@@ -240,6 +250,49 @@ export abstract class Schema<
                 message: `An error has occurred during encoding`,
                 args: { error },
               },
+        ],
+      }
+    }
+  }
+
+  public tryDecodeJson(text: string): ParseResult<T> {
+    try {
+      const json = JSON.parse(text)
+      return this.tryDecode(json)
+    } catch (error) {
+      return {
+        success: false,
+        violations: [
+          {
+            type: 'decode.json',
+            message: `An error has occurred during parsing json`,
+            args: { error },
+          },
+        ],
+      }
+    }
+  }
+
+  public tryEncodeJson(value: T): ParseResult<string> {
+    const result = this.tryEncode(value)
+    if (!result.success) {
+      return result
+    }
+
+    try {
+      return {
+        success: true,
+        value: JSON.stringify(result.value),
+      }
+    } catch (error) {
+      return {
+        success: false,
+        violations: [
+          {
+            type: 'encode.json',
+            message: 'An error has occurred during parsing json',
+            args: { error },
+          },
         ],
       }
     }
