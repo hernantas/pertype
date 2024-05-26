@@ -9,6 +9,7 @@ import {
   Tuple,
 } from './util/alias'
 import { IntersectOf, Merge, OptionalOf, UnionOf } from './util/helpers'
+import { resolvePath } from './util/path'
 import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
@@ -323,6 +324,30 @@ export abstract class Schema<
    */
   public nullable(): NullableSchema<this> {
     return nullable(this)
+  }
+}
+
+function repath(
+  violations: Violation[],
+  path?: string | undefined,
+): Violation[] {
+  return violations.map((violation) => ({
+    ...violation,
+    path: resolvePath(path, violation.path),
+  }))
+}
+
+function reException<T>(fn: () => T, path?: string | undefined): T {
+  try {
+    return fn()
+  } catch (error) {
+    if (error instanceof UnsupportedTypeError) {
+      throw new UnsupportedTypeError(error.value, resolvePath(path, error.path))
+    }
+    if (error instanceof UnsupportedValueError) {
+      throw new UnsupportedTypeError(error.value, resolvePath(path, error.path))
+    }
+    throw error
   }
 }
 
@@ -1305,8 +1330,14 @@ export class ArraySchema<S extends Schema> extends Schema<
     return `${this.schema.signature}[]`
   }
 
-  public override check(value: TypeOf<S>[]): Violation[] {
-    return super.check(value).concat(...value.map((v) => this.schema.check(v)))
+  public override check(values: TypeOf<S>[]): Violation[] {
+    return super
+      .check(values)
+      .concat(
+        ...values.map((value, index) =>
+          repath(this.schema.check(value), String(index)),
+        ),
+      )
   }
 
   public override decode(value: unknown): TypeOf<S>[] {
@@ -1319,11 +1350,15 @@ export class ArraySchema<S extends Schema> extends Schema<
       : value !== undefined && value !== null
         ? [value]
         : []
-    return values.map((value) => this.schema.decode(value))
+    return values.map((value, index) =>
+      reException(() => this.schema.decode(value), String(index)),
+    )
   }
 
   public override encode(value: TypeOf<S>[]): OutputOf<S>[] {
-    return value.map((value) => this.schema.encode(value))
+    return value.map((value, index) =>
+      reException(() => this.schema.encode(value), String(index)),
+    )
   }
 
   /**
@@ -1441,7 +1476,10 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
       .check(value)
       .concat(
         ...Array.from(value.entries()).flatMap(([key, value]) =>
-          this.key.check(key as never).concat(this.value.check(value)),
+          repath(
+            this.key.check(key as never).concat(this.value.check(value)),
+            String(key),
+          ),
         ),
       )
   }
@@ -1450,9 +1488,11 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
     if (this.is(value)) {
       return value
     }
-    const entries = this.toEntries(value).map(
-      ([key, value]) =>
-        [this.key.decode(key), this.value.decode(value)] as const,
+    const entries = this.toEntries(value).map(([key, value]) =>
+      reException(
+        () => [this.key.decode(key), this.value.decode(value)] as const,
+        String(this.key),
+      ),
     )
     return new Map(entries) as Map<TypeOf<K>, TypeOf<V>>
   }
@@ -1460,10 +1500,12 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
   public override encode(
     value: Map<TypeOf<K>, TypeOf<V>>,
   ): Record<OutputOf<K>, OutputOf<V>> {
-    const entries = Array.from(value.entries()).map(([key, value]) => [
-      this.key.encode(key as never),
-      this.value.encode(value),
-    ])
+    const entries = Array.from(value.entries()).map(([key, value]) =>
+      reException(
+        () => [this.key.encode(key as never), this.value.encode(value)],
+        String(key),
+      ),
+    )
     return Object.fromEntries(entries)
   }
 
@@ -1781,7 +1823,9 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
     return super
       .check(value)
       .concat(
-        ...this.items.flatMap((member, index) => member.check(value[index])),
+        ...this.items.flatMap((member, index) =>
+          repath(member.check(value[index]), String(index)),
+        ),
       )
   }
 
@@ -1792,7 +1836,7 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
 
     if (Array.isArray(value)) {
       return this.items.map((schema, index) =>
-        schema.decode(value[index]),
+        reException(() => schema.decode(value[index]), String(index)),
       ) as TypeOf<S>
     }
 
@@ -1801,7 +1845,7 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
 
   public override encode(value: TypeOf<S>): OutputOf<S> {
     return this.items.map((schema, index) =>
-      schema.encode(value[index]),
+      reException(() => schema.encode(value[index]), String(index)),
     ) as OutputOf<S>
   }
 
@@ -2031,7 +2075,7 @@ export class ObjectSchema<
       .check(value)
       .concat(
         ...this.entries.flatMap(([key, prop]) =>
-          prop.check((value as TypeOf<S>)[key]),
+          repath(prop.check((value as TypeOf<S>)[key]), key),
         ),
       )
   }
@@ -2041,20 +2085,21 @@ export class ObjectSchema<
       return value
     }
     if (typeof value === 'object' && value !== null) {
-      const entries = Object.entries(this.properties).map(([key, schema]) => [
-        key,
-        schema.decode((value as AnyRecord)[key]),
-      ])
+      const entries = Object.entries(this.properties).map(([key, schema]) =>
+        reException(() => [key, schema.decode((value as AnyRecord)[key])], key),
+      )
       return Object.fromEntries(entries)
     }
     throw new UnsupportedTypeError(value)
   }
 
   public override encode(value: OptionalOf<TypeOf<S>>): OutputOf<S> {
-    const entries = Object.entries(this.properties).map(([key, schema]) => [
-      key,
-      schema.encode(value[key as keyof OptionalOf<TypeOf<S>>]),
-    ])
+    const entries = Object.entries(this.properties).map(([key, schema]) =>
+      reException(
+        () => [key, schema.encode(value[key as keyof OptionalOf<TypeOf<S>>])],
+        key,
+      ),
+    )
     return Object.fromEntries(entries)
   }
 

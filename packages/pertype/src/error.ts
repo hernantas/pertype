@@ -18,24 +18,26 @@ export interface Violation {
    * Optional arguments used in the constraint
    */
   readonly args?: AnyRecord | undefined
+
+  /**
+   * Path to the cause of violations
+   */
+  readonly path?: string | undefined
 }
 
-export class ViolationError extends Error implements Violation {
+export class ViolationError extends Error {
   public override readonly name: string = 'ViolationError'
-  public constructor(
-    public readonly type: string,
-    message?: string | undefined,
-    public readonly args?: AnyRecord | undefined,
-  ) {
-    super(message)
+
+  public constructor(private readonly violation: Violation) {
+    if (violation.path !== undefined) {
+      super(`${violation.path}: ${violation.message}`)
+    } else {
+      super(violation.message)
+    }
   }
 
   public toViolation(): Violation {
-    return {
-      type: this.type,
-      message: this.message,
-      args: this.args,
-    }
+    return this.violation
   }
 }
 
@@ -43,12 +45,16 @@ export class ViolationError extends Error implements Violation {
 export class UnsupportedTypeError extends ViolationError {
   public override readonly name: string = 'UnsupportedTypeError'
 
-  public constructor(value: unknown) {
-    super(
-      'unsupported.type',
-      `Given value type of "${typeof value}" is not supported`,
-      { value },
-    )
+  public constructor(
+    public value: unknown,
+    public readonly path?: string | undefined,
+  ) {
+    super({
+      type: 'unsupported.type',
+      message: `Given value type of "${typeof value}" is not supported`,
+      args: { value },
+      path,
+    })
   }
 }
 
@@ -59,11 +65,15 @@ export class UnsupportedTypeError extends ViolationError {
 export class UnsupportedValueError extends ViolationError {
   public override readonly name: string = 'UnsupportedValueError'
 
-  public constructor(public readonly value: unknown) {
-    super(
-      'unsupported.value',
-      `Given value of "${JSON.stringify(value)}" is not supported`,
-      { value },
-    )
+  public constructor(
+    public readonly value: unknown,
+    public readonly path?: string | undefined,
+  ) {
+    super({
+      type: 'unsupported.value',
+      message: `Given value of "${JSON.stringify(value)}" is not supported`,
+      args: { value },
+      path,
+    })
   }
 }
