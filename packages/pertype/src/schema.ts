@@ -34,6 +34,18 @@ export interface ValidationFailed {
 
 export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailed
 
+export interface ParseSuccess<T> {
+  readonly success: true
+  readonly value: T
+}
+
+export interface ParseFailed {
+  readonly success: false
+  readonly violations: Violation[]
+}
+
+export type ParseResult<T> = ParseSuccess<T> | ParseFailed
+
 /**
  * Key value store used in schema
  */
@@ -186,6 +198,52 @@ export abstract class Schema<
    * @param value Value to be coerced
    */
   public abstract encode(value: T): O
+
+  public tryDecode(value: I): ParseResult<T> {
+    try {
+      return {
+        success: true,
+        value: this.decode(value),
+      }
+    } catch (error) {
+      return {
+        success: false,
+        violations: [
+          error instanceof UnsupportedTypeError ||
+          error instanceof UnsupportedValueError
+            ? error.toViolation()
+            : {
+                type: 'decode',
+                message: `An error has occurred during decoding`,
+                args: { error },
+              },
+        ],
+      }
+    }
+  }
+
+  public tryEncode(value: T): ParseResult<O> {
+    try {
+      return {
+        success: true,
+        value: this.encode(value),
+      }
+    } catch (error) {
+      return {
+        success: false,
+        violations: [
+          error instanceof UnsupportedTypeError ||
+          error instanceof UnsupportedValueError
+            ? error.toViolation()
+            : {
+                type: 'encode',
+                message: `An error has occurred during encoding`,
+                args: { error },
+              },
+        ],
+      }
+    }
+  }
 
   /**
    * Wrap this {@link Schema} instance with {@link ArraySchema}
