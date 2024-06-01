@@ -200,6 +200,14 @@ export abstract class Schema<
    */
   public abstract encode(value: T): O
 
+  public async decodeAsync(value: I | PromiseLike<I>): Promise<T> {
+    return this.decode(await value)
+  }
+
+  public async encodeAsync(value: T | PromiseLike<T>): Promise<O> {
+    return this.encode(await value)
+  }
+
   public tryDecode(value: I): ParseResult<T> {
     try {
       return {
