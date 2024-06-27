@@ -33,8 +33,8 @@
     "import": "./dist/index.mjs"
   },
   "scripts": {
-    "clean": "bun rimraf ./dist *.tsbuildinfo .rollup.*",
-    "build": "bun ../../build.ts"
+    "clean": "bun ../../scripts/clean.ts",
+    "build": "bun ../../scripts/build.ts"
   },
   "dependencies": {
     "decimal.js": "^10.4.3",

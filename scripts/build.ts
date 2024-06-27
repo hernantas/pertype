@@ -31,5 +31,4 @@ async function build() {
     sourcemap: true,
   })
 }
-
 build()
