@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'bun:test'
 import {
   Schema,
   _null,
@@ -766,13 +767,13 @@ describe('Schema', () => {
     })
 
     it('Should decode undefined as undefined', () =>
-      expect(string().optional().decode(undefined)).toBe(undefined))
+      expect(string().optional().decode(undefined)).toBeUndefined())
 
     it('Should decode non-undefined as defined', () =>
       expect(string().optional().decode(1)).toBe('1'))
 
     it('Should encode undefined as undefined', () =>
-      expect(string().optional().encode(undefined)).toBe(undefined))
+      expect(string().optional().encode(undefined)).toBeUndefined())
 
     it('Should encode non-undefined as defined', () =>
       expect(string().optional().encode('1')).toBe('1'))

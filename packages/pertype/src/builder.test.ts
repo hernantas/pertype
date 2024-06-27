@@ -1,5 +1,6 @@
-import { AnyRecord } from './util/alias'
+import { describe, expect, it } from 'bun:test'
 import { ImmutableBuilder } from './builder'
+import { AnyRecord } from './util/alias'
 
 describe('ImmutableBuilder', () => {
   class TestBuilder extends ImmutableBuilder<AnyRecord> {

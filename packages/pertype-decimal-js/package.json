@@ -33,12 +33,11 @@
     "import": "./dist/index.mjs"
   },
   "scripts": {
-    "clean": "npx rimraf ./dist *.tsbuildinfo .rollup.*",
-    "test": "npx jest",
-    "build": "npx tsx ../../build.ts"
+    "clean": "bun rimraf ./dist *.tsbuildinfo .rollup.*",
+    "build": "bun ../../build.ts"
   },
   "dependencies": {
     "decimal.js": "^10.4.3",
-    "pertype": "^0.4.0"
+    "pertype": "workspace:*"
   }
 }
