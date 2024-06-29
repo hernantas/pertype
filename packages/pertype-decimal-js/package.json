@@ -22,15 +22,17 @@
   ],
   "version": "0.4.0",
   "files": [
-    "dist"
+    "dist/cjs",
+    "dist/esm",
+    "dist/type"
   ],
-  "main": "./dist/index.cjs",
-  "types": "./dist/index.d.ts",
-  "module": "./dist/index.mjs",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/type/index.d.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.mjs"
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js",
+    "types": "./dist/type/index.d.ts"
   },
   "scripts": {
     "clean": "bun ../../scripts/clean.ts",
