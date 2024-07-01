@@ -2163,10 +2163,16 @@ export class TypeSchema<T, Args extends any[]> extends Schema<
   }
 
   public override decode(value: unknown): T {
+    if (this.is(value)) {
+      return value
+    }
     throw new UnsupportedTypeError(value)
   }
 
   public override encode(value: T): T {
+    if (this.is(value)) {
+      return value
+    }
     throw new UnsupportedTypeError(value)
   }
 
