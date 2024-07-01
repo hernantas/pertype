@@ -14,6 +14,8 @@ export type TypeOf<T> = T extends Type
       [K in keyof T]: TypeOf<T[K]>
     }
 
+export type Infer<T> = TypeOf<T>
+
 export interface Output<T = any> {
   readonly __output: T
 }
