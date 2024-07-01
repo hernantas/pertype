@@ -2301,5 +2301,6 @@ export const t = {
   intersect,
   object,
   type,
+  json,
   promise,
 }
