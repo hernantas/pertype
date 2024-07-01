@@ -1,3 +1,4 @@
+import { InputOf } from '../dist/type'
 import { ImmutableBuilder } from './builder'
 import { UnsupportedTypeError, UnsupportedValueError, Violation } from './error'
 import {
@@ -200,14 +201,6 @@ export abstract class Schema<
    */
   public abstract encode(value: T): O
 
-  public async decodeAsync(value: I | PromiseLike<I>): Promise<T> {
-    return this.decode(await value)
-  }
-
-  public async encodeAsync(value: T | PromiseLike<T>): Promise<O> {
-    return this.encode(await value)
-  }
-
   public tryDecode(value: I): ParseResult<T> {
     try {
       return {
@@ -283,6 +276,10 @@ export abstract class Schema<
 
   public json(): JSONSchema<this> {
     return json(this)
+  }
+
+  public promise(): PromiseSchema<this> {
+    return promise(this)
   }
 }
 
@@ -2239,6 +2236,49 @@ export function json<S extends Schema>(schema: S): JSONSchema<S> {
   return JSONSchema.create(schema)
 }
 
+// # Promise
+
+export interface PromiseDefinition<S extends Schema> extends Definition {
+  readonly schema: S
+}
+
+export class PromiseSchema<S extends Schema> extends Schema<
+  Promise<TypeOf<S>>,
+  Promise<OutputOf<S>>,
+  Promise<InputOf<S>>,
+  PromiseDefinition<S>
+> {
+  public static create<S extends Schema>(schema: S): PromiseSchema<S> {
+    return new PromiseSchema({ schema })
+  }
+
+  public get schema(): S {
+    return this.get('schema')
+  }
+
+  public override is(value: unknown): value is Promise<any> {
+    return value instanceof Promise
+  }
+
+  public override get signature(): string {
+    return `Promise<${this.schema.signature}>`
+  }
+
+  public override async decode(value: Promise<InputOf<S>>): Promise<TypeOf<S>> {
+    return this.schema.decode(await value)
+  }
+
+  public override async encode(
+    value: Promise<TypeOf<S>>,
+  ): Promise<OutputOf<S>> {
+    return this.schema.encode(await value)
+  }
+}
+
+export function promise<S extends Schema>(schema: S): PromiseSchema<S> {
+  return PromiseSchema.create(schema)
+}
+
 export const t = {
   boolean,
   bool,
@@ -2261,4 +2301,5 @@ export const t = {
   intersect,
   object,
   type,
+  promise,
 }
