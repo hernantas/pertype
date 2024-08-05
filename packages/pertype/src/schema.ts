@@ -307,7 +307,89 @@ function reException<T>(fn: () => T, path?: string | undefined): T {
   }
 }
 
-// # Boolean
+// #######
+// # Any #
+// #######
+
+/**
+ * {@link Schema} that represent `any`
+ */
+export class AnySchema extends Schema<any> {
+  private static readonly instance = new AnySchema({})
+
+  public static create(): AnySchema {
+    return this.instance
+  }
+
+  public override is(_: unknown): _ is any {
+    return true
+  }
+
+  public override get signature(): string {
+    return 'any'
+  }
+
+  public override decode(value: unknown): any {
+    return value
+  }
+
+  public override encode(value: any): any {
+    return value
+  }
+}
+
+/**
+ * Create new instances of {@link AnySchema}
+ *
+ * @returns A new instances
+ */
+export function any(): AnySchema {
+  return AnySchema.create()
+}
+
+// ###########
+// # Unknown #
+// ###########
+
+/**
+ * {@link Schema} that represent `unknown`
+ */
+export class UnknownSchema extends Schema<unknown> {
+  private static readonly instance = new UnknownSchema({})
+
+  public static create(): UnknownSchema {
+    return this.instance
+  }
+
+  public override is(_: unknown): _ is unknown {
+    return true
+  }
+
+  public override get signature(): string {
+    return 'unknown'
+  }
+
+  public override decode(value: unknown): unknown {
+    return value
+  }
+
+  public override encode(value: unknown): unknown {
+    return value
+  }
+}
+
+/**
+ * Create new instances of {@link UnknownSchema}
+ *
+ * @returns A new instances
+ */
+export function unknown(): UnknownSchema {
+  return UnknownSchema.create()
+}
+
+// ###########
+// # Boolean #
+// ###########
 
 /**
  * {@link Schema} that represent `boolean`
@@ -354,7 +436,9 @@ export function bool(): BooleanSchema {
   return BooleanSchema.create()
 }
 
-// # Number
+// ##########
+// # Number #
+// ##########
 
 /**
  * {@link Schema} that represent `number`
@@ -515,170 +599,9 @@ export function number(): NumberSchema {
   return NumberSchema.create()
 }
 
-// # BigInt
-export class BigIntSchema extends Schema<bigint, string> {
-  private static readonly instance = new BigIntSchema({})
-
-  public static create(): BigIntSchema {
-    return this.instance
-  }
-
-  public override is(value: unknown): value is bigint {
-    return typeof value === 'bigint'
-  }
-
-  public override get signature(): string {
-    return 'bigint'
-  }
-
-  public override decode(value: unknown): bigint {
-    if (this.is(value)) {
-      return value
-    }
-    if (
-      value === false ||
-      value === null ||
-      value === undefined ||
-      value === 0 ||
-      value === -0 ||
-      value === 0n ||
-      Number.isNaN(value) ||
-      value === ''
-    ) {
-      return 0n
-    }
-    if (
-      typeof value === 'string' ||
-      typeof value === 'number' ||
-      typeof value === 'boolean'
-    ) {
-      try {
-        return BigInt(value)
-      } catch {
-        throw new UnsupportedValueError(value)
-      }
-    }
-    throw new UnsupportedTypeError(value)
-  }
-
-  public override encode(value: bigint): string {
-    return value.toString()
-  }
-
-  /**
-   * Add new validation constraint that check minimum bigint (`>=`)
-   *
-   * @param limit Minimum bigint
-   * @param message Optional message when rule is violated
-   * @returns A new instance with new rules added
-   */
-  public min(
-    limit: bigint,
-    message: string = `must greater than or equal to ${limit}`,
-  ): this {
-    return this.rule({
-      type: `bigint.min`,
-      args: { limit },
-      test: (v) => v >= limit,
-      message,
-    })
-  }
-
-  /**
-   * Add new validation constraint that check maximum bigint (`<=`)
-   *
-   * @param limit Maximum bigint
-   * @param message Optional message when rule is violated
-   * @returns A new instance with new rules added
-   */
-  public max(
-    limit: bigint,
-    message: string = `must be less than or equal to ${limit}`,
-  ): this {
-    return this.rule({
-      type: `bigint.max`,
-      args: { limit },
-      test: (v) => v <= limit,
-      message,
-    })
-  }
-
-  /**
-   * Add new validation constraint that check bigint to be greater than given
-   * bigint (`>`)
-   *
-   * @param limit Limit bigint
-   * @param message Optional message when rule is violated
-   * @returns A new instance with new rules added
-   */
-  public greater(
-    limit: bigint,
-    message: string = `must be greater than ${limit}`,
-  ): this {
-    return this.rule({
-      type: `bigint.greater`,
-      args: { limit },
-      test: (v) => v > limit,
-      message,
-    })
-  }
-
-  /**
-   * Add new validation constraint that check bigint to be less than given
-   * bigint (`<`)
-   *
-   * @param limit Limit bigint
-   * @param message Optional message when rule is violated
-   * @returns A new instance with new rules added
-   */
-  public less(
-    limit: bigint,
-    message: string = `must be less than ${limit}`,
-  ): this {
-    return this.rule({
-      type: `bigint.less`,
-      args: { limit },
-      test: (v) => v < limit,
-      message,
-    })
-  }
-
-  /**
-   * Add new validation constraint that bigint must be positive
-   *
-   * @param limit Limit bigint
-   * @param message Optional message when rule is violated
-   * @returns A new instance with new rules added
-   */
-  public positive(message: string = `must be positive bigint`): this {
-    return this.rule({
-      type: `bigint.positive`,
-      test: (v) => v > 0n,
-      message,
-    })
-  }
-
-  /**
-   * Add new validation constraint that bigint must be negative
-   *
-   * @param limit Limit bigint
-   * @param message Optional message when rule is violated
-   * @returns A new instance with new rules added
-   */
-  public negative(message: string = `must be negative bigint`): this {
-    return this.rule({
-      type: `bigint.negative`,
-      test: (v) => v < 0n,
-      message: message,
-    })
-  }
-}
-
-export function bigint(): BigIntSchema {
-  return BigIntSchema.create()
-}
-
-// # String
+// ##########
+// # String #
+// ##########
 
 const pattern = {
   base64: /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/,
@@ -852,7 +775,261 @@ export function string(): StringSchema {
   return StringSchema.create()
 }
 
-// # Date
+// ########
+// # Null #
+// ########
+
+/**
+ * {@link Schema} that represent `null`
+ */
+export class NullSchema extends Schema<null> {
+  private static readonly instance = new NullSchema({})
+
+  public static create(): NullSchema {
+    return this.instance
+  }
+
+  public override is(value: unknown): value is null {
+    return value === null
+  }
+
+  public override get signature(): string {
+    return 'null'
+  }
+
+  public override decode(value: unknown): null {
+    if (this.is(value)) {
+      return value
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: null): null {
+    return value
+  }
+}
+
+/**
+ * Create new instances of {@link NullSchema}
+ *
+ * @returns A new instances
+ */
+export function _null(): NullSchema {
+  return NullSchema.create()
+}
+
+// #############
+// # Undefined #
+// #############
+
+/**
+ * {@link Schema} that represent `null`
+ */
+export class UndefinedSchema extends Schema<undefined> {
+  private static readonly instance = new UndefinedSchema({})
+
+  public static create(): UndefinedSchema {
+    return this.instance
+  }
+
+  public override is(value: unknown): value is undefined {
+    return value === undefined
+  }
+
+  public override get signature(): string {
+    return 'undefined'
+  }
+
+  public override decode(value: unknown): undefined {
+    if (this.is(value)) {
+      return value
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: undefined): undefined {
+    return value
+  }
+}
+
+/**
+ * Create new instances of {@link UndefinedSchema}
+ *
+ * @returns A new instances
+ */
+export function _undefined(): UndefinedSchema {
+  return UndefinedSchema.create()
+}
+
+// ##########
+// # BigInt #
+// ##########
+
+export class BigIntSchema extends Schema<bigint, string> {
+  private static readonly instance = new BigIntSchema({})
+
+  public static create(): BigIntSchema {
+    return this.instance
+  }
+
+  public override is(value: unknown): value is bigint {
+    return typeof value === 'bigint'
+  }
+
+  public override get signature(): string {
+    return 'bigint'
+  }
+
+  public override decode(value: unknown): bigint {
+    if (this.is(value)) {
+      return value
+    }
+    if (
+      value === false ||
+      value === null ||
+      value === undefined ||
+      value === 0 ||
+      value === -0 ||
+      value === 0n ||
+      Number.isNaN(value) ||
+      value === ''
+    ) {
+      return 0n
+    }
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      try {
+        return BigInt(value)
+      } catch {
+        throw new UnsupportedValueError(value)
+      }
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public override encode(value: bigint): string {
+    return value.toString()
+  }
+
+  /**
+   * Add new validation constraint that check minimum bigint (`>=`)
+   *
+   * @param limit Minimum bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public min(
+    limit: bigint,
+    message: string = `must greater than or equal to ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.min`,
+      args: { limit },
+      test: (v) => v >= limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check maximum bigint (`<=`)
+   *
+   * @param limit Maximum bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public max(
+    limit: bigint,
+    message: string = `must be less than or equal to ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.max`,
+      args: { limit },
+      test: (v) => v <= limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check bigint to be greater than given
+   * bigint (`>`)
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public greater(
+    limit: bigint,
+    message: string = `must be greater than ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.greater`,
+      args: { limit },
+      test: (v) => v > limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that check bigint to be less than given
+   * bigint (`<`)
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public less(
+    limit: bigint,
+    message: string = `must be less than ${limit}`,
+  ): this {
+    return this.rule({
+      type: `bigint.less`,
+      args: { limit },
+      test: (v) => v < limit,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that bigint must be positive
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public positive(message: string = `must be positive bigint`): this {
+    return this.rule({
+      type: `bigint.positive`,
+      test: (v) => v > 0n,
+      message,
+    })
+  }
+
+  /**
+   * Add new validation constraint that bigint must be negative
+   *
+   * @param limit Limit bigint
+   * @param message Optional message when rule is violated
+   * @returns A new instance with new rules added
+   */
+  public negative(message: string = `must be negative bigint`): this {
+    return this.rule({
+      type: `bigint.negative`,
+      test: (v) => v < 0n,
+      message: message,
+    })
+  }
+}
+
+export function bigint(): BigIntSchema {
+  return BigIntSchema.create()
+}
+
+// ########
+// # Date #
+// ########
 
 /**
  * {@link Schema} that represent `date`
@@ -980,7 +1157,9 @@ export function date(): DateSchema {
   return DateSchema.create()
 }
 
-// # Symbol
+// ##########
+// # Symbol #
+// ##########
 
 /**
  * {@link Schema} that represent `symbol`
@@ -1051,165 +1230,9 @@ export function symbol(): SymbolSchema {
   return SymbolSchema.create()
 }
 
-// # Null
-
-/**
- * {@link Schema} that represent `null`
- */
-export class NullSchema extends Schema<null> {
-  private static readonly instance = new NullSchema({})
-
-  public static create(): NullSchema {
-    return this.instance
-  }
-
-  public override is(value: unknown): value is null {
-    return value === null
-  }
-
-  public override get signature(): string {
-    return 'null'
-  }
-
-  public override decode(value: unknown): null {
-    if (this.is(value)) {
-      return value
-    }
-    throw new UnsupportedTypeError(value)
-  }
-
-  public override encode(value: null): null {
-    return value
-  }
-}
-
-/**
- * Create new instances of {@link NullSchema}
- *
- * @returns A new instances
- */
-export function _null(): NullSchema {
-  return NullSchema.create()
-}
-
-// # Undefined
-
-/**
- * {@link Schema} that represent `null`
- */
-export class UndefinedSchema extends Schema<undefined> {
-  private static readonly instance = new UndefinedSchema({})
-
-  public static create(): UndefinedSchema {
-    return this.instance
-  }
-
-  public override is(value: unknown): value is undefined {
-    return value === undefined
-  }
-
-  public override get signature(): string {
-    return 'undefined'
-  }
-
-  public override decode(value: unknown): undefined {
-    if (this.is(value)) {
-      return value
-    }
-    throw new UnsupportedTypeError(value)
-  }
-
-  public override encode(value: undefined): undefined {
-    return value
-  }
-}
-
-/**
- * Create new instances of {@link UndefinedSchema}
- *
- * @returns A new instances
- */
-export function _undefined(): UndefinedSchema {
-  return UndefinedSchema.create()
-}
-
-// # Any
-
-/**
- * {@link Schema} that represent `any`
- */
-export class AnySchema extends Schema<any> {
-  private static readonly instance = new AnySchema({})
-
-  public static create(): AnySchema {
-    return this.instance
-  }
-
-  public override is(_: unknown): _ is any {
-    return true
-  }
-
-  public override get signature(): string {
-    return 'any'
-  }
-
-  public override decode(value: unknown): any {
-    return value
-  }
-
-  public override encode(value: any): any {
-    return value
-  }
-}
-
-/**
- * Create new instances of {@link AnySchema}
- *
- * @returns A new instances
- */
-export function any(): AnySchema {
-  return AnySchema.create()
-}
-
-// # Unknown
-
-/**
- * {@link Schema} that represent `unknown`
- */
-export class UnknownSchema extends Schema<unknown> {
-  private static readonly instance = new UnknownSchema({})
-
-  public static create(): UnknownSchema {
-    return this.instance
-  }
-
-  public override is(_: unknown): _ is unknown {
-    return true
-  }
-
-  public override get signature(): string {
-    return 'unknown'
-  }
-
-  public override decode(value: unknown): unknown {
-    return value
-  }
-
-  public override encode(value: unknown): unknown {
-    return value
-  }
-}
-
-/**
- * Create new instances of {@link UnknownSchema}
- *
- * @returns A new instances
- */
-export function unknown(): UnknownSchema {
-  return UnknownSchema.create()
-}
-
-// # Literal
+// ###########
+// # Literal #
+// ###########
 
 export interface LiteralDefinition<T extends Literal> extends Definition {
   readonly value: T
@@ -1253,14 +1276,23 @@ export function literal<T extends Literal>(value: T): LiteralSchema<T> {
   return LiteralSchema.create(value)
 }
 
-// # Array
+// ###########
+// # Wrapper #
+// ###########
 
-export interface ArrayDefinition<S extends Schema> extends Definition {
+interface WrapperDefinition<S extends Schema> extends Definition {
   /**
-   * Inner schema
+   * Wrapped inner schema
    */
   readonly schema: S
 }
+
+// #########
+// # Array #
+// #########
+
+export interface ArrayDefinition<S extends Schema>
+  extends WrapperDefinition<S> {}
 
 /**
  * {@link Schema} that represent `Array` of type of inner schema
@@ -1391,7 +1423,234 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
   return ArraySchema.create(schema)
 }
 
-// # Map
+// ########
+// # JSON #
+// ########
+
+export interface JSONDefinition<S extends Schema> extends Definition {
+  readonly schema: S
+}
+
+export class JSONSchema<S extends Schema> extends Schema<
+  TypeOf<S>,
+  string,
+  unknown,
+  JSONDefinition<S>
+> {
+  public static create<S extends Schema>(schema: S): JSONSchema<S> {
+    return new JSONSchema({ schema })
+  }
+
+  public override is(value: unknown): value is TypeOf<S> {
+    return this.schema.is(value)
+  }
+
+  public override get signature(): string {
+    return this.schema.signature
+  }
+
+  public override decode(value: unknown): TypeOf<S> {
+    const text = string().decode(value)
+    const parsed = JSON.parse(text)
+    return this.schema.decode(parsed)
+  }
+
+  public override encode(value: TypeOf<S>): string {
+    const encoded = this.schema.encode(value)
+    return JSON.stringify(encoded)
+  }
+
+  public get schema(): S {
+    return this.get('schema')
+  }
+}
+
+export function json<S extends Schema>(schema: S): JSONSchema<S> {
+  return JSONSchema.create(schema)
+}
+
+// ############
+// # Nullable #
+// ############
+
+export interface NullableDefinition<S extends Schema>
+  extends WrapperDefinition<S> {}
+
+/**
+ * {@link Schema} that wrap any schema as `nullable`
+ */
+export class NullableSchema<S extends Schema> extends Schema<
+  TypeOf<S> | null,
+  OutputOf<S> | null,
+  unknown,
+  NullableDefinition<S>
+> {
+  public static create<S extends Schema>(schema: S): NullableSchema<S> {
+    return new NullableSchema({ schema: schema })
+  }
+
+  public override is(value: unknown): value is TypeOf<S> | null {
+    return value === null || this.schema.is(value)
+  }
+
+  public override get signature(): string {
+    return `Nullable<${this.schema.signature}>`
+  }
+
+  public override check(value: TypeOf<S> | null): Violation[] {
+    return super
+      .check(value)
+      .concat(...(this.schema.is(value) ? this.schema.check(value) : []))
+  }
+
+  public override decode(value: unknown): TypeOf<S> | null {
+    return value === null ? null : this.schema.decode(value)
+  }
+
+  public override encode(value: TypeOf<S> | null): OutputOf<S> | null {
+    return value === null ? null : this.schema.encode(value)
+  }
+
+  public get schema(): S {
+    return this.get('schema')
+  }
+
+  /**
+   * Make this schema non nullable
+   *
+   * @returns inner schema
+   */
+  public nonNullable(): S {
+    return this.schema
+  }
+}
+
+/**
+ * Create new instances of {@link NullableSchema}
+ *
+ * @param schema Schema to be wrapped
+ * @returns A new instances
+ */
+export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
+  return NullableSchema.create(schema)
+}
+
+// ############
+// # Optional #
+// ############
+
+export interface OptionalDefinition<S extends Schema>
+  extends WrapperDefinition<S> {}
+
+/**
+ * {@link Schema} that wrap any schema as `optional`
+ */
+export class OptionalSchema<S extends Schema> extends Schema<
+  TypeOf<S> | undefined,
+  OutputOf<S> | undefined,
+  unknown,
+  OptionalDefinition<S>
+> {
+  public static create<S extends Schema>(schema: S): OptionalSchema<S> {
+    return new OptionalSchema({ schema: schema })
+  }
+
+  public override is(value: unknown): value is TypeOf<S> | undefined {
+    return value === undefined || this.schema.is(value)
+  }
+
+  public override get signature(): string {
+    return `Optional<${this.schema.signature}>`
+  }
+
+  public override check(value: TypeOf<S> | undefined): Violation[] {
+    return super
+      .check(value)
+      .concat(...(this.schema.is(value) ? this.schema.check(value) : []))
+  }
+
+  public override decode(value: unknown): TypeOf<S> | undefined {
+    return value === undefined ? undefined : this.schema.decode(value)
+  }
+
+  public override encode(
+    value: TypeOf<S> | undefined,
+  ): OutputOf<S> | undefined {
+    return value === undefined ? undefined : this.schema.encode(value)
+  }
+
+  public get schema(): S {
+    return this.get('schema')
+  }
+
+  /**
+   * Make this schema required
+   *
+   * @returns Inner schema
+   */
+  public required(): S {
+    return this.schema
+  }
+}
+
+/**
+ * Create new instances of {@link OptionalSchema}
+ *
+ * @param schema Schema to be wrapped
+ * @returns A new instances
+ */
+export function optional<S extends Schema>(schema: S): OptionalSchema<S> {
+  return OptionalSchema.create(schema)
+}
+
+// ###########
+// # Promise #
+// ###########
+
+export interface PromiseDefinition<S extends Schema> extends Definition {
+  readonly schema: S
+}
+
+export class PromiseSchema<S extends Schema> extends Schema<
+  Promise<TypeOf<S>>,
+  Promise<OutputOf<S>>,
+  Promise<InputOf<S>>,
+  PromiseDefinition<S>
+> {
+  public static create<S extends Schema>(schema: S): PromiseSchema<S> {
+    return new PromiseSchema({ schema })
+  }
+
+  public get schema(): S {
+    return this.get('schema')
+  }
+
+  public override is(value: unknown): value is Promise<any> {
+    return value instanceof Promise
+  }
+
+  public override get signature(): string {
+    return `Promise<${this.schema.signature}>`
+  }
+
+  public override async decode(value: Promise<InputOf<S>>): Promise<TypeOf<S>> {
+    return this.schema.decode(await value)
+  }
+
+  public override async encode(
+    value: Promise<TypeOf<S>>,
+  ): Promise<OutputOf<S>> {
+    return this.schema.encode(await value)
+  }
+}
+
+export function promise<S extends Schema>(schema: S): PromiseSchema<S> {
+  return PromiseSchema.create(schema)
+}
+
+// #######
+// # Map #
+// #######
 
 export type KeySchema = StringSchema | NumberSchema | SymbolSchema
 
@@ -1525,7 +1784,9 @@ export function map<K extends KeySchema, V extends Schema>(
   return MapSchema.create(key, value)
 }
 
-// # Set
+// #######
+// # Set #
+// #######
 
 export interface SetDefinition<V extends Schema> extends Definition {
   readonly value: V
@@ -1613,139 +1874,9 @@ export function set<V extends Schema>(value: V): SetSchema<V> {
   return SetSchema.create(value)
 }
 
-// # Nullable
-
-export interface NullableDefinition<S extends Schema> extends Definition {
-  readonly schema: S
-}
-
-/**
- * {@link Schema} that wrap any schema as `nullable`
- */
-export class NullableSchema<S extends Schema> extends Schema<
-  TypeOf<S> | null,
-  OutputOf<S> | null,
-  unknown,
-  NullableDefinition<S>
-> {
-  public static create<S extends Schema>(schema: S): NullableSchema<S> {
-    return new NullableSchema({ schema: schema })
-  }
-
-  public override is(value: unknown): value is TypeOf<S> | null {
-    return value === null || this.schema.is(value)
-  }
-
-  public override get signature(): string {
-    return `Nullable<${this.schema.signature}>`
-  }
-
-  public override check(value: TypeOf<S> | null): Violation[] {
-    return super
-      .check(value)
-      .concat(...(this.schema.is(value) ? this.schema.check(value) : []))
-  }
-
-  public override decode(value: unknown): TypeOf<S> | null {
-    return value === null ? null : this.schema.decode(value)
-  }
-
-  public override encode(value: TypeOf<S> | null): OutputOf<S> | null {
-    return value === null ? null : this.schema.encode(value)
-  }
-
-  public get schema(): S {
-    return this.get('schema')
-  }
-
-  /**
-   * Make this schema non nullable
-   *
-   * @returns inner schema
-   */
-  public nonNullable(): S {
-    return this.schema
-  }
-}
-
-/**
- * Create new instances of {@link NullableSchema}
- *
- * @param schema Schema to be wrapped
- * @returns A new instances
- */
-export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
-  return NullableSchema.create(schema)
-}
-
-// # Optional
-
-export interface OptionalDefinition<S extends Schema> extends Definition {
-  readonly schema: S
-}
-
-/**
- * {@link Schema} that wrap any schema as `optional`
- */
-export class OptionalSchema<S extends Schema> extends Schema<
-  TypeOf<S> | undefined,
-  OutputOf<S> | undefined,
-  unknown,
-  OptionalDefinition<S>
-> {
-  public static create<S extends Schema>(schema: S): OptionalSchema<S> {
-    return new OptionalSchema({ schema: schema })
-  }
-
-  public override is(value: unknown): value is TypeOf<S> | undefined {
-    return value === undefined || this.schema.is(value)
-  }
-
-  public override get signature(): string {
-    return `Optional<${this.schema.signature}>`
-  }
-
-  public override check(value: TypeOf<S> | undefined): Violation[] {
-    return super
-      .check(value)
-      .concat(...(this.schema.is(value) ? this.schema.check(value) : []))
-  }
-
-  public override decode(value: unknown): TypeOf<S> | undefined {
-    return value === undefined ? undefined : this.schema.decode(value)
-  }
-
-  public override encode(
-    value: TypeOf<S> | undefined,
-  ): OutputOf<S> | undefined {
-    return value === undefined ? undefined : this.schema.encode(value)
-  }
-
-  public get schema(): S {
-    return this.get('schema')
-  }
-
-  /**
-   * Make this schema required
-   *
-   * @returns Inner schema
-   */
-  public required(): S {
-    return this.schema
-  }
-}
-
-/**
- * Create new instances of {@link OptionalSchema}
- *
- * @param schema Schema to be wrapped
- * @returns A new instances
- */
-export function optional<S extends Schema>(schema: S): OptionalSchema<S> {
-  return OptionalSchema.create(schema)
-}
-
-// # Tuple
+// #########
+// # Tuple #
+// #########
 
 /**
  * {@link Schema} that represent `tuple`
@@ -1820,175 +1951,9 @@ export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
   return TupleSchema.create(...members)
 }
 
-// # Union
-
-export interface UnionDefinition<S extends Member<Schema>> extends Definition {
-  readonly members: S
-}
-
-/**
- * {@link Schema} that represent `union`
- */
-export class UnionSchema<S extends Member<Schema>> extends Schema<
-  UnionOf<TypeOf<S>>,
-  UnionOf<OutputOf<S>>,
-  unknown,
-  UnionDefinition<S>
-> {
-  public static create<S extends Member<Schema>>(
-    ...members: S
-  ): UnionSchema<S> {
-    return new UnionSchema({ members })
-  }
-
-  public override is(value: unknown): value is UnionOf<TypeOf<S>> {
-    return this.members.find((member) => member.is(value)) !== undefined
-  }
-
-  public override get signature(): string {
-    return this.members.map((member) => member.signature).join('|')
-  }
-
-  public override check(value: UnionOf<TypeOf<S>>): Violation[] {
-    return super
-      .check(value)
-      .concat(
-        ...this.members.flatMap((member) =>
-          member.is(value) ? member.check(value) : [],
-        ),
-      )
-  }
-
-  public override decode(value: unknown): UnionOf<TypeOf<S>> {
-    if (this.is(value)) {
-      return value
-    }
-
-    // decode using its schema
-    for (const member of this.members) {
-      if (member.is(value)) {
-        return member.decode(value)
-      }
-    }
-
-    // brute force decoding
-    for (const member of this.members) {
-      try {
-        return member.decode(value)
-      } catch (e) {}
-    }
-    throw new UnsupportedTypeError(value)
-  }
-
-  public override encode(value: UnionOf<TypeOf<S>>): UnionOf<OutputOf<S>> {
-    for (const member of this.members) {
-      if (member.is(value)) {
-        return member.encode(value)
-      }
-    }
-    throw new UnsupportedTypeError(value)
-  }
-
-  public get members(): S {
-    return this.get('members')
-  }
-}
-
-/**
- * Create new instances of {@link UnionSchema}
- *
- * @param members inner schema members of this union
- * @returns A new instances
- */
-export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
-  return UnionSchema.create(...members)
-}
-
-// # Intersect
-
-export interface IntersectDefinition<S extends Member<Schema>>
-  extends Definition {
-  readonly members: S
-}
-
-/**
- * {@link Schema} that represent `intersection`
- */
-export class IntersectSchema<S extends Member<Schema>> extends Schema<
-  IntersectOf<TypeOf<S>>,
-  IntersectOf<OutputOf<S>>,
-  unknown,
-  IntersectDefinition<S>
-> {
-  public static create<S extends Member<Schema>>(
-    ...members: S
-  ): IntersectSchema<S> {
-    return new IntersectSchema({ members })
-  }
-
-  public override is(value: unknown): value is IntersectOf<TypeOf<S>> {
-    return this.members.find((member) => !member.is(value)) === undefined
-  }
-
-  public override get signature(): string {
-    return this.members.map((member) => member.signature).join('&')
-  }
-
-  public override check(value: IntersectOf<TypeOf<S>>): Violation[] {
-    return super
-      .check(value)
-      .concat(...this.members.flatMap((member) => member.check(value)))
-  }
-
-  public override decode(value: unknown): IntersectOf<TypeOf<S>> {
-    return this.is(value)
-      ? value
-      : this.members
-          .map((member) => member.decode(value))
-          .filter((v) => typeof v === 'object')
-          .reduce((result, v) => merge(result, v), {})
-  }
-
-  public override encode(
-    value: IntersectOf<TypeOf<S>>,
-  ): IntersectOf<OutputOf<S>> {
-    return this.members
-      .map((member) => member.encode(value))
-      .filter((v) => typeof v === 'object')
-      .reduce((result, v) => merge(result, v), {})
-  }
-
-  public get members(): S {
-    return this.get('members')
-  }
-}
-
-/**
- * Merge 2 given object
- *
- * @param base Base to be merged
- * @param target Target to be merged
- * @returns A new object from the merger
- */
-function merge<T, U>(base: T, target: U): T & U {
-  return {
-    ...target,
-    ...base,
-  }
-}
-
-/**
- * Create new instances of {@link IntersectSchema}
- *
- * @returns A new instances
- */
-export function intersect<S extends Member<Schema>>(
-  ...members: S
-): IntersectSchema<S> {
-  return IntersectSchema.create(...members)
-}
-
-// # Object
+// ##########
+// # Object #
+// ##########
 
 export interface ObjectDefinition<S extends AnyRecord<Schema>>
   extends Definition {
@@ -2130,7 +2095,9 @@ export function object<S extends AnyRecord<Schema>>(
   return ObjectSchema.create(properties)
 }
 
-// # Type
+// ########
+// # Type #
+// ########
 
 export interface TypeDefinition<T, Args extends any[]> extends Definition {
   readonly ctor: Constructor<T, Args>
@@ -2192,115 +2159,205 @@ export function type<T, Args extends any[]>(
   return TypeSchema.create(ctor)
 }
 
-// # JSON
+// #########
+// # Union #
+// #########
 
-export interface JSONDefinition<S extends Schema> extends Definition {
-  readonly schema: S
+export interface UnionDefinition<S extends Member<Schema>> extends Definition {
+  readonly members: S
 }
 
-export class JSONSchema<S extends Schema> extends Schema<
-  TypeOf<S>,
-  string,
+/**
+ * {@link Schema} that represent `union`
+ */
+export class UnionSchema<S extends Member<Schema>> extends Schema<
+  UnionOf<TypeOf<S>>,
+  UnionOf<OutputOf<S>>,
   unknown,
-  JSONDefinition<S>
+  UnionDefinition<S>
 > {
-  public static create<S extends Schema>(schema: S): JSONSchema<S> {
-    return new JSONSchema({ schema })
+  public static create<S extends Member<Schema>>(
+    ...members: S
+  ): UnionSchema<S> {
+    return new UnionSchema({ members })
   }
 
-  public override is(value: unknown): value is TypeOf<S> {
-    return this.schema.is(value)
+  public override is(value: unknown): value is UnionOf<TypeOf<S>> {
+    return this.members.find((member) => member.is(value)) !== undefined
   }
 
   public override get signature(): string {
-    return this.schema.signature
+    return this.members.map((member) => member.signature).join('|')
   }
 
-  public override decode(value: unknown): TypeOf<S> {
-    const text = string().decode(value)
-    const parsed = JSON.parse(text)
-    return this.schema.decode(parsed)
+  public override check(value: UnionOf<TypeOf<S>>): Violation[] {
+    return super
+      .check(value)
+      .concat(
+        ...this.members.flatMap((member) =>
+          member.is(value) ? member.check(value) : [],
+        ),
+      )
   }
 
-  public override encode(value: TypeOf<S>): string {
-    const encoded = this.schema.encode(value)
-    return JSON.stringify(encoded)
+  public override decode(value: unknown): UnionOf<TypeOf<S>> {
+    if (this.is(value)) {
+      return value
+    }
+
+    // decode using its schema
+    for (const member of this.members) {
+      if (member.is(value)) {
+        return member.decode(value)
+      }
+    }
+
+    // brute force decoding
+    for (const member of this.members) {
+      try {
+        return member.decode(value)
+      } catch (e) {}
+    }
+    throw new UnsupportedTypeError(value)
   }
 
-  public get schema(): S {
-    return this.get('schema')
+  public override encode(value: UnionOf<TypeOf<S>>): UnionOf<OutputOf<S>> {
+    for (const member of this.members) {
+      if (member.is(value)) {
+        return member.encode(value)
+      }
+    }
+    throw new UnsupportedTypeError(value)
+  }
+
+  public get members(): S {
+    return this.get('members')
   }
 }
 
-export function json<S extends Schema>(schema: S): JSONSchema<S> {
-  return JSONSchema.create(schema)
+/**
+ * Create new instances of {@link UnionSchema}
+ *
+ * @param members inner schema members of this union
+ * @returns A new instances
+ */
+export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
+  return UnionSchema.create(...members)
 }
 
-// # Promise
+// #############
+// # Intersect #
+// #############
 
-export interface PromiseDefinition<S extends Schema> extends Definition {
-  readonly schema: S
+export interface IntersectDefinition<S extends Member<Schema>>
+  extends Definition {
+  readonly members: S
 }
 
-export class PromiseSchema<S extends Schema> extends Schema<
-  Promise<TypeOf<S>>,
-  Promise<OutputOf<S>>,
-  Promise<InputOf<S>>,
-  PromiseDefinition<S>
+/**
+ * {@link Schema} that represent `intersection`
+ */
+export class IntersectSchema<S extends Member<Schema>> extends Schema<
+  IntersectOf<TypeOf<S>>,
+  IntersectOf<OutputOf<S>>,
+  unknown,
+  IntersectDefinition<S>
 > {
-  public static create<S extends Schema>(schema: S): PromiseSchema<S> {
-    return new PromiseSchema({ schema })
+  public static create<S extends Member<Schema>>(
+    ...members: S
+  ): IntersectSchema<S> {
+    return new IntersectSchema({ members })
   }
 
-  public get schema(): S {
-    return this.get('schema')
-  }
-
-  public override is(value: unknown): value is Promise<any> {
-    return value instanceof Promise
+  public override is(value: unknown): value is IntersectOf<TypeOf<S>> {
+    return this.members.find((member) => !member.is(value)) === undefined
   }
 
   public override get signature(): string {
-    return `Promise<${this.schema.signature}>`
+    return this.members.map((member) => member.signature).join('&')
   }
 
-  public override async decode(value: Promise<InputOf<S>>): Promise<TypeOf<S>> {
-    return this.schema.decode(await value)
+  public override check(value: IntersectOf<TypeOf<S>>): Violation[] {
+    return super
+      .check(value)
+      .concat(...this.members.flatMap((member) => member.check(value)))
   }
 
-  public override async encode(
-    value: Promise<TypeOf<S>>,
-  ): Promise<OutputOf<S>> {
-    return this.schema.encode(await value)
+  public override decode(value: unknown): IntersectOf<TypeOf<S>> {
+    return this.is(value)
+      ? value
+      : this.members
+          .map((member) => member.decode(value))
+          .filter((v) => typeof v === 'object')
+          .reduce((result, v) => merge(result, v), {})
+  }
+
+  public override encode(
+    value: IntersectOf<TypeOf<S>>,
+  ): IntersectOf<OutputOf<S>> {
+    return this.members
+      .map((member) => member.encode(value))
+      .filter((v) => typeof v === 'object')
+      .reduce((result, v) => merge(result, v), {})
+  }
+
+  public get members(): S {
+    return this.get('members')
   }
 }
 
-export function promise<S extends Schema>(schema: S): PromiseSchema<S> {
-  return PromiseSchema.create(schema)
+/**
+ * Merge 2 given object
+ *
+ * @param base Base to be merged
+ * @param target Target to be merged
+ * @returns A new object from the merger
+ */
+function merge<T, U>(base: T, target: U): T & U {
+  return {
+    ...target,
+    ...base,
+  }
 }
+
+/**
+ * Create new instances of {@link IntersectSchema}
+ *
+ * @returns A new instances
+ */
+export function intersect<S extends Member<Schema>>(
+  ...members: S
+): IntersectSchema<S> {
+  return IntersectSchema.create(...members)
+}
+
+// ###########
+// # Builder #
+// ###########
 
 export const t = {
+  any,
+  unknown,
   boolean,
   bool,
   number,
   string,
-  date,
-  symbol,
   null: _null,
   undefined: _undefined,
-  any,
-  unknown,
+  bigint,
+  date,
+  symbol,
   literal,
   array,
-  map,
-  set,
   nullable,
   optional,
-  tuple,
-  union,
-  intersect,
-  object,
-  type,
   json,
   promise,
+  map,
+  set,
+  tuple,
+  object,
+  type,
+  union,
+  intersect,
 }
