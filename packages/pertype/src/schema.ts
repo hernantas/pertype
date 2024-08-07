@@ -1,4 +1,3 @@
-import { InputOf } from '../dist/type'
 import { ImmutableBuilder } from './builder'
 import { UnsupportedTypeError, UnsupportedValueError, Violation } from './error'
 import {
@@ -11,7 +10,7 @@ import {
 } from './util/alias'
 import { IntersectOf, Merge, OptionalOf, UnionOf } from './util/helpers'
 import { resolvePath } from './util/path'
-import { Input, Output, OutputOf, Type, TypeOf } from './util/type'
+import { Input, InputOf, Output, OutputOf, Type, TypeOf } from './util/type'
 
 /**
  * Function to test if value is within constraint
