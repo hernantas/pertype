@@ -36,6 +36,7 @@
   },
   "scripts": {
     "clean": "bun ../../scripts/clean.ts",
+    "test": "bun jest",
     "build": "bun ../../scripts/build.ts"
   },
   "dependencies": {
