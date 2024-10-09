@@ -24,7 +24,7 @@
   ],
   "private": true,
   "scripts": {
-    "format": "bun prettier --write ."
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.6",
@@ -38,6 +38,7 @@
     "rollup": "^4.20.0",
     "ts-jest": "^29.2.5",
     "tslib": "^2.6.3",
+    "tsx": "^4.19.1",
     "typescript": "^5.5.4"
   }
 }

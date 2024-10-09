@@ -35,12 +35,12 @@
     "types": "./dist/type/index.d.ts"
   },
   "scripts": {
-    "clean": "bun ../../scripts/clean.ts",
-    "test": "bun jest",
-    "build": "bun ../../scripts/build.ts"
+    "clean": "tsx ../../scripts/clean.ts",
+    "test": "jest",
+    "build": "tsx ../../scripts/build.ts"
   },
   "dependencies": {
     "decimal.js": "^10.4.3",
-    "pertype": "workspace:*"
+    "pertype": "^0.5.0"
   }
 }
