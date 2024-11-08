@@ -286,14 +286,18 @@ export abstract class Schema<
   }
 }
 
-function repath(
+function redirect(violation: Violation, path?: string | undefined): Violation {
+  return {
+    ...violation,
+    path: resolvePath(path, violation.path),
+  }
+}
+
+function redirectAll(
   violations: Violation[],
   path?: string | undefined,
 ): Violation[] {
-  return violations.map((violation) => ({
-    ...violation,
-    path: resolvePath(path, violation.path),
-  }))
+  return violations.map((violation) => redirect(violation, path))
 }
 
 function reException<T>(fn: () => T, path?: string | undefined): T {
@@ -1326,7 +1330,7 @@ export class ArraySchema<S extends Schema> extends Schema<
       .check(values)
       .concat(
         ...values.map((value, index) =>
-          repath(this.schema.check(value), String(index)),
+          redirectAll(this.schema.check(value), String(index)),
         ),
       )
   }
@@ -1702,7 +1706,7 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
       .check(value)
       .concat(
         ...Array.from(value.entries()).flatMap(([key, value]) =>
-          repath(
+          redirectAll(
             this.key.check(key as never).concat(this.value.check(value)),
             String(key),
           ),
@@ -1922,7 +1926,7 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
       .check(value)
       .concat(
         ...this.items.flatMap((member, index) =>
-          repath(member.check(value[index]), String(index)),
+          redirectAll(member.check(value[index]), String(index)),
         ),
       )
   }
@@ -2007,7 +2011,7 @@ export class ObjectSchema<
       .check(value)
       .concat(
         ...this.entries.flatMap(([key, prop]) =>
-          repath(prop.check((value as TypeOf<S>)[key]), key),
+          redirectAll(prop.check((value as TypeOf<S>)[key]), key),
         ),
       )
   }
