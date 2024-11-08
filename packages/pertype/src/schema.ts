@@ -273,6 +273,10 @@ export abstract class Schema<
     return nullable(this)
   }
 
+  public nullish(): OptionalSchema<NullableSchema<this>> {
+    return optional(nullable(this))
+  }
+
   public json(): JSONSchema<this> {
     return json(this)
   }
