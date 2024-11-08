@@ -1448,6 +1448,10 @@ export class JSONSchema<S extends Schema> extends Schema<
     return this.schema.signature
   }
 
+  public override check(value: TypeOf<S>): Violation[] {
+    return super.check(value).concat(...this.schema.check(value))
+  }
+
   public override decode(value: unknown): TypeOf<S> {
     const text = string().decode(value)
     const parsed = JSON.parse(text)
@@ -1630,6 +1634,10 @@ export class PromiseSchema<S extends Schema> extends Schema<
 
   public override get signature(): string {
     return `Promise<${this.schema.signature}>`
+  }
+
+  public override check(value: Promise<TypeOf<S>>): Violation[] {
+    return super.check(value).concat(...this.schema.check(value))
   }
 
   public override async decode(value: Promise<InputOf<S>>): Promise<TypeOf<S>> {
