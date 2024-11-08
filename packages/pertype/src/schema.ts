@@ -12,16 +12,16 @@ import { IntersectOf, Merge, OptionalOf, UnionOf } from './util/helpers'
 import { resolvePath } from './util/path'
 import { Input, InputOf, Output, OutputOf, Type, TypeOf } from './util/type'
 
-/**
- * Function to test if value is within constraint
- */
-export type TestConstraint<T> = (value: T) => boolean
-
 /** Constraint to determine valid value */
 export interface Constraint<T = any> extends Violation {
   /** Check if given value is not violating the constraint */
-  readonly test: TestConstraint<T>
+  readonly test: ConstraintTest<T>
 }
+
+/**
+ * Function to test if value is within constraint
+ */
+export type ConstraintTest<T> = (value: T) => boolean
 
 export interface ValidationSuccess<T> {
   readonly valid: true
