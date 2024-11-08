@@ -615,6 +615,7 @@ const pattern = {
   email:
     /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i,
   uuid: /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i,
+  ulid: /^[0-9A-HJKMNP-TV-Z]{26}$/i,
   nanoid: /^[a-z0-9_-]{21}$/i,
 }
 
@@ -763,6 +764,14 @@ export class StringSchema extends Schema<string> {
     return this.rule({
       type: 'string.pattern.uuid',
       test: (v) => pattern.uuid.test(v),
+      message,
+    })
+  }
+
+  public ulid(message: string = `must be valid ULID`): this {
+    return this.rule({
+      type: 'string.pattern.ulid',
+      test: (v) => pattern.ulid.test(v),
       message,
     })
   }
