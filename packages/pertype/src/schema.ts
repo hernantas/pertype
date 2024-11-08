@@ -497,7 +497,7 @@ export class NumberSchema extends Schema<number> {
    */
   public min(
     limit: number,
-    message: string = `must greater than or equal to ${limit}`,
+    message: string = `must be greater than or equal to ${limit}`,
   ): this {
     return this.rule({
       type: `number.min`,
@@ -713,7 +713,7 @@ export class StringSchema extends Schema<string> {
    * @param message Optional message when rule is violated
    * @returns A new instance with new rules added
    */
-  public notEmpty(message: string = `must not empty`): this {
+  public notEmpty(message: string = `must not be empty string`): this {
     return this.rule({
       type: `string.not.empty`,
       test: (v) => v.length > 0,
@@ -731,7 +731,7 @@ export class StringSchema extends Schema<string> {
    */
   public pattern(
     pattern: RegExp,
-    message: string = `must match "${pattern.source}" pattern`,
+    message: string = `must be match "${pattern.source}" pattern`,
   ): this {
     return this.rule({
       type: `string.pattern`,
