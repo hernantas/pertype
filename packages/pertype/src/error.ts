@@ -46,7 +46,7 @@ export class UnsupportedTypeError extends ViolationError {
   public override readonly name: string = 'UnsupportedTypeError'
 
   public constructor(
-    public value: unknown,
+    public readonly value: unknown,
     public readonly path?: string | undefined,
   ) {
     super({
