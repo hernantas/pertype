@@ -614,6 +614,7 @@ const pattern = {
   base64: /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/,
   email:
     /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i,
+  ipv4: /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/,
   uuid: /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i,
   ulid: /^[0-9A-HJKMNP-TV-Z]{26}$/i,
   nanoid: /^[a-z0-9_-]{21}$/i,
@@ -756,6 +757,14 @@ export class StringSchema extends Schema<string> {
     return this.rule({
       type: 'string.pattern.email',
       test: (v) => pattern.email.test(v),
+      message,
+    })
+  }
+
+  public ipv4(message: string = `must be valid IPv4`): this {
+    return this.rule({
+      type: 'string.pattern.ipv4',
+      test: (v) => pattern.ipv4.test(v),
       message,
     })
   }
