@@ -29,11 +29,9 @@ export class ViolationError extends Error {
   public override readonly name: string = 'ViolationError'
 
   public constructor(private readonly violation: Violation) {
-    if (violation.path !== undefined) {
-      super(`${violation.path}: ${violation.message}`)
-    } else {
-      super(violation.message)
-    }
+    super(
+      `${violation.path !== undefined ? `${violation.path}: ` : ''}${violation.message}`,
+    )
   }
 
   public toViolation(): Violation {
@@ -51,7 +49,7 @@ export class UnsupportedTypeError extends ViolationError {
   ) {
     super({
       type: 'unsupported.type',
-      message: `Given value type of "${typeof value}" is not supported`,
+      message: `Unsupported value type of "${typeof value}"`,
       args: { value },
       path,
     })
@@ -71,7 +69,7 @@ export class UnsupportedValueError extends ViolationError {
   ) {
     super({
       type: 'unsupported.value',
-      message: `Given value of "${JSON.stringify(value)}" is not supported`,
+      message: `Unsupported value of "${JSON.stringify(value)}"`,
       args: { value },
       path,
     })
