@@ -2062,38 +2062,32 @@ export class ObjectSchema<
   public extends<P extends AnyRecord<Schema>>(
     extension: P,
   ): ObjectSchema<Merge<S, P>> {
-    type Def = Omit<ObjectDefinition<S>, 'properties'>
-    return new ObjectSchema({
-      ...(this.definition as Def),
-      properties: Object.fromEntries([
+    return ObjectSchema.create(
+      Object.fromEntries([
         ...Object.entries(this.properties),
         ...Object.entries(extension),
       ]) as Merge<S, P>,
-    })
+    )
   }
 
   public pick<K extends keyof S>(...keys: K[]): ObjectSchema<Pick<S, K>> {
-    type Def = Omit<ObjectDefinition<S>, 'properties'>
-    return new ObjectSchema({
-      ...(this.definition as Def),
-      properties: Object.fromEntries(
+    return ObjectSchema.create(
+      Object.fromEntries(
         Object.entries(this.properties)
           .filter(([key]) => keys.includes(key as K))
           .map(([key, schema]) => [key, schema]),
       ) as Pick<S, K>,
-    })
+    )
   }
 
   public omit<K extends keyof S>(...keys: K[]): ObjectSchema<Omit<S, K>> {
-    type Def = Omit<ObjectDefinition<S>, 'properties'>
-    return new ObjectSchema({
-      ...(this.definition as Def),
-      properties: Object.fromEntries(
+    return ObjectSchema.create(
+      Object.fromEntries(
         Object.entries(this.properties)
           .filter(([key]) => !keys.includes(key as K))
           .map(([key, schema]) => [key, schema]),
       ) as Omit<S, K>,
-    })
+    )
   }
 }
 
