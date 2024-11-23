@@ -186,6 +186,8 @@ export abstract class Schema<
    */
   public abstract get signature(): string
 
+  public abstract get create(): T
+
   /**
    * Coerced given input value of `I` type to `T` type
    *
@@ -336,6 +338,10 @@ export class AnySchema extends Schema<any> {
     return 'any'
   }
 
+  public override get create(): any {
+    return undefined
+  }
+
   public override decode(value: unknown): any {
     return value
   }
@@ -376,6 +382,10 @@ export class UnknownSchema extends Schema<unknown> {
     return 'unknown'
   }
 
+  public override get create(): unknown {
+    return undefined
+  }
+
   public override decode(value: unknown): unknown {
     return value
   }
@@ -414,6 +424,10 @@ export class BooleanSchema extends Schema<boolean> {
 
   public override get signature(): string {
     return 'boolean'
+  }
+
+  public override get create(): boolean {
+    return false
   }
 
   public override decode(value: unknown): boolean {
@@ -463,6 +477,10 @@ export class NumberSchema extends Schema<number> {
 
   public override get signature(): string {
     return 'number'
+  }
+
+  public override get create(): number {
+    return 0
   }
 
   public override decode(value: unknown): number {
@@ -637,6 +655,10 @@ export class StringSchema extends Schema<string> {
 
   public override get signature(): string {
     return 'string'
+  }
+
+  public override get create(): string {
+    return ''
   }
 
   public override decode(value: unknown): string {
@@ -849,6 +871,10 @@ export class NullSchema extends Schema<null> {
     return 'null'
   }
 
+  public override get create(): null {
+    return null
+  }
+
   public override decode(value: unknown): null {
     if (this.is(value)) {
       return value
@@ -892,6 +918,10 @@ export class UndefinedSchema extends Schema<undefined> {
     return 'undefined'
   }
 
+  public override get create(): undefined {
+    return undefined
+  }
+
   public override decode(value: unknown): undefined {
     if (this.is(value)) {
       return value
@@ -930,6 +960,10 @@ export class BigIntSchema extends Schema<bigint, string> {
 
   public override get signature(): string {
     return 'bigint'
+  }
+
+  public override get create(): bigint {
+    return 0n
   }
 
   public override decode(value: unknown): bigint {
@@ -1101,6 +1135,10 @@ export class DateSchema extends Schema<Date, string> {
     return 'Date'
   }
 
+  public override get create(): Date {
+    return new Date()
+  }
+
   public override decode(value: unknown): Date {
     if (this.is(value)) {
       return value
@@ -1231,6 +1269,10 @@ export class SymbolSchema extends Schema<symbol, string> {
     return 'symbol'
   }
 
+  public override get create(): symbol {
+    return Symbol('')
+  }
+
   public override decode(value: unknown): symbol {
     if (this.is(value)) {
       return value
@@ -1308,6 +1350,10 @@ export class LiteralSchema<T extends Literal> extends Schema<
     return String(this.value)
   }
 
+  public override get create(): T {
+    return this.value
+  }
+
   public override decode(value: unknown): T {
     if (this.is(value)) {
       return value
@@ -1368,6 +1414,10 @@ export class ArraySchema<S extends Schema> extends Schema<
 
   public override get signature(): string {
     return `${this.schema.signature}[]`
+  }
+
+  public override get create(): TypeOf<S>[] {
+    return []
   }
 
   public override check(values: TypeOf<S>[]): Violation[] {
@@ -1501,6 +1551,10 @@ export class JSONSchema<S extends Schema> extends Schema<
     return this.schema.signature
   }
 
+  public override get create(): TypeOf<S> {
+    return this.schema.create()
+  }
+
   public override check(value: TypeOf<S>): Violation[] {
     return super.check(value).concat(...this.schema.check(value))
   }
@@ -1551,6 +1605,10 @@ export class NullableSchema<S extends Schema> extends Schema<
 
   public override get signature(): string {
     return `Nullable<${this.schema.signature}>`
+  }
+
+  public override get create(): TypeOf<S> | null {
+    return null
   }
 
   public override check(value: TypeOf<S> | null): Violation[] {
@@ -1617,6 +1675,10 @@ export class OptionalSchema<S extends Schema> extends Schema<
 
   public override get signature(): string {
     return `Optional<${this.schema.signature}>`
+  }
+
+  public override get create(): TypeOf<S> | undefined {
+    return undefined
   }
 
   public override check(value: TypeOf<S> | undefined): Violation[] {
@@ -1689,6 +1751,10 @@ export class PromiseSchema<S extends Schema> extends Schema<
     return `Promise<${this.schema.signature}>`
   }
 
+  public override get create(): Promise<TypeOf<S>> {
+    return Promise.resolve(this.schema.create())
+  }
+
   public override check(value: Promise<TypeOf<S>>): Violation[] {
     return super.check(value).concat(...this.schema.check(value))
   }
@@ -1744,6 +1810,10 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
 
   public override get signature(): string {
     return `Map<${this.key.signature},${this.value.signature}>`
+  }
+
+  public override get create(): Map<TypeOf<K>, TypeOf<V>> {
+    return new Map()
   }
 
   public override check(value: Map<TypeOf<K>, TypeOf<V>>): Violation[] {
@@ -1874,6 +1944,10 @@ export class SetSchema<V extends Schema> extends Schema<
     return `Set<${this.value.signature}>`
   }
 
+  public override get create(): Set<TypeOf<V>> {
+    return new Set()
+  }
+
   public override check(value: Set<TypeOf<V>>): Violation[] {
     return super
       .check(value)
@@ -1966,6 +2040,10 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
     return `[${this.items.map((item) => item.signature).join(',')}]`
   }
 
+  public override get create(): TypeOf<S> {
+    return this.items.map((item) => item.create()) as TypeOf<S>
+  }
+
   public override check(value: TypeOf<S>): Violation[] {
     return super
       .check(value)
@@ -2049,6 +2127,14 @@ export class ObjectSchema<
 
   public override get signature(): string {
     return `{${this.entries.map(([key, schema]) => `${key}:${schema.signature}`).join(',')}}`
+  }
+
+  public override get create(): OptionalOf<TypeOf<S>> {
+    const entries = Object.entries(this.properties).map(([key, schema]) => [
+      key,
+      schema.create(),
+    ])
+    return Object.fromEntries(entries)
   }
 
   public override check(value: OptionalOf<TypeOf<S>>): Violation[] {
@@ -2180,6 +2266,10 @@ export class TypeSchema<T, Args extends any[]> extends Schema<
     return this.ctor.name
   }
 
+  public override get create(): T {
+    throw new Error('Not implemented')
+  }
+
   public override decode(value: unknown): T {
     if (this.is(value)) {
       return value
@@ -2242,6 +2332,10 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
 
   public override get signature(): string {
     return this.members.map((member) => member.signature).join('|')
+  }
+
+  public override get create(): UnionOf<TypeOf<S>> {
+    return this.members[0].create()
   }
 
   public override check(value: UnionOf<TypeOf<S>>): Violation[] {
@@ -2329,6 +2423,13 @@ export class IntersectSchema<S extends Member<Schema>> extends Schema<
 
   public override get signature(): string {
     return this.members.map((member) => member.signature).join('&')
+  }
+
+  public override get create(): IntersectOf<TypeOf<S>> {
+    return this.members
+      .map((member) => member.create())
+      .filter((v) => typeof v === 'object')
+      .reduce((result, v) => merge(result, v), {})
   }
 
   public override check(value: IntersectOf<TypeOf<S>>): Violation[] {
