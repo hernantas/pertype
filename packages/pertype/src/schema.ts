@@ -1,13 +1,6 @@
 import { ImmutableBuilder } from './builder'
 import { UnsupportedTypeError, UnsupportedValueError, Violation } from './error'
-import {
-  AnyRecord,
-  Constructor,
-  Key,
-  Literal,
-  Member,
-  Tuple,
-} from './util/alias'
+import { AnyRecord, Key, Literal, Member, Tuple } from './util/alias'
 import { IntersectOf, Merge, OptionalOf, UnionOf } from './util/helpers'
 import { resolvePath } from './util/path'
 import { Input, InputOf, Output, OutputOf, Type, TypeOf } from './util/type'
@@ -2235,74 +2228,6 @@ export function object<S extends AnyRecord<Schema>>(
   return ObjectSchema.create(properties)
 }
 
-// ########
-// # Type #
-// ########
-
-export interface TypeDefinition<T, Args extends any[]> extends Definition {
-  readonly ctor: Constructor<T, Args>
-}
-
-/**
- * {@link Schema} that represent `class` object
- */
-export class TypeSchema<T, Args extends any[]> extends Schema<
-  T,
-  T,
-  unknown,
-  TypeDefinition<T, Args>
-> {
-  public static create<T, Args extends any[]>(
-    ctor: Constructor<T, Args>,
-  ): TypeSchema<T, Args> {
-    return new TypeSchema({ ctor })
-  }
-
-  public override is(value: unknown): value is T {
-    return value instanceof this.ctor
-  }
-
-  public override get signature(): string {
-    return this.ctor.name
-  }
-
-  public override get create(): T {
-    throw new Error('Not implemented')
-  }
-
-  public override decode(value: unknown): T {
-    if (this.is(value)) {
-      return value
-    }
-    throw new UnsupportedTypeError(value)
-  }
-
-  public override encode(value: T): T {
-    if (this.is(value)) {
-      return value
-    }
-    throw new UnsupportedTypeError(value)
-  }
-
-  /**
-   * Get constructor of the type
-   */
-  public get ctor(): Constructor<T, Args> {
-    return this.get('ctor')
-  }
-}
-
-/**
- * Create new instances of {@link TypeSchema}
- *
- * @returns A new instances
- */
-export function type<T, Args extends any[]>(
-  ctor: Constructor<T, Args>,
-): TypeSchema<T, Args> {
-  return TypeSchema.create(ctor)
-}
-
 // #########
 // # Union #
 // #########
@@ -2512,7 +2437,6 @@ export const t = {
   set,
   tuple,
   object,
-  type,
   union,
   intersect,
 }

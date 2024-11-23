@@ -19,7 +19,6 @@ import {
   string,
   symbol,
   tuple,
-  type,
   union,
   unknown,
 } from './schema'
@@ -1041,24 +1040,6 @@ describe('Schema', () => {
       expect(schema.test({ _string: '12', _number: 0 })).toBe(false)
       expect(schema.test({ _string: '12', _number: 1 })).toBe(false)
       expect(schema.test({ _string: '12', _number: 2 })).toBe(false)
-    })
-  })
-
-  describe('TypeSchema', () => {
-    class User {
-      public constructor(
-        public readonly id: number,
-        public readonly name: string,
-        public readonly active: boolean,
-      ) {}
-    }
-
-    it('Should be compatible with Schema', () => expectType<Schema>(type(User)))
-
-    it('Should narrow object class as object class', () => {
-      const schema = type(User)
-      expect(schema.is(new User(1, 'Adam', true))).toBe(true)
-      expect(schema.is({ id: 1, name: 'Adam', active: true })).toBe(false)
     })
   })
 })
