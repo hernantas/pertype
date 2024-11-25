@@ -179,6 +179,9 @@ export abstract class Schema<
    */
   public abstract get signature(): string
 
+  /**
+   * Create new default value of `T` type
+   */
   public abstract create(): T
 
   /**
