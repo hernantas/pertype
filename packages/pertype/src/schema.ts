@@ -179,7 +179,7 @@ export abstract class Schema<
    */
   public abstract get signature(): string
 
-  public abstract get create(): T
+  public abstract create(): T
 
   /**
    * Coerced given input value of `I` type to `T` type
@@ -331,7 +331,7 @@ export class AnySchema extends Schema<any> {
     return 'any'
   }
 
-  public override get create(): any {
+  public override create(): any {
     return undefined
   }
 
@@ -375,7 +375,7 @@ export class UnknownSchema extends Schema<unknown> {
     return 'unknown'
   }
 
-  public override get create(): unknown {
+  public override create(): unknown {
     return undefined
   }
 
@@ -419,7 +419,7 @@ export class BooleanSchema extends Schema<boolean> {
     return 'boolean'
   }
 
-  public override get create(): boolean {
+  public override create(): boolean {
     return false
   }
 
@@ -472,7 +472,7 @@ export class NumberSchema extends Schema<number> {
     return 'number'
   }
 
-  public override get create(): number {
+  public override create(): number {
     return 0
   }
 
@@ -650,7 +650,7 @@ export class StringSchema extends Schema<string> {
     return 'string'
   }
 
-  public override get create(): string {
+  public override create(): string {
     return ''
   }
 
@@ -864,7 +864,7 @@ export class NullSchema extends Schema<null> {
     return 'null'
   }
 
-  public override get create(): null {
+  public override create(): null {
     return null
   }
 
@@ -911,7 +911,7 @@ export class UndefinedSchema extends Schema<undefined> {
     return 'undefined'
   }
 
-  public override get create(): undefined {
+  public override create(): undefined {
     return undefined
   }
 
@@ -955,7 +955,7 @@ export class BigIntSchema extends Schema<bigint, string> {
     return 'bigint'
   }
 
-  public override get create(): bigint {
+  public override create(): bigint {
     return 0n
   }
 
@@ -1128,7 +1128,7 @@ export class DateSchema extends Schema<Date, string> {
     return 'Date'
   }
 
-  public override get create(): Date {
+  public override create(): Date {
     return new Date()
   }
 
@@ -1262,7 +1262,7 @@ export class SymbolSchema extends Schema<symbol, string> {
     return 'symbol'
   }
 
-  public override get create(): symbol {
+  public override create(): symbol {
     return Symbol('')
   }
 
@@ -1343,7 +1343,7 @@ export class LiteralSchema<T extends Literal> extends Schema<
     return String(this.value)
   }
 
-  public override get create(): T {
+  public override create(): T {
     return this.value
   }
 
@@ -1409,7 +1409,7 @@ export class ArraySchema<S extends Schema> extends Schema<
     return `${this.schema.signature}[]`
   }
 
-  public override get create(): TypeOf<S>[] {
+  public override create(): TypeOf<S>[] {
     return []
   }
 
@@ -1544,7 +1544,7 @@ export class JSONSchema<S extends Schema> extends Schema<
     return this.schema.signature
   }
 
-  public override get create(): TypeOf<S> {
+  public override create(): TypeOf<S> {
     return this.schema.create()
   }
 
@@ -1600,7 +1600,7 @@ export class NullableSchema<S extends Schema> extends Schema<
     return `Nullable<${this.schema.signature}>`
   }
 
-  public override get create(): TypeOf<S> | null {
+  public override create(): TypeOf<S> | null {
     return null
   }
 
@@ -1670,7 +1670,7 @@ export class OptionalSchema<S extends Schema> extends Schema<
     return `Optional<${this.schema.signature}>`
   }
 
-  public override get create(): TypeOf<S> | undefined {
+  public override create(): TypeOf<S> | undefined {
     return undefined
   }
 
@@ -1744,7 +1744,7 @@ export class PromiseSchema<S extends Schema> extends Schema<
     return `Promise<${this.schema.signature}>`
   }
 
-  public override get create(): Promise<TypeOf<S>> {
+  public override create(): Promise<TypeOf<S>> {
     return Promise.resolve(this.schema.create())
   }
 
@@ -1805,7 +1805,7 @@ export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
     return `Map<${this.key.signature},${this.value.signature}>`
   }
 
-  public override get create(): Map<TypeOf<K>, TypeOf<V>> {
+  public override create(): Map<TypeOf<K>, TypeOf<V>> {
     return new Map()
   }
 
@@ -1937,7 +1937,7 @@ export class SetSchema<V extends Schema> extends Schema<
     return `Set<${this.value.signature}>`
   }
 
-  public override get create(): Set<TypeOf<V>> {
+  public override create(): Set<TypeOf<V>> {
     return new Set()
   }
 
@@ -2033,7 +2033,7 @@ export class TupleSchema<S extends Tuple<Schema>> extends Schema<
     return `[${this.items.map((item) => item.signature).join(',')}]`
   }
 
-  public override get create(): TypeOf<S> {
+  public override create(): TypeOf<S> {
     return this.items.map((item) => item.create()) as TypeOf<S>
   }
 
@@ -2122,7 +2122,7 @@ export class ObjectSchema<
     return `{${this.entries.map(([key, schema]) => `${key}:${schema.signature}`).join(',')}}`
   }
 
-  public override get create(): OptionalOf<TypeOf<S>> {
+  public override create(): OptionalOf<TypeOf<S>> {
     const entries = Object.entries(this.properties).map(([key, schema]) => [
       key,
       schema.create(),
@@ -2259,7 +2259,7 @@ export class UnionSchema<S extends Member<Schema>> extends Schema<
     return this.members.map((member) => member.signature).join('|')
   }
 
-  public override get create(): UnionOf<TypeOf<S>> {
+  public override create(): UnionOf<TypeOf<S>> {
     return this.members[0].create()
   }
 
@@ -2350,7 +2350,7 @@ export class IntersectSchema<S extends Member<Schema>> extends Schema<
     return this.members.map((member) => member.signature).join('&')
   }
 
-  public override get create(): IntersectOf<TypeOf<S>> {
+  public override create(): IntersectOf<TypeOf<S>> {
     return this.members
       .map((member) => member.create())
       .filter((v) => typeof v === 'object')
