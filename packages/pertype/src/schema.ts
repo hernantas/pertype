@@ -207,16 +207,17 @@ export abstract class Schema<
     } catch (error) {
       return {
         success: false,
-        violations: [
+        violations:
           error instanceof UnsupportedTypeError ||
           error instanceof UnsupportedValueError
-            ? error.toViolation()
-            : {
-                type: 'decode',
-                message: `An error has occurred during decoding`,
-                args: { error },
-              },
-        ],
+            ? error.violations
+            : [
+                {
+                  type: 'decode',
+                  message: `An error has occurred during decoding`,
+                  args: { error },
+                },
+              ],
       }
     }
   }
@@ -230,16 +231,17 @@ export abstract class Schema<
     } catch (error) {
       return {
         success: false,
-        violations: [
+        violations:
           error instanceof UnsupportedTypeError ||
           error instanceof UnsupportedValueError
-            ? error.toViolation()
-            : {
-                type: 'encode',
-                message: `An error has occurred during encoding`,
-                args: { error },
-              },
-        ],
+            ? error.violations
+            : [
+                {
+                  type: 'encode',
+                  message: `An error has occurred during encoding`,
+                  args: { error },
+                },
+              ],
       }
     }
   }
