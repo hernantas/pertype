@@ -1,5 +1,10 @@
 import { ImmutableBuilder } from './builder'
-import { UnsupportedTypeError, UnsupportedValueError, Violation } from './error'
+import {
+  UnsupportedTypeError,
+  UnsupportedValueError,
+  Violation,
+  ViolationError,
+} from './error'
 import { AnyRecord, Key, Literal, Member, Tuple } from './util/alias'
 import { IntersectOf, Merge, OptionalOf, UnionOf } from './util/helpers'
 import { resolvePath } from './util/path'
@@ -200,48 +205,40 @@ export abstract class Schema<
 
   public tryDecode(value: I): ParseResult<T> {
     try {
-      return {
-        success: true,
-        value: this.decode(value),
-      }
+      return { success: true, value: this.decode(value) }
     } catch (error) {
+      if (error instanceof ViolationError) {
+        return { success: false, violations: error.violations }
+      }
       return {
         success: false,
-        violations:
-          error instanceof UnsupportedTypeError ||
-          error instanceof UnsupportedValueError
-            ? error.violations
-            : [
-                {
-                  type: 'decode',
-                  message: `An error has occurred during decoding`,
-                  args: { error },
-                },
-              ],
+        violations: [
+          {
+            type: 'decode',
+            message: `An error has occurred during decoding`,
+            args: { error },
+          },
+        ],
       }
     }
   }
 
   public tryEncode(value: T): ParseResult<O> {
     try {
-      return {
-        success: true,
-        value: this.encode(value),
-      }
+      return { success: true, value: this.encode(value) }
     } catch (error) {
+      if (error instanceof ViolationError) {
+        return { success: false, violations: error.violations }
+      }
       return {
         success: false,
-        violations:
-          error instanceof UnsupportedTypeError ||
-          error instanceof UnsupportedValueError
-            ? error.violations
-            : [
-                {
-                  type: 'encode',
-                  message: `An error has occurred during encoding`,
-                  args: { error },
-                },
-              ],
+        violations: [
+          {
+            type: 'encode',
+            message: `An error has occurred during encoding`,
+            args: { error },
+          },
+        ],
       }
     }
   }
