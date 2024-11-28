@@ -1524,9 +1524,8 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
 // # JSON #
 // ########
 
-export interface JSONDefinition<S extends Schema> extends Definition {
-  readonly schema: S
-}
+export interface JSONDefinition<S extends Schema>
+  extends WrapperDefinition<S> {}
 
 export class JSONSchema<S extends Schema> extends Schema<
   TypeOf<S>,
