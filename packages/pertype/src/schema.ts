@@ -1690,7 +1690,10 @@ export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
 // ############
 
 export interface OptionalDefinition<S extends Schema>
-  extends WrapperDefinition<S> {}
+  extends WrapperDefinition<S> {
+  readonly parseNull?: boolean
+  readonly parseFalsy?: boolean
+}
 
 /**
  * {@link Schema} that wrap any schema as `optional`
@@ -1722,7 +1725,16 @@ export class OptionalSchema<
   }
 
   public override decode(value: unknown): TypeOf<S> | undefined {
-    return value === undefined ? undefined : this.schema.decode(value)
+    if (value === undefined) {
+      return undefined
+    }
+    if (this.isParseNull() && value === null) {
+      return undefined
+    }
+    if (this.isParseFalsy() && !value) {
+      return undefined
+    }
+    return this.schema.decode(value)
   }
 
   public override encode(
@@ -1733,6 +1745,22 @@ export class OptionalSchema<
 
   public get schema(): S {
     return this.get('schema')
+  }
+
+  public isParseNull(): boolean {
+    return this.get('parseNull') ?? false
+  }
+
+  public parseNull(value: boolean = true): this {
+    return this.set('parseNull', value)
+  }
+
+  public isParseFalsy(): boolean {
+    return this.get('parseFalsy') ?? false
+  }
+
+  public parseFalsy(value: boolean = true): this {
+    return this.set('parseFalsy', value)
   }
 
   /**

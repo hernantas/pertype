@@ -794,6 +794,25 @@ describe('Schema', () => {
       expect(validator.test(1)).toBe(true)
       expect(validator.test(2)).toBe(true)
     })
+
+    describe('"parseNull" options', () => {
+      it('Should decode null as undefined', () =>
+        expect(string().optional().parseNull().decode(null)).toBeUndefined())
+    })
+
+    describe('"parseFalsy" options', () => {
+      it('Should decode falsy value as undefined', () => {
+        expect(string().optional().parseFalsy().decode(null)).toBeUndefined()
+        expect(
+          string().optional().parseFalsy().decode(undefined),
+        ).toBeUndefined()
+        expect(string().optional().parseFalsy().decode(false)).toBeUndefined()
+        expect(string().optional().parseFalsy().decode(NaN)).toBeUndefined()
+        expect(string().optional().parseFalsy().decode(0)).toBeUndefined()
+        expect(string().optional().parseFalsy().decode(-0)).toBeUndefined()
+        expect(string().optional().parseFalsy().decode('')).toBeUndefined()
+      })
+    })
   })
 
   describe('TupleSchema', () => {
