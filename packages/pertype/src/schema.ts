@@ -318,7 +318,12 @@ function reException<T>(fn: () => T, path?: string | undefined): T {
 /**
  * {@link Schema} that represent `any`
  */
-export class AnySchema extends Schema<any> {
+export class AnySchema<D extends Definition = Definition> extends Schema<
+  any,
+  any,
+  unknown,
+  D
+> {
   private static readonly instance = new AnySchema({})
 
   public static create(): AnySchema {
@@ -362,7 +367,12 @@ export function any(): AnySchema {
 /**
  * {@link Schema} that represent `unknown`
  */
-export class UnknownSchema extends Schema<unknown> {
+export class UnknownSchema<D extends Definition = Definition> extends Schema<
+  unknown,
+  unknown,
+  unknown,
+  D
+> {
   private static readonly instance = new UnknownSchema({})
 
   public static create(): UnknownSchema {
@@ -406,7 +416,12 @@ export function unknown(): UnknownSchema {
 /**
  * {@link Schema} that represent `boolean`
  */
-export class BooleanSchema extends Schema<boolean> {
+export class BooleanSchema<D extends Definition = Definition> extends Schema<
+  boolean,
+  boolean,
+  unknown,
+  D
+> {
   private static readonly instance = new BooleanSchema({})
 
   public static create(): BooleanSchema {
@@ -459,7 +474,12 @@ export function bool(): BooleanSchema {
 /**
  * {@link Schema} that represent `number`
  */
-export class NumberSchema extends Schema<number> {
+export class NumberSchema<D extends Definition = Definition> extends Schema<
+  number,
+  number,
+  unknown,
+  D
+> {
   private static readonly instance = new NumberSchema({})
 
   public static create(): NumberSchema {
@@ -637,7 +657,12 @@ const pattern = {
 /**
  * {@link Schema} that represent `string`
  */
-export class StringSchema extends Schema<string> {
+export class StringSchema<D extends Definition = Definition> extends Schema<
+  string,
+  string,
+  unknown,
+  D
+> {
   private static readonly instance = new StringSchema({})
 
   public static create(): StringSchema {
@@ -851,7 +876,12 @@ export function string(): StringSchema {
 /**
  * {@link Schema} that represent `null`
  */
-export class NullSchema extends Schema<null> {
+export class NullSchema<D extends Definition = Definition> extends Schema<
+  null,
+  null,
+  unknown,
+  D
+> {
   private static readonly instance = new NullSchema({})
 
   public static create(): NullSchema {
@@ -898,7 +928,12 @@ export function _null(): NullSchema {
 /**
  * {@link Schema} that represent `null`
  */
-export class UndefinedSchema extends Schema<undefined> {
+export class UndefinedSchema<D extends Definition = Definition> extends Schema<
+  undefined,
+  undefined,
+  unknown,
+  D
+> {
   private static readonly instance = new UndefinedSchema({})
 
   public static create(): UndefinedSchema {
@@ -942,7 +977,12 @@ export function _undefined(): UndefinedSchema {
 // # BigInt #
 // ##########
 
-export class BigIntSchema extends Schema<bigint, string> {
+export class BigIntSchema<D extends Definition = Definition> extends Schema<
+  bigint,
+  string,
+  unknown,
+  D
+> {
   private static readonly instance = new BigIntSchema({})
 
   public static create(): BigIntSchema {
@@ -1115,7 +1155,12 @@ export function bigint(): BigIntSchema {
 /**
  * {@link Schema} that represent `date`
  */
-export class DateSchema extends Schema<Date, string> {
+export class DateSchema<D extends Definition = Definition> extends Schema<
+  Date,
+  string,
+  unknown,
+  D
+> {
   private static readonly instance = new DateSchema({})
 
   public static create(): DateSchema {
@@ -1249,7 +1294,12 @@ export function date(): DateSchema {
 /**
  * {@link Schema} that represent `symbol`
  */
-export class SymbolSchema extends Schema<symbol, string> {
+export class SymbolSchema<D extends Definition = Definition> extends Schema<
+  symbol,
+  string,
+  unknown,
+  D
+> {
   private static readonly instance = new SymbolSchema({})
 
   public static create(): SymbolSchema {
@@ -1327,12 +1377,10 @@ export interface LiteralDefinition<T extends Literal> extends Definition {
   readonly value: T
 }
 
-export class LiteralSchema<T extends Literal> extends Schema<
-  T,
-  T,
-  unknown,
-  LiteralDefinition<T>
-> {
+export class LiteralSchema<
+  T extends Literal,
+  D extends LiteralDefinition<T> = LiteralDefinition<T>,
+> extends Schema<T, T, unknown, D> {
   public static create<T extends Literal>(value: T): LiteralSchema<T> {
     return new LiteralSchema({ value })
   }
@@ -1390,12 +1438,10 @@ export interface ArrayDefinition<S extends Schema>
 /**
  * {@link Schema} that represent `Array` of type of inner schema
  */
-export class ArraySchema<S extends Schema> extends Schema<
-  TypeOf<S>[],
-  OutputOf<S>[],
-  unknown,
-  ArrayDefinition<S>
-> {
+export class ArraySchema<
+  S extends Schema,
+  D extends ArrayDefinition<S> = ArrayDefinition<S>,
+> extends Schema<TypeOf<S>[], OutputOf<S>[], unknown, D> {
   public static create<S extends Schema>(schema: S): ArraySchema<S> {
     return new ArraySchema({ schema: schema })
   }
@@ -1527,12 +1573,10 @@ export function array<S extends Schema>(schema: S): ArraySchema<S> {
 export interface JSONDefinition<S extends Schema>
   extends WrapperDefinition<S> {}
 
-export class JSONSchema<S extends Schema> extends Schema<
-  TypeOf<S>,
-  string,
-  unknown,
-  JSONDefinition<S>
-> {
+export class JSONSchema<
+  S extends Schema,
+  D extends JSONDefinition<S> = JSONDefinition<S>,
+> extends Schema<TypeOf<S>, string, unknown, D> {
   public static create<S extends Schema>(schema: S): JSONSchema<S> {
     return new JSONSchema({ schema })
   }
@@ -1583,12 +1627,10 @@ export interface NullableDefinition<S extends Schema>
 /**
  * {@link Schema} that wrap any schema as `nullable`
  */
-export class NullableSchema<S extends Schema> extends Schema<
-  TypeOf<S> | null,
-  OutputOf<S> | null,
-  unknown,
-  NullableDefinition<S>
-> {
+export class NullableSchema<
+  S extends Schema,
+  D extends NullableDefinition<S> = NullableDefinition<S>,
+> extends Schema<TypeOf<S> | null, OutputOf<S> | null, unknown, D> {
   public static create<S extends Schema>(schema: S): NullableSchema<S> {
     return new NullableSchema({ schema: schema })
   }
@@ -1653,12 +1695,10 @@ export interface OptionalDefinition<S extends Schema>
 /**
  * {@link Schema} that wrap any schema as `optional`
  */
-export class OptionalSchema<S extends Schema> extends Schema<
-  TypeOf<S> | undefined,
-  OutputOf<S> | undefined,
-  unknown,
-  OptionalDefinition<S>
-> {
+export class OptionalSchema<
+  S extends Schema,
+  D extends OptionalDefinition<S> = OptionalDefinition<S>,
+> extends Schema<TypeOf<S> | undefined, OutputOf<S> | undefined, unknown, D> {
   public static create<S extends Schema>(schema: S): OptionalSchema<S> {
     return new OptionalSchema({ schema: schema })
   }
@@ -1722,11 +1762,14 @@ export function optional<S extends Schema>(schema: S): OptionalSchema<S> {
 export interface PromiseDefinition<S extends Schema>
   extends WrapperDefinition<S> {}
 
-export class PromiseSchema<S extends Schema> extends Schema<
+export class PromiseSchema<
+  S extends Schema,
+  D extends PromiseDefinition<S> = PromiseDefinition<S>,
+> extends Schema<
   Promise<TypeOf<S>>,
   Promise<OutputOf<S>>,
   Promise<InputOf<S>>,
-  PromiseDefinition<S>
+  D
 > {
   public static create<S extends Schema>(schema: S): PromiseSchema<S> {
     return new PromiseSchema({ schema })
@@ -1779,11 +1822,15 @@ export interface MapDefinition<K extends KeySchema, V extends Schema>
   readonly value: V
 }
 
-export class MapSchema<K extends KeySchema, V extends Schema> extends Schema<
+export class MapSchema<
+  K extends KeySchema,
+  V extends Schema,
+  D extends MapDefinition<K, V> = MapDefinition<K, V>,
+> extends Schema<
   Map<TypeOf<K>, TypeOf<V>>,
   Record<OutputOf<K>, OutputOf<V>>,
   unknown,
-  MapDefinition<K, V>
+  D
 > {
   public static create<K extends KeySchema, V extends Schema>(
     key: K,
@@ -1915,12 +1962,10 @@ export interface SetDefinition<V extends Schema> extends Definition {
   readonly value: V
 }
 
-export class SetSchema<V extends Schema> extends Schema<
-  Set<TypeOf<V>>,
-  OutputOf<V>[],
-  unknown,
-  SetDefinition<V>
-> {
+export class SetSchema<
+  V extends Schema,
+  D extends SetDefinition<V> = SetDefinition<V>,
+> extends Schema<Set<TypeOf<V>>, OutputOf<V>[], unknown, D> {
   public static create<V extends Schema>(value: V): SetSchema<V> {
     return new SetSchema({ value })
   }
@@ -2012,12 +2057,10 @@ export interface TupleDefinition<S extends Tuple<Schema>> extends Definition {
   readonly items: S
 }
 
-export class TupleSchema<S extends Tuple<Schema>> extends Schema<
-  TypeOf<S>,
-  OutputOf<S>,
-  unknown,
-  TupleDefinition<S>
-> {
+export class TupleSchema<
+  S extends Tuple<Schema>,
+  D extends TupleDefinition<S> = TupleDefinition<S>,
+> extends Schema<TypeOf<S>, OutputOf<S>, unknown, D> {
   public static create<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
     return new TupleSchema({ items: members })
   }
@@ -2096,12 +2139,8 @@ export interface ObjectDefinition<S extends AnyRecord<Schema>>
  */
 export class ObjectSchema<
   S extends AnyRecord<Schema> = AnyRecord<Schema>,
-> extends Schema<
-  OptionalOf<TypeOf<S>>,
-  OutputOf<S>,
-  unknown,
-  ObjectDefinition<S>
-> {
+  D extends ObjectDefinition<S> = ObjectDefinition<S>,
+> extends Schema<OptionalOf<TypeOf<S>>, OutputOf<S>, unknown, D> {
   public static create<S extends AnyRecord<Schema>>(
     properties: S,
   ): ObjectSchema<S> {
@@ -2239,12 +2278,10 @@ export interface UnionDefinition<S extends Member<Schema>> extends Definition {
 /**
  * {@link Schema} that represent `union`
  */
-export class UnionSchema<S extends Member<Schema>> extends Schema<
-  UnionOf<TypeOf<S>>,
-  UnionOf<OutputOf<S>>,
-  unknown,
-  UnionDefinition<S>
-> {
+export class UnionSchema<
+  S extends Member<Schema>,
+  D extends UnionDefinition<S> = UnionDefinition<S>,
+> extends Schema<UnionOf<TypeOf<S>>, UnionOf<OutputOf<S>>, unknown, D> {
   public static create<S extends Member<Schema>>(
     ...members: S
   ): UnionSchema<S> {
@@ -2330,12 +2367,10 @@ export interface IntersectDefinition<S extends Member<Schema>>
 /**
  * {@link Schema} that represent `intersection`
  */
-export class IntersectSchema<S extends Member<Schema>> extends Schema<
-  IntersectOf<TypeOf<S>>,
-  IntersectOf<OutputOf<S>>,
-  unknown,
-  IntersectDefinition<S>
-> {
+export class IntersectSchema<
+  S extends Member<Schema>,
+  D extends IntersectDefinition<S> = IntersectDefinition<S>,
+> extends Schema<IntersectOf<TypeOf<S>>, IntersectOf<OutputOf<S>>, unknown, D> {
   public static create<S extends Member<Schema>>(
     ...members: S
   ): IntersectSchema<S> {
