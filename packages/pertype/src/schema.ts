@@ -1719,9 +1719,8 @@ export function optional<S extends Schema>(schema: S): OptionalSchema<S> {
 // # Promise #
 // ###########
 
-export interface PromiseDefinition<S extends Schema> extends Definition {
-  readonly schema: S
-}
+export interface PromiseDefinition<S extends Schema>
+  extends WrapperDefinition<S> {}
 
 export class PromiseSchema<S extends Schema> extends Schema<
   Promise<TypeOf<S>>,
