@@ -750,6 +750,26 @@ describe('Schema', () => {
       expect(validator.test(1)).toBe(true)
       expect(validator.test(2)).toBe(true)
     })
+
+    describe('"parseUndefined" options', () => {
+      it('Should decode undefined as null', () => {
+        expect(
+          string().nullable().parseUndefined().decode(undefined),
+        ).toBeNull()
+      })
+    })
+
+    describe('"parseFalsy" options', () => {
+      it('Should decode falsy value as undefined', () => {
+        expect(string().nullable().parseFalsy().decode(null)).toBeNull()
+        expect(string().nullable().parseFalsy().decode(undefined)).toBeNull()
+        expect(string().nullable().parseFalsy().decode(false)).toBeNull()
+        expect(string().nullable().parseFalsy().decode(NaN)).toBeNull()
+        expect(string().nullable().parseFalsy().decode(0)).toBeNull()
+        expect(string().nullable().parseFalsy().decode(-0)).toBeNull()
+        expect(string().nullable().parseFalsy().decode('')).toBeNull()
+      })
+    })
   })
 
   describe('OptionalSchema', () => {

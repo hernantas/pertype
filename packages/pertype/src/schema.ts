@@ -1622,7 +1622,10 @@ export function json<S extends Schema>(schema: S): JSONSchema<S> {
 // ############
 
 export interface NullableDefinition<S extends Schema>
-  extends WrapperDefinition<S> {}
+  extends WrapperDefinition<S> {
+  readonly parseUndefined?: boolean
+  readonly parseFalsy?: boolean
+}
 
 /**
  * {@link Schema} that wrap any schema as `nullable`
@@ -1654,7 +1657,16 @@ export class NullableSchema<
   }
 
   public override decode(value: unknown): TypeOf<S> | null {
-    return value === null ? null : this.schema.decode(value)
+    if (value === null) {
+      return null
+    }
+    if (this.isParseUndefined() && value === undefined) {
+      return null
+    }
+    if (this.isParseFalsy() && !value) {
+      return null
+    }
+    return this.schema.decode(value)
   }
 
   public override encode(value: TypeOf<S> | null): OutputOf<S> | null {
@@ -1663,6 +1675,22 @@ export class NullableSchema<
 
   public get schema(): S {
     return this.get('schema')
+  }
+
+  public isParseUndefined(): boolean {
+    return this.get('parseUndefined') ?? false
+  }
+
+  public parseUndefined(value: boolean = true): this {
+    return this.set('parseUndefined', value)
+  }
+
+  public isParseFalsy(): boolean {
+    return this.get('parseFalsy') ?? false
+  }
+
+  public parseFalsy(value: boolean = true): this {
+    return this.set('parseFalsy', value)
   }
 
   /**
