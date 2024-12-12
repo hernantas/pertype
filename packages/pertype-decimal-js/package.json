@@ -20,7 +20,7 @@
     "validate",
     "validation"
   ],
-  "version": "0.5.1",
+  "version": "0.6.0",
   "files": [
     "dist/cjs",
     "dist/esm",
@@ -41,6 +41,6 @@
   },
   "dependencies": {
     "decimal.js": "^10.4.3",
-    "pertype": "^0.5.1"
+    "pertype": "^0.6.0"
   }
 }
