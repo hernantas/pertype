@@ -1,4 +1,4 @@
-export * from './builder'
+export * from './cloneable'
 export * from './error'
 export * from './util/helpers'
 export * from './schema'

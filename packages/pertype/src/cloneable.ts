@@ -5,7 +5,7 @@ import { Constructor } from './util/alias'
  * Builder to build `T` object map (key-value store) that create new instance
  * every time its mutated
  */
-export class ImmutableBuilder<T extends {}> implements MetaTarget {
+export class Cloneable<T extends {}> implements MetaTarget {
   /**
    * NEVER OVERRIDE CONSTRUCTOR.
    *

@@ -1,4 +1,4 @@
-import { ImmutableBuilder } from './builder'
+import { Cloneable } from './cloneable'
 import {
   UnsupportedTypeError,
   UnsupportedValueError,
@@ -56,7 +56,7 @@ const description = metadata<string>()
  * validate the value
  */
 export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
-  extends ImmutableBuilder<D>
+  extends Cloneable<D>
   implements Type<T>, Output<O>, Input<I>
 {
   /** Ignore */
