@@ -1,10 +1,11 @@
+import { MetaTarget } from './metadata'
 import { Constructor } from './util/alias'
 
 /**
  * Builder to build `T` object map (key-value store) that create new instance
  * every time its mutated
  */
-export class ImmutableBuilder<T extends {}> {
+export class ImmutableBuilder<T extends {}> implements MetaTarget {
   /**
    * NEVER OVERRIDE CONSTRUCTOR.
    *
@@ -13,7 +14,10 @@ export class ImmutableBuilder<T extends {}> {
    * wrong.
    * @param definition Key-value store object
    */
-  protected constructor(private readonly definition: T) {}
+  protected constructor(
+    private readonly definition: T,
+    public readonly parent?: MetaTarget | undefined,
+  ) {}
 
   /**
    * Get value of store object given by the key
@@ -44,7 +48,10 @@ export class ImmutableBuilder<T extends {}> {
    * @returns A new instance of current object
    */
   public clone(newDefinition: T = this.definition): this {
-    const Ctor = this.constructor as Constructor<this, [T]>
-    return new Ctor(newDefinition)
+    const Ctor = this.constructor as Constructor<
+      this,
+      [T, MetaTarget | undefined]
+    >
+    return new Ctor(newDefinition, this)
   }
 }

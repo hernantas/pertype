@@ -5,7 +5,8 @@ import {
   Violation,
   ViolationError,
 } from './error'
-import { AnyRecord, Key, Literal, Member, Tuple } from './util/alias'
+import { Metadata, metadata } from './metadata'
+import { AnyRecord, Literal, Member, Tuple } from './util/alias'
 import { IntersectOf, Merge, OptionalOf, UnionOf } from './util/helpers'
 import { resolvePath } from './util/path'
 import { Input, InputOf, Output, OutputOf, Type, TypeOf } from './util/type'
@@ -45,37 +46,16 @@ export interface ParseFailed {
 
 export type ParseResult<T> = ParseSuccess<T> | ParseFailed
 
-/**
- * Key value store used in schema
- */
-export interface Definition {
-  /**
-   * List of constraints of current schema
-   */
-  readonly constraints?: Constraint[]
-
-  readonly label?: string
-
-  readonly name?: string
-
-  readonly description?: string
-
-  /**
-   * Other kind of key value pair stored on this definition
-   */
-  readonly [key: Key]: unknown
-}
+const constraints = metadata<Constraint[]>()
+const label = metadata<string>()
+const name = metadata<string>()
+const description = metadata<string>()
 
 /**
  * Runtime type that represent some type and can be used to identify and
  * validate the value
  */
-export abstract class Schema<
-    T = any,
-    O = T,
-    I = unknown,
-    D extends Definition = Definition,
-  >
+export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
   extends ImmutableBuilder<D>
   implements Type<T>, Output<O>, Input<I>
 {
@@ -86,11 +66,29 @@ export abstract class Schema<
   /** Ignore */
   public readonly __input!: I
 
+  public metadata<T>(metadata: Metadata<T>): T | undefined
+  public metadata<T>(metadata: Metadata<T>, value: T): this
+  public metadata<T>(metadata: Metadata<T>, value?: T): this | T | undefined {
+    if (value !== undefined) {
+      const newInstance = this.clone()
+      metadata.set(newInstance, value)
+      return newInstance
+    } else {
+      return metadata.get(this)
+    }
+  }
+
+  public meta<T>(metadata: Metadata<T>): T | undefined
+  public meta<T>(metadata: Metadata<T>, value: T): this
+  public meta<T>(metadata: Metadata<T>, value?: T): this | T | undefined {
+    return this.metadata(metadata, value)
+  }
+
   /**
    * List of constraints of current schema
    */
   public get constraints(): Constraint[] {
-    return this.get('constraints') ?? []
+    return this.metadata(constraints) ?? []
   }
 
   /**
@@ -100,7 +98,7 @@ export abstract class Schema<
    * @returns A new instance of this class
    */
   public rule(constraint: Constraint<T>): this {
-    return this.set('constraints', this.constraints.concat(constraint))
+    return this.metadata(constraints, this.constraints.concat(constraint))
   }
 
   /**
@@ -149,27 +147,27 @@ export abstract class Schema<
   }
 
   public label(value: string): this {
-    return this.set('label', value)
+    return this.metadata(label, value)
   }
 
   public getLabel(): string | undefined {
-    return this.get('label')
+    return this.metadata(label)
   }
 
   public name(value: string): this {
-    return this.set('name', value)
+    return this.metadata(name, value)
   }
 
   public getName(): string | undefined {
-    return this.get('name')
+    return this.metadata(name)
   }
 
   public description(value: string): this {
-    return this.set('description', value)
+    return this.metadata(description, value)
   }
 
   public getDescription(): string | undefined {
-    return this.get('description')
+    return this.metadata(description)
   }
 
   /**
@@ -318,12 +316,7 @@ function reException<T>(fn: () => T, path?: string | undefined): T {
 /**
  * {@link Schema} that represent `any`
  */
-export class AnySchema<D extends Definition = Definition> extends Schema<
-  any,
-  any,
-  unknown,
-  D
-> {
+export class AnySchema<D extends {} = {}> extends Schema<any, any, unknown, D> {
   private static readonly instance = new AnySchema({})
 
   public static create(): AnySchema {
@@ -367,7 +360,7 @@ export function any(): AnySchema {
 /**
  * {@link Schema} that represent `unknown`
  */
-export class UnknownSchema<D extends Definition = Definition> extends Schema<
+export class UnknownSchema<D extends {} = {}> extends Schema<
   unknown,
   unknown,
   unknown,
@@ -416,7 +409,7 @@ export function unknown(): UnknownSchema {
 /**
  * {@link Schema} that represent `boolean`
  */
-export class BooleanSchema<D extends Definition = Definition> extends Schema<
+export class BooleanSchema<D extends {} = {}> extends Schema<
   boolean,
   boolean,
   unknown,
@@ -474,7 +467,7 @@ export function bool(): BooleanSchema {
 /**
  * {@link Schema} that represent `number`
  */
-export class NumberSchema<D extends Definition = Definition> extends Schema<
+export class NumberSchema<D extends {} = {}> extends Schema<
   number,
   number,
   unknown,
@@ -657,7 +650,7 @@ const pattern = {
 /**
  * {@link Schema} that represent `string`
  */
-export class StringSchema<D extends Definition = Definition> extends Schema<
+export class StringSchema<D extends {} = {}> extends Schema<
   string,
   string,
   unknown,
@@ -876,7 +869,7 @@ export function string(): StringSchema {
 /**
  * {@link Schema} that represent `null`
  */
-export class NullSchema<D extends Definition = Definition> extends Schema<
+export class NullSchema<D extends {} = {}> extends Schema<
   null,
   null,
   unknown,
@@ -928,7 +921,7 @@ export function _null(): NullSchema {
 /**
  * {@link Schema} that represent `null`
  */
-export class UndefinedSchema<D extends Definition = Definition> extends Schema<
+export class UndefinedSchema<D extends {} = {}> extends Schema<
   undefined,
   undefined,
   unknown,
@@ -977,7 +970,7 @@ export function _undefined(): UndefinedSchema {
 // # BigInt #
 // ##########
 
-export class BigIntSchema<D extends Definition = Definition> extends Schema<
+export class BigIntSchema<D extends {} = {}> extends Schema<
   bigint,
   string,
   unknown,
@@ -1155,7 +1148,7 @@ export function bigint(): BigIntSchema {
 /**
  * {@link Schema} that represent `date`
  */
-export class DateSchema<D extends Definition = Definition> extends Schema<
+export class DateSchema<D extends {} = {}> extends Schema<
   Date,
   string,
   unknown,
@@ -1294,7 +1287,7 @@ export function date(): DateSchema {
 /**
  * {@link Schema} that represent `symbol`
  */
-export class SymbolSchema<D extends Definition = Definition> extends Schema<
+export class SymbolSchema<D extends {} = {}> extends Schema<
   symbol,
   string,
   unknown,
@@ -1373,7 +1366,7 @@ export function symbol(): SymbolSchema {
 // # Literal #
 // ###########
 
-export interface LiteralDefinition<T extends Literal> extends Definition {
+export interface LiteralDefinition<T extends Literal> {
   readonly value: T
 }
 
@@ -1421,7 +1414,7 @@ export function literal<T extends Literal>(value: T): LiteralSchema<T> {
 // # Wrapper #
 // ###########
 
-interface WrapperDefinition<S extends Schema> extends Definition {
+interface WrapperDefinition<S extends Schema> {
   /**
    * Wrapped inner schema
    */
@@ -1621,11 +1614,11 @@ export function json<S extends Schema>(schema: S): JSONSchema<S> {
 // # Nullable #
 // ############
 
+const parseUndefined = metadata<boolean>()
+const parseFalsy = metadata<boolean>()
+
 export interface NullableDefinition<S extends Schema>
-  extends WrapperDefinition<S> {
-  readonly parseUndefined?: boolean
-  readonly parseFalsy?: boolean
-}
+  extends WrapperDefinition<S> {}
 
 /**
  * {@link Schema} that wrap any schema as `nullable`
@@ -1678,19 +1671,19 @@ export class NullableSchema<
   }
 
   public isParseUndefined(): boolean {
-    return this.get('parseUndefined') ?? false
+    return this.metadata(parseUndefined) ?? false
   }
 
   public parseUndefined(value: boolean = true): this {
-    return this.set('parseUndefined', value)
+    return this.metadata(parseUndefined, value)
   }
 
   public isParseFalsy(): boolean {
-    return this.get('parseFalsy') ?? false
+    return this.metadata(parseFalsy) ?? false
   }
 
   public parseFalsy(value: boolean = true): this {
-    return this.set('parseFalsy', value)
+    return this.metadata(parseFalsy, value)
   }
 
   /**
@@ -1717,11 +1710,10 @@ export function nullable<S extends Schema>(schema: S): NullableSchema<S> {
 // # Optional #
 // ############
 
+const parseNull = metadata<boolean>()
+
 export interface OptionalDefinition<S extends Schema>
-  extends WrapperDefinition<S> {
-  readonly parseNull?: boolean
-  readonly parseFalsy?: boolean
-}
+  extends WrapperDefinition<S> {}
 
 /**
  * {@link Schema} that wrap any schema as `optional`
@@ -1776,19 +1768,19 @@ export class OptionalSchema<
   }
 
   public isParseNull(): boolean {
-    return this.get('parseNull') ?? false
+    return this.metadata(parseNull) ?? false
   }
 
   public parseNull(value: boolean = true): this {
-    return this.set('parseNull', value)
+    return this.metadata(parseNull, value)
   }
 
   public isParseFalsy(): boolean {
-    return this.get('parseFalsy') ?? false
+    return this.metadata(parseFalsy) ?? false
   }
 
   public parseFalsy(value: boolean = true): this {
-    return this.set('parseFalsy', value)
+    return this.metadata(parseFalsy, value)
   }
 
   /**
@@ -1872,8 +1864,7 @@ export function promise<S extends Schema>(schema: S): PromiseSchema<S> {
 
 export type KeySchema = StringSchema | NumberSchema | SymbolSchema
 
-export interface MapDefinition<K extends KeySchema, V extends Schema>
-  extends Definition {
+export interface MapDefinition<K extends KeySchema, V extends Schema> {
   readonly key: K
   readonly value: V
 }
@@ -2014,7 +2005,7 @@ export function map<K extends KeySchema, V extends Schema>(
 // # Set #
 // #######
 
-export interface SetDefinition<V extends Schema> extends Definition {
+export interface SetDefinition<V extends Schema> {
   readonly value: V
 }
 
@@ -2109,7 +2100,7 @@ export function set<V extends Schema>(value: V): SetSchema<V> {
 /**
  * {@link Schema} that represent `tuple`
  */
-export interface TupleDefinition<S extends Tuple<Schema>> extends Definition {
+export interface TupleDefinition<S extends Tuple<Schema>> {
   readonly items: S
 }
 
@@ -2185,8 +2176,7 @@ export function tuple<S extends Tuple<Schema>>(...members: S): TupleSchema<S> {
 // # Object #
 // ##########
 
-export interface ObjectDefinition<S extends AnyRecord<Schema>>
-  extends Definition {
+export interface ObjectDefinition<S extends AnyRecord<Schema>> {
   readonly properties: S
 }
 
@@ -2327,7 +2317,7 @@ export function object<S extends AnyRecord<Schema>>(
 // # Union #
 // #########
 
-export interface UnionDefinition<S extends Member<Schema>> extends Definition {
+export interface UnionDefinition<S extends Member<Schema>> {
   readonly members: S
 }
 
@@ -2415,8 +2405,7 @@ export function union<S extends Member<Schema>>(...members: S): UnionSchema<S> {
 // # Intersect #
 // #############
 
-export interface IntersectDefinition<S extends Member<Schema>>
-  extends Definition {
+export interface IntersectDefinition<S extends Member<Schema>> {
   readonly members: S
 }
 
