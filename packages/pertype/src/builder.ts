@@ -37,16 +37,6 @@ export class ImmutableBuilder<T extends {}> {
     return this.clone({ ...this.definition, [key]: value })
   }
 
-  public decorate(...decors: Partial<T>[]): this {
-    return decors.reduce<this>((builder, decor) => {
-      const kvs = Object.entries(decor) as [keyof T, T[keyof T]][]
-      return kvs.reduce(
-        (builder, [key, value]) => builder.set(key, value),
-        builder,
-      )
-    }, this)
-  }
-
   /**
    * Create a new instance of current object. Copy current definition by default
    *
