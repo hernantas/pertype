@@ -205,7 +205,7 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
     try {
       return { success: true, value: this.decode(value) }
     } catch (error) {
-      if (error instanceof ViolationError) {
+      if (ViolationError.is(error)) {
         return { success: false, violations: error.violations }
       }
       return {
@@ -225,7 +225,7 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
     try {
       return { success: true, value: this.encode(value) }
     } catch (error) {
-      if (error instanceof ViolationError) {
+      if (ViolationError.is(error)) {
         return { success: false, violations: error.violations }
       }
       return {

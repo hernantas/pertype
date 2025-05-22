@@ -28,12 +28,12 @@ export interface Violation {
 export class ViolationError extends Error {
   public override readonly name: string = 'ViolationError'
 
-  public constructor(public readonly violations: Tuple<Violation>) {
-    super(violations[0].message)
+  public static is(error: unknown): error is ViolationError {
+    return error instanceof ViolationError
   }
 
-  public is(error: unknown): error is ViolationError {
-    return error instanceof ViolationError
+  public constructor(public readonly violations: Tuple<Violation>) {
+    super(violations[0].message)
   }
 }
 
