@@ -2,17 +2,19 @@ import { MetaTarget } from './metadata'
 import { Constructor } from './util/alias'
 
 /**
- * Builder to build `T` object map (key-value store) that create new instance
- * every time its mutated
+ * Utility class to build a record object (key-value) that create new instance
+ * every time its properties mutated
  */
 export class Cloneable<T extends {}> implements MetaTarget {
   /**
    * NEVER OVERRIDE CONSTRUCTOR.
    *
-   * This constructor is used each time the key-value store object is mutated.
+   * This constructor is used each time the stored record object is mutated.
    * Any changes to the parameter signature can cause unsafe parameters passed
    * wrong.
-   * @param definition Key-value store object
+   *
+   * @param definition A record object
+   * @param parent The parent to inherited metadata from
    */
   protected constructor(
     private readonly definition: T,
