@@ -34,11 +34,7 @@ export class ImmutableBuilder<T extends {}> {
    * @returns A new instance of current class
    */
   public set<K extends keyof T>(key: K, value: T[K]): this {
-    const Ctor = this.constructor as Constructor<this, [T]>
-    return new Ctor({
-      ...this.definition,
-      [key]: value,
-    })
+    return this.clone({ ...this.definition, [key]: value })
   }
 
   public decorate(...decors: Partial<T>[]): this {
@@ -49,5 +45,16 @@ export class ImmutableBuilder<T extends {}> {
         builder,
       )
     }, this)
+  }
+
+  /**
+   * Create a new instance of current object. Copy current definition by default
+   *
+   * @param newDefinition Optional new definition that will be used for new instance
+   * @returns A new instance of current object
+   */
+  public clone(newDefinition: T = this.definition): this {
+    const Ctor = this.constructor as Constructor<this, [T]>
+    return new Ctor(newDefinition)
   }
 }
