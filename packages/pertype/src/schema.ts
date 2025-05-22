@@ -205,18 +205,17 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
     try {
       return { success: true, value: this.decode(value) }
     } catch (error) {
-      if (ViolationError.is(error)) {
-        return { success: false, violations: error.violations }
-      }
       return {
         success: false,
-        violations: [
-          {
-            type: 'decode',
-            message: `An error has occurred during decoding`,
-            args: { error },
-          },
-        ],
+        violations: ViolationError.is(error)
+          ? error.violations
+          : [
+              {
+                type: 'decode',
+                message: `An error has occurred during decoding`,
+                args: { error },
+              },
+            ],
       }
     }
   }
@@ -225,18 +224,17 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
     try {
       return { success: true, value: this.encode(value) }
     } catch (error) {
-      if (ViolationError.is(error)) {
-        return { success: false, violations: error.violations }
-      }
       return {
         success: false,
-        violations: [
-          {
-            type: 'encode',
-            message: `An error has occurred during encoding`,
-            args: { error },
-          },
-        ],
+        violations: ViolationError.is(error)
+          ? error.violations
+          : [
+              {
+                type: 'encode',
+                message: `An error has occurred during encoding`,
+                args: { error },
+              },
+            ],
       }
     }
   }
