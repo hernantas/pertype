@@ -1,4 +1,4 @@
-import { AnyRecord, Tuple } from './util/alias'
+import { AnyRecord } from './util/alias'
 
 /**
  * Violation information that describe the constraint that being violated
@@ -32,8 +32,8 @@ export class ViolationError extends Error {
     return error instanceof ViolationError
   }
 
-  public constructor(public readonly violations: Tuple<Violation>) {
-    super(violations[0].message)
+  public constructor(public readonly violation: Violation) {
+    super(violation.message)
   }
 }
 
@@ -45,14 +45,12 @@ export class UnsupportedTypeError extends ViolationError {
     public readonly value: unknown,
     public readonly path?: string | undefined,
   ) {
-    super([
-      {
-        type: 'unsupported.type',
-        message: `Unsupported value type of "${typeof value}"`,
-        args: { value },
-        path,
-      },
-    ])
+    super({
+      type: 'unsupported.type',
+      message: `Unsupported value type of "${typeof value}"`,
+      args: { value },
+      path,
+    })
   }
 }
 
@@ -67,13 +65,11 @@ export class UnsupportedValueError extends ViolationError {
     public readonly value: unknown,
     public readonly path?: string | undefined,
   ) {
-    super([
-      {
-        type: 'unsupported.value',
-        message: `Unsupported value of "${JSON.stringify(value)}"`,
-        args: { value },
-        path,
-      },
-    ])
+    super({
+      type: 'unsupported.value',
+      message: `Unsupported value of "${JSON.stringify(value)}"`,
+      args: { value },
+      path,
+    })
   }
 }

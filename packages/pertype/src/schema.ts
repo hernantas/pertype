@@ -207,15 +207,15 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
     } catch (error) {
       return {
         success: false,
-        violations: ViolationError.is(error)
-          ? error.violations
-          : [
-              {
+        violations: [
+          ViolationError.is(error)
+            ? error.violation
+            : {
                 type: 'decode',
                 message: `An error has occurred during decoding`,
                 args: { error },
               },
-            ],
+        ],
       }
     }
   }
@@ -226,15 +226,15 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
     } catch (error) {
       return {
         success: false,
-        violations: ViolationError.is(error)
-          ? error.violations
-          : [
-              {
+        violations: [
+          ViolationError.is(error)
+            ? error.violation
+            : {
                 type: 'encode',
                 message: `An error has occurred during encoding`,
                 args: { error },
               },
-            ],
+        ],
       }
     }
   }
