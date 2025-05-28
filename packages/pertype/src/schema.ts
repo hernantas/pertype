@@ -146,28 +146,22 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
         }
   }
 
-  public label(value: string): this {
+  public label(): string | undefined
+  public label(value: string): this
+  public label(value?: string): string | undefined | this {
     return this.metadata(label, value)
   }
 
-  public getLabel(): string | undefined {
-    return this.metadata(label)
-  }
-
-  public name(value: string): this {
+  public name(): string | undefined
+  public name(value: string): this
+  public name(value?: string): string | undefined | this {
     return this.metadata(name, value)
   }
 
-  public getName(): string | undefined {
-    return this.metadata(name)
-  }
-
-  public description(value: string): this {
+  public description(): string | undefined
+  public description(value: string): this
+  public description(value?: string): string | undefined | this {
     return this.metadata(description, value)
-  }
-
-  public getDescription(): string | undefined {
-    return this.metadata(description)
   }
 
   /**
