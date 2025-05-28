@@ -52,8 +52,24 @@ const name = metadata<string>()
 const description = metadata<string>()
 
 /**
- * Runtime type that represent some type and can be used to identify and
- * validate the value
+ * Abstract base class representing a type schema with validation, metadata, and transformation capabilities.
+ *
+ * This class provides a foundation for defining type-safe schemas with support for:
+ * - Metadata management
+ * - Validation constraints and rules
+ * - Type narrowing and runtime type checks
+ * - Value creation, encoding, and decoding
+ * - Optional, nullable, and array schema transformations
+ * - JSON schema generation and promise-based schemas
+ *
+ * Subclasses must implement the abstract methods for type checking, signature, value creation, decoding, and encoding.
+ *
+ * @template T The internal type represented by the schema.
+ * @template O The output type after encoding (defaults to `T`).
+ * @template I The input type accepted for decoding (defaults to `unknown`).
+ * @template D The type of the schema's internal data (defaults to `{}`). This
+ * should only be used for properties that makes `Schema` work. Otherwise, use
+ * `Metadata` instead.
  */
 export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
   extends Cloneable<D>
@@ -66,8 +82,30 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
   /** Ignore */
   public readonly __input!: I
 
+  /**
+   * Get metadata for this schema
+   *
+   * @param metadata Metadata to be retrieved
+   * @returns The current value of the metadata, or undefined if not set
+   */
   public metadata<T>(metadata: Metadata<T>): T | undefined
+
+  /**
+   * Set metadata for this schema
+   *
+   * @param metadata Metadata to be set
+   * @param value Value to be set for the metadata
+   * @returns The current instance with updated metadata
+   */
   public metadata<T>(metadata: Metadata<T>, value: T): this
+
+  /**
+   * Get or set metadata for this schema
+   *
+   * @param metadata Metadata to be set or retrieved
+   * @param value Value to be set for the metadata (optional)
+   * @returns The current instance with updated metadata, or the current value of the metadata if no value is provided
+   */
   public metadata<T>(metadata: Metadata<T>, value?: T): this | T | undefined {
     if (value !== undefined) {
       const newInstance = this.clone()
@@ -78,8 +116,30 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
     }
   }
 
+  /**
+   * Get metadata for this schema
+   *
+   * @param metadata Metadata to be retrieved
+   * @returns The current value of the metadata, or undefined if not set
+   */
   public meta<T>(metadata: Metadata<T>): T | undefined
+
+  /**
+   * Set metadata for this schema
+   *
+   * @param metadata Metadata to be set
+   * @param value Value to be set for the metadata
+   * @returns The current instance with updated metadata
+   */
   public meta<T>(metadata: Metadata<T>, value: T): this
+
+  /**
+   * Get or set metadata for this schema
+   *
+   * @param metadata Metadata to be set or retrieved
+   * @param value Value to be set for the metadata (optional)
+   * @returns The current instance with updated metadata, or the current value of the metadata if no value is provided
+   */
   public meta<T>(metadata: Metadata<T>, value?: T): this | T | undefined {
     return this.metadata(metadata, value)
   }
@@ -146,20 +206,75 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
         }
   }
 
+  /**
+   * Gets the "label" metadata for the current instance.
+   *
+   * @returns The label as a string if set, or `undefined` if not set.
+   */
   public label(): string | undefined
+
+  /**
+   * Sets the "label" metadata for the current instance.
+   *
+   * @param value - The label to set for the current instance.
+   * @returns The current instance for method chaining.
+   */
   public label(value: string): this
+
+  /**
+   * Gets or sets the "label" metadata for the current instance.
+   *
+   * @param value - The label to set for the current instance (optional).
+   * @returns The current label as a string if no value is provided, `undefined` if not set, or the current instance for chaining if a value is provided.
+   */
   public label(value?: string): string | undefined | this {
     return this.metadata(label, value)
   }
 
+  /**
+   * Gets the "name" metadata for the current instance.
+   *
+   * @returns The name as a string if set, or `undefined` if not set.
+   */
   public name(): string | undefined
+
+  /**
+   * Gets the "name" metadata for the current instance.
+   *
+   * @returns The name as a string if set, or `undefined` if not set.
+   */
   public name(value: string): this
+
+  /**
+   * Gets or sets the "name" metadata for the current instance.
+   *
+   * @param value - The name to set for the current instance (optional).
+   * @returns The current name as a string if no value is provided, `undefined` if not set, or the current instance for chaining if a value is provided.
+   */
   public name(value?: string): string | undefined | this {
     return this.metadata(name, value)
   }
 
+  /**
+   * Gets the "description" metadata for the current instance.
+   *
+   * @returns The description as a string if set, or `undefined` if not set.
+   */
   public description(): string | undefined
+
+  /**
+   * Gets the "description" metadata for the current instance.
+   *
+   * @returns The description as a string if set, or `undefined` if not set.
+   */
   public description(value: string): this
+
+  /**
+   * Gets or sets the "description" metadata for the current instance.
+   *
+   * @param value - The description to set for the current instance (optional).
+   * @returns The current description as a string if no value is provided, `undefined` if not set, or the current instance for chaining if a value is provided.
+   */
   public description(value?: string): string | undefined | this {
     return this.metadata(description, value)
   }
@@ -234,40 +349,61 @@ export abstract class Schema<T = any, O = T, I = unknown, D extends {} = {}>
   }
 
   /**
-   * Wrap this {@link Schema} instance with {@link ArraySchema}
+   * Creates an array schema based on the current schema instance.
    *
-   * @returns A new instance of {@link ArraySchema}
+   * @returns An {@link ArraySchema} where each element conforms to the current schema type.
    */
   public array(): ArraySchema<this> {
     return array(this)
   }
 
   /**
-   * Wrap this {@link Schema} instance with {@link OptionalSchema}
+   * Marks the current schema as optional, allowing values to be either of the schema type or `undefined`.
    *
-   * @returns A new instance of {@link OptionalSchema}
+   * @returns An {@link OptionalSchema} wrapping the current schema, permitting `undefined` as a valid value.
    */
   public optional(): OptionalSchema<this> {
     return optional(this)
   }
 
   /**
-   * Wrap this {@link Schema} instance with {@link NullableSchema}
+   * Marks the current schema as nullable, allowing `null` as a valid value.
    *
-   * @returns A new instance of {@link NullableSchema}
+   * @returns A new {@link NullableSchema} instance wrapping the current schema, permitting `null` values.
    */
   public nullable(): NullableSchema<this> {
     return nullable(this)
   }
 
+  /**
+   * Returns a schema that allows both `null` and `undefined` values in addition to the current schema's type.
+   *
+   * This method combines the effects of `nullable()` and `optional()`, making the schema accept values that are either
+   * `null`, `undefined`, or conform to the original schema.
+   *
+   * @returns An {@link OptionalSchema} wrapping a {@link NullableSchema} of the current schema.
+   */
   public nullish(): OptionalSchema<NullableSchema<this>> {
     return optional(nullable(this))
   }
 
+  /**
+   * Generates and returns the JSON schema representation of the current instance.
+   *
+   * @returns The {@link JSONSchema} corresponding to this instance.
+   */
   public json(): JSONSchema<this> {
     return json(this)
   }
 
+  /**
+   * Returns a `PromiseSchema` that wraps the current schema instance.
+   *
+   * This method allows the schema to be used in asynchronous contexts by returning
+   * a promise-based schema representation.
+   *
+   * @returns A {@link PromiseSchema} wrapping the current schema instance.
+   */
   public promise(): PromiseSchema<this> {
     return promise(this)
   }
